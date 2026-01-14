@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/anarzone/uptime-sentinel/compare/v1.0.0...v1.0.1) (2026-01-14)
+
+### Bug Fixes
+
+* Add GitHub Actions permissions for releases ([3ab5a44](https://github.com/anarzone/uptime-sentinel/commit/3ab5a4407b469cade4d6120ba32330e0274800da))
+
 ## 1.0.0 (2026-01-14)
 
 ### Features
