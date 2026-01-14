@@ -1,3 +1,13 @@
+## [1.1.0](https://github.com/anarzone/uptime-sentinel/compare/v1.0.1...v1.1.0) (2026-01-14)
+
+### Features
+
+* Add comprehensive project documentation and developer workflows ([f357137](https://github.com/anarzone/uptime-sentinel/commit/f3571378f8671ce16034ce0347e6f101e9363f17))
+
+### Bug Fixes
+
+* Rename ci workflow ([ab280b9](https://github.com/anarzone/uptime-sentinel/commit/ab280b9a6bcdb66920f03e22c3d54c50b5cdd3cb))
+
 ## [1.0.1](https://github.com/anarzone/uptime-sentinel/compare/v1.0.0...v1.0.1) (2026-01-14)
 
 ### Bug Fixes
