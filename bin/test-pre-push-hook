@@ -70,12 +70,12 @@ fi
 
 # Test 6: Check if claude-code CLI is available
 echo ""
-echo "Test 6: Checking if claude-code CLI is available..."
-if command -v claude-code &> /dev/null; then
-    echo -e "${GREEN}✅ claude-code CLI is installed${NC}"
-    claude-code --version 2>&1 | head -1 || echo "   (version command not available)"
+echo "Test 6: Checking if claude CLI is available..."
+if command -v claude &> /dev/null; then
+    echo -e "${GREEN}✅ claude CLI is installed${NC}"
+    claude --version 2>&1 | head -1 || echo "   (version command not available)"
 else
-    echo -e "${RED}❌ claude-code CLI NOT found${NC}"
+    echo -e "${RED}❌ claude CLI NOT found${NC}"
     echo "   The automatic review feature requires Claude Code CLI"
     echo "   Install from: https://code.claude.com"
     echo ""
