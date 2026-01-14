@@ -1,4 +1,4 @@
-name: FastReserve CI
+name: Uptime Sentinel CI
 
 on:
     push:
