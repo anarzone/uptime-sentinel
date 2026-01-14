@@ -11,44 +11,74 @@ Both workflows use the same review criteria defined in [CLAUDE.md](./CLAUDE.md).
 
 ## 🔄 Local Pre-Push Hook
 
-Every time you run `git push`, the pre-push hook automatically runs:
+Every time you run `git push`, the pre-push hook **automatically** runs the **senior-code-reviewer agent** (if enabled):
 
-```bash
-composer check-all
-```
+### What Runs When
 
-This includes:
+**Pre-Commit Hook** (`.husky/pre-commit`) - Runs before every commit:
 - ✅ **PHP CS Fixer** - Code style checks
 - ✅ **PHPStan** - Static analysis at level 5
 - ✅ **PHPUnit** - Unit and integration tests
+
+**Pre-Push Hook** (`.husky/pre-push`) - Runs before every push:
+- 🤖 **Senior Code Reviewer Agent** - Reviews ALL files changed in the push
+
+### Pre-Push: Senior Code Reviewer Agent (Automatic)
+
+The hook automatically launches the **senior-code-reviewer agent** to review **all changed files**:
+
+- 📝 **Reviews ALL file types**: PHP, YAML, Markdown, config files, workflows, etc.
+- 🔍 **Checks for**:
+  - Critical security issues
+  - DDD violations (for PHP)
+  - Code quality issues
+  - Configuration errors (YAML syntax, secrets detection)
+  - Documentation completeness
+  - Design system consistency
+  - CI/CD workflow correctness
+- 🚫 **Blocks push** if critical issues found
+- ⚡ **Fast feedback** before code leaves your machine
+- ⚙️ **Configurable** via `.husky/pre-push-config.yml`
+
+**Configuration** (`.husky/pre-push-config.yml`):
+```yaml
+# Enable/disable automatic code review
+auto_review: true
+
+# Block push if critical issues found
+block_on_issues: true
+
+# Max files to review (larger pushes use PR workflow)
+max_files: 20
+```
+
+### Bypassing the Hook
 
 If any check fails, the push is blocked. You can bypass with:
 ```bash
 git push --no-verify
 ```
 
-## 🤖 Manual Code Review
+**Note**: Use `--no-verify` sparingly. The hook catches issues early!
 
-For deeper architectural analysis, use the **senior-code-reviewer** agent:
+## 🤖 Manual Code Review (Optional)
 
-### Quick Start (Recommended)
+**Note**: The pre-push hook now runs automatic code review! Manual review is optional for deeper analysis.
+
+For deeper architectural analysis beyond the automatic review, use the **senior-code-reviewer** agent:
+
+### Quick Start
 1. Make your code changes
 2. Ask me: **"Review the changes I'm about to push"**
 3. I'll launch the senior-code-reviewer agent automatically
 4. Fix any issues found
-5. Push with confidence: `git push`
+5. Push with confidence: `git push` (automatic review will run again)
 
-### Using the Convenience Script
-Run the interactive review script:
-```bash
-bin/review-before-push
-```
-
-This script:
-- Runs automated quality checks
-- Shows you what files changed
-- Provides options for manual review
-- Asks if you're ready before pushing
+### When to Use Manual Review
+- **Before pushing** major refactors or new features
+- **To explore** alternative implementations
+- **To learn** from detailed architectural feedback
+- **To review** code that exceeds `max_files` limit
 
 ### Review Specific Aspects
 You can also ask for focused reviews:
@@ -279,19 +309,41 @@ gh pr merge --merge
 
 ## 🔧 Local Workflow Configuration
 
+### Configure Automatic Review
+
+Edit `.husky/pre-push-config.yml`:
+
+```yaml
+# Disable automatic review (use only composer checks)
+auto_review: false
+
+# Don't block push, just warn
+block_on_issues: false
+
+# Review up to 50 files (default: 20)
+max_files: 50
+```
+
 ### Disable Pre-Push Hook Temporarily
 ```bash
 git push --no-verify
 ```
 
+### Disable Automatic Review Only
+If you want to keep composer checks but skip automatic review:
+```yaml
+# In .husky/pre-push-config.yml
+auto_review: false
+```
+
 ### Skip Pre-Push Hook Permanently
 ```bash
-rm .git/hooks/pre-push
+rm .husky/pre-push
 ```
 
 ### Re-Install Pre-Push Hook
 ```bash
-chmod +x .git/hooks/pre-push
+chmod +x .husky/pre-push
 ```
 
 ## 📚 Resources

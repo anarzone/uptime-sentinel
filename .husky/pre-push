@@ -1,0 +1,164 @@
+#!/bin/bash
+
+# Pre-push hook for UptimeSentinel
+# Runs senior-code-reviewer agent on all files before pushing
+
+# Don't exit on error - we want to handle errors gracefully
+# set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/pre-push-config.yml"
+BLOCK_ON_ISSUES=true
+AUTO_REVIEW=true
+MAX_FILES=20
+
+# Load configuration if exists
+if [ -f "$CONFIG_FILE" ]; then
+    # Check for auto_review setting (more robust YAML parsing)
+    if grep -E "^auto_review:\s*false" "$CONFIG_FILE" 2>/dev/null; then
+        AUTO_REVIEW=false
+    fi
+    if grep -E "^block_on_issues:\s*false" "$CONFIG_FILE" 2>/dev/null; then
+        BLOCK_ON_ISSUES=false
+    fi
+    MAX_FILES=$(grep -E "^max_files:\s*[0-9]+" "$CONFIG_FILE" 2>/dev/null | awk '{print $2}' || echo 20)
+fi
+
+echo -e "${BLUE}🤖 Running pre-push code review...${NC}"
+echo ""
+
+# Get the current and remote refs
+read local_ref local_sha1 remote_ref remote_sha1
+
+# Get list of all changed files in this push
+if [ -z "$remote_sha1" ] || [ "$remote_sha1" = "0000000000000000000000000000000000000000" ]; then
+    # New branch or no remote - compare against main
+    CHANGED_FILES=$(git diff --name-only --diff-filter=d "$(git merge-base $local_sha1 main 2>/dev/null || echo main)" $local_sha1 2>/dev/null || git diff --name-only --diff-filter=d $local_sha1)
+else
+    # Existing branch
+    CHANGED_FILES=$(git diff --name-only --diff-filter=d ${remote_sha1}..${local_sha1})
+fi
+
+# Count all changed files
+FILE_COUNT=0
+if [ -n "$CHANGED_FILES" ]; then
+    FILE_COUNT=$(echo "$CHANGED_FILES" | grep -v -e '^[[:space:]]*$' | wc -l | tr -d '[:space:]')
+fi
+
+# Check if auto-review is enabled
+if [ "$AUTO_REVIEW" = false ]; then
+    echo -e "${YELLOW}⏭️  Automatic code review disabled (skipping)${NC}"
+    echo -e "${YELLOW}   Pre-commit hook already ran composer checks ✅${NC}"
+    exit 0
+fi
+
+if [ "$FILE_COUNT" -eq 0 ]; then
+    echo -e "${GREEN}✅ No files changed - skipping code review${NC}"
+    exit 0
+fi
+
+if [ "$FILE_COUNT" -gt "$MAX_FILES" ]; then
+    echo -e "${YELLOW}⚠️  $FILE_COUNT files changed (max: $MAX_FILES) - skipping automatic review${NC}"
+    echo -e "${YELLOW}   Large changes should be reviewed via PR workflow instead${NC}"
+    exit 0
+fi
+
+echo -e "${BLUE}📝 Reviewing $FILE_COUNT file(s):${NC}"
+echo "$CHANGED_FILES" | while read -r file; do
+    [ -n "$file" ] && echo -e "${BLUE}   - $file${NC}"
+done
+echo ""
+
+# Create temp file for review output
+REVIEW_OUTPUT=$(mktemp)
+trap "rm -f $REVIEW_OUTPUT" EXIT
+
+# Run the review using Claude Code CLI
+echo -e "${BLUE}🤖 Calling Claude Code senior-code-reviewer agent...${NC}"
+
+# Check if claude CLI is available
+if ! command -v claude &> /dev/null; then
+    echo -e "${RED}❌ claude CLI not found${NC}"
+    echo -e "${RED}   Automatic review requires the Claude CLI to be installed${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Install from: https://code.claude.com${NC}"
+    echo -e "${YELLOW}   Or disable auto_review in .husky/pre-push-config.yml${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 To bypass this check: git push --no-verify${NC}"
+    exit 1
+fi
+
+if claude --non-interactive --max-turns 5 > "$REVIEW_OUTPUT" 2>&1 <<EOF
+/task subagent_type=senior-code-reviewer description="Review all code changes" prompt="Review these files that are about to be pushed:
+
+$(echo "$CHANGED_FILES" | while read -r file; do
+    [ -n "$file" ] && echo "- $file"
+done)
+
+**Review Scope**: Review ALL files comprehensively:
+- **PHP Files**: DDD violations, code quality, security, performance, testing
+- **YAML Files**: Configuration correctness, syntax, best practices
+- **Markdown/Docs**: Clarity, completeness, accuracy
+- **Design System**: Consistency, proper patterns, accessibility
+- **CI/CD Files**: Workflow correctness, security, best practices
+- **Config Files**: Proper settings, no secrets, environment-specific checks
+
+Focus on:
+1. **Critical Issues**: Security vulnerabilities, breaking changes, obvious bugs
+2. **Architecture**: DDD violations, design patterns, scalability
+3. **Code Quality**: Standards violations per CLAUDE.md, maintainability
+4. **Configuration**: YAML syntax, environment variables, secrets detection
+5. **Documentation**: Completeness, clarity, accuracy
+6. **Testing**: Missing tests for critical paths
+
+**Important**:
+- If you find CRITICAL issues (must-fix), start your response with exactly: \"BLOCKING ISSUES FOUND:\"
+- If only suggestions, start with: \"RECOMMENDATIONS:\"
+- Keep feedback concise and actionable
+- Reference specific file:line numbers where possible"
+EOF
+then
+    REVIEW_SUCCESS=true
+else
+    REVIEW_SUCCESS=false
+fi
+
+# Display review output (with nice formatting)
+echo ""
+echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
+echo -e "${BLUE}📊 CODE REVIEW RESULTS${NC}"
+echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
+echo ""
+cat "$REVIEW_OUTPUT"
+echo ""
+echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
+echo ""
+
+# Check if blocking issues were found
+if grep -q "BLOCKING ISSUES FOUND:" "$REVIEW_OUTPUT"; then
+    echo ""
+    if [ "$BLOCK_ON_ISSUES" = true ]; then
+        echo -e "${RED}❌ Push BLOCKED: Critical issues found${NC}"
+        echo -e "${RED}   Please address the issues above before pushing.${NC}"
+        echo ""
+        echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
+        exit 1
+    else
+        echo -e "${YELLOW}⚠️  Warning: Critical issues found (push not blocked per config)${NC}"
+    fi
+elif grep -q "RECOMMENDATIONS:" "$REVIEW_OUTPUT"; then
+    echo -e "${GREEN}✅ No blocking issues - some suggestions provided above${NC}"
+else
+    echo -e "${GREEN}✅ Code review passed - no issues found!${NC}"
+fi
+
+echo ""
+echo -e "${GREEN}🚀 Proceeding with push...${NC}"
+exit 0

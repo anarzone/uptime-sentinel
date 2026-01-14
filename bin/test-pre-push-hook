@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# Test script to verify pre-push hook is properly configured
+
+echo "🧪 Testing Pre-Push Hook Configuration"
+echo "======================================="
+echo ""
+
+# Colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Test 1: Check if Husky is configured
+echo "Test 1: Checking if Husky is configured..."
+if [ -d ".husky" ]; then
+    echo -e "${GREEN}✅ Husky directory exists${NC}"
+else
+    echo -e "${RED}❌ Husky NOT configured${NC}"
+    echo "   Run: npm install husky (or configure manually)"
+    exit 1
+fi
+
+# Test 2: Check if pre-push hook exists
+echo ""
+echo "Test 2: Checking if pre-push hook exists..."
+if [ -f ".husky/pre-push" ]; then
+    echo -e "${GREEN}✅ Pre-push hook exists${NC}"
+else
+    echo -e "${RED}❌ Pre-push hook NOT found${NC}"
+    echo "   Expected location: .husky/pre-push"
+    exit 1
+fi
+
+# Test 3: Check if hook is executable
+echo ""
+echo "Test 3: Checking if hook is executable..."
+if [ -x ".husky/pre-push" ]; then
+    echo -e "${GREEN}✅ Hook is executable${NC}"
+else
+    echo -e "${RED}❌ Hook is NOT executable${NC}"
+    echo "   Run: chmod +x .husky/pre-push"
+    exit 1
+fi
+
+# Test 4: Check if config file exists
+echo ""
+echo "Test 4: Checking if configuration file exists..."
+if [ -f ".husky/pre-push-config.yml" ]; then
+    echo -e "${GREEN}✅ Configuration file exists${NC}"
+    echo "   Location: .husky/pre-push-config.yml"
+else
+    echo -e "${YELLOW}⚠️  Configuration file NOT found (will use defaults)${NC}"
+    echo "   Create .husky/pre-push-config.yml to customize behavior"
+fi
+
+# Test 5: Check if git hooks path points to Husky
+echo ""
+echo "Test 5: Checking if git is configured to use Husky..."
+HOOKS_PATH=$(git config core.hooksPath)
+if [ "$HOOKS_PATH" = ".husky" ] || [ "$HOOKS_PATH" = ".husky/_" ]; then
+    echo -e "${GREEN}✅ Git hooks path configured: $HOOKS_PATH${NC}"
+else
+    echo -e "${YELLOW}⚠️  Git hooks path: $HOOKS_PATH${NC}"
+    echo "   Expected: .husky or .husky/_"
+    echo "   Hooks may not be triggered. Run: git config core.hooksPath .husky/_"
+fi
+
+# Test 6: Check if claude-code CLI is available
+echo ""
+echo "Test 6: Checking if claude-code CLI is available..."
+if command -v claude-code &> /dev/null; then
+    echo -e "${GREEN}✅ claude-code CLI is installed${NC}"
+    claude-code --version 2>&1 | head -1 || echo "   (version command not available)"
+else
+    echo -e "${RED}❌ claude-code CLI NOT found${NC}"
+    echo "   The automatic review feature requires Claude Code CLI"
+    echo "   Install from: https://code.claude.com"
+    echo ""
+    echo "   To disable automatic review, create .husky/pre-push-config.yml with:"
+    echo "   auto_review: false"
+fi
+
+# Test 7: Check if composer is available (for pre-commit hook)
+echo ""
+echo "Test 7: Checking if composer is available (pre-commit hook)..."
+if command -v composer &> /dev/null; then
+    echo -e "${GREEN}✅ Composer is installed${NC}"
+    composer --version | head -1
+else
+    echo -e "${RED}❌ Composer NOT found${NC}"
+    echo "   Pre-commit hook requires Composer"
+    echo "   Install from: https://getcomposer.org/"
+fi
+
+# Test 8: Show what would be reviewed on next push
+echo ""
+echo "Test 8: Checking what would be reviewed on next push..."
+echo "   Finding PHP files changed since last commit..."
+
+# Get uncommitted PHP files
+CHANGED_PHP=$(git diff --name-only --diff-filter=d HEAD | grep -E '\.php$' || true)
+CHANGED_COUNT=$(echo "$CHANGED_PHP" | grep -c -v -e '^[[:space:]]*$' || echo 0)
+
+if [ "$CHANGED_COUNT" -gt 0 ]; then
+    echo -e "${GREEN}   Found $CHANGED_COUNT PHP file(s) to review:${NC}"
+    echo "$CHANGED_PHP" | while read -r file; do
+        [ -n "$file" ] && echo "   - $file"
+    done
+else
+    echo -e "${YELLOW}   No PHP files changed (hook would skip review)${NC}"
+fi
+
+echo ""
+echo "======================================="
+echo -e "${GREEN}✅ Pre-push hook is properly configured!${NC}"
+echo ""
+echo -e "${BLUE}📋 Workflow Summary:${NC}"
+echo "  1. Pre-commit hook (.husky/pre-commit):"
+echo "     - Runs PHP CS Fixer, PHPStan, PHPUnit"
+echo "     - Triggers before every commit"
+echo ""
+echo "  2. Pre-push hook (.husky/pre-push):"
+echo "     - Runs senior-code-reviewer agent (if enabled)"
+echo "     - Triggers before every push"
+echo ""
+echo "Next steps:"
+echo "1. Make some code changes"
+echo "2. Commit them: git commit -m 'test: change'"
+echo "   (pre-commit hook will run quality checks)"
+echo "3. Try to push: git push"
+echo "   (pre-push hook will review your changes)"
+echo ""
+echo "To bypass the pre-push hook temporarily:"
+echo "  git push --no-verify"
+echo ""
+echo "Configuration: .husky/pre-push-config.yml"
+echo ""

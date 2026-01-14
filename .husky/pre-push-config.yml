@@ -1,0 +1,32 @@
+# Pre-Push Hook Configuration for UptimeSentinel
+# Controls the behavior of the automatic senior-code-reviewer agent
+
+# Enable/disable automatic code review on push
+# NOTE: Requires Claude CLI to be installed
+# Install from: https://code.claude.com
+# Set to 'false' to use composer checks only and skip automatic review
+auto_review: true
+
+# Block push if critical issues are found
+# Set to false to warn only (not recommended for production)
+block_on_issues: true
+
+# Maximum number of files to review in one push
+# Larger changes will skip automatic review and use PR workflow instead
+max_files: 20
+
+# File types to review (empty = review all files)
+# To review only specific types, uncomment and configure:
+# include_patterns:
+#   - '\.php$'
+#   - '\.yml$'
+#   - '\.yaml$'
+#   - '\.md$'
+
+# File patterns to exclude from review
+exclude_patterns:
+  - '/vendor/'
+  - '/var/'
+  - 'node_modules/'
+  - '.git/'
+  - 'lock files'
