@@ -41,3 +41,4 @@ docker compose up -d
 
 # 3. Start the Application
 symfony server:start
+# Test hook

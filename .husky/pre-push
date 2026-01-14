@@ -95,7 +95,7 @@ if ! command -v claude &> /dev/null; then
     exit 1
 fi
 
-if claude --non-interactive --max-turns 5 > "$REVIEW_OUTPUT" 2>&1 <<EOF
+if claude -p --max-turns 5 > "$REVIEW_OUTPUT" 2>&1 <<EOF
 /task subagent_type=senior-code-reviewer description="Review all code changes" prompt="Review these files that are about to be pushed:
 
 $(echo "$CHANGED_FILES" | while read -r file; do
