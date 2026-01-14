@@ -1,0 +1,27 @@
+# compose.yaml
+services:
+  # 1. Database (The Partitioning Gym)
+  database:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: uptime_sentinel
+    ports:
+      - "3306:3306" # Expose to your local PHP
+    command: --default-authentication-plugin=mysql_native_password
+
+  # 2. The Queue (The Thundering Herd Gym)
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # App connects here
+      - "15672:15672" # You see the dashboard here (http://localhost:15672)
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+
+  # 3. The Cache (The Speed Gym)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
