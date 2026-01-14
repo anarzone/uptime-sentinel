@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Convenience script for code review before pushing
+# Runs automated checks and provides guidance for manual review
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+echo -e "${CYAN}${BOLD}🔍 Code Review Before Push${NC}${NC}"
+echo ""
+
+# Step 1: Run automated checks
+echo -e "${BLUE}Step 1: Running automated quality checks...${NC}"
+echo "   ▸ Composer check-all (CS Fixer, PHPStan, PHPUnit)"
+echo ""
+
+if composer check-all; then
+    echo -e "${GREEN}✅ Automated checks passed!${NC}"
+else
+    echo -e "${RED}❌ Automated checks failed.${NC}"
+    echo -e "${YELLOW}Please fix these issues before proceeding with code review.${NC}"
+    exit 1
+fi
+
+echo ""
+
+# Step 2: Show what's being pushed
+echo -e "${BLUE}Step 2: Checking changes to be pushed...${NC}"
+
+# Get the current branch
+CURRENT_BRANCH=$(git branch --show-current)
+echo "   ▸ Current branch: ${BOLD}$CURRENT_BRANCH${NC}"
+
+# Get files changed compared to main/main
+if git rev-parse --verify main >/dev/null 2>&1; then
+    BASE_BRANCH="main"
+elif git rev-parse --verify master >/dev/null 2>&1; then
+    BASE_BRANCH="master"
+else
+    BASE_BRANCH="HEAD~1"
+fi
+
+CHANGED_FILES=$(git diff --name-only $BASE_BRANCH...HEAD 2>/dev/null || git diff --name-only HEAD~1 2>/dev/null || echo "")
+FILE_COUNT=$(echo "$CHANGED_FILES" | grep -c . || echo "0")
+
+echo "   ▸ Files changed: ${BOLD}$FILE_COUNT${NC}"
+
+if [ -n "$CHANGED_FILES" ]; then
+    echo ""
+    echo "   Changed files:"
+    echo "$CHANGED_FILES" | sed 's/^/     • /'
+fi
+
+echo ""
+
+# Step 3: Provide instructions for manual review
+echo -e "${BLUE}Step 3: Manual code review with Claude${NC}"
+echo ""
+echo -e "${CYAN}${BOLD}Option A: Interactive Review (Recommended)${NC}"
+echo "   Ask me to review your changes:"
+echo -e "   ${YELLOW}→ 'Review the changes I'm about to push'${NC}"
+echo -e "   ${YELLOW}→ 'Run senior-code-reviewer on my changes'${NC}"
+echo -e "   ${YELLOW}→ 'Check if my code is production-ready'${NC}"
+echo ""
+echo -e "${CYAN}${BOLD}Option B: Automated Agent Review${NC}"
+echo "   Use the Task tool to launch the code reviewer:"
+echo "   ${YELLOW}→ Ask: 'Use the senior-code-reviewer agent to review my changes'${NC}"
+echo ""
+echo -e "${CYAN}${BOLD}Option C: Quick Review Focus${NC}"
+echo "   Ask for specific aspects:"
+echo "   ${YELLOW}→ 'Review my changes for security issues'${NC}"
+echo -   ${YELLOW}→ 'Check my code for performance problems'${NC}"
+echo -   ${YELLOW}→ 'Review my architectural decisions'${NC}"
+echo ""
+
+# Step 4: Next steps
+echo -e "${BLUE}Step 4: Ready to push?${NC}"
+echo ""
+echo -e "After review completion, push your changes:"
+echo -e "   ${GREEN}git push origin $CURRENT_BRANCH${NC}"
+echo ""
+echo -e "${YELLOW}💡 Tip: The pre-push hook will run automated checks again.${NC}"
+echo "   If you need to bypass: ${BOLD}git push --no-verify${NC}"
+echo ""
+
+# Ask user if they want to proceed
+read -p "Have you completed the code review? (y/n) " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${GREEN}✅ Proceeding with push...${NC}"
+    git push
+else
+    echo -e "${YELLOW}⏸️  Push cancelled. Complete your review and run this script again.${NC}"
+fi
