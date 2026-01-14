@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/anarzone/uptime-sentinel/compare/v1.1.0...v1.1.1) (2026-01-14)
+
+### Bug Fixes
+
+* Update pre-push hook to use claude CLI and improve error handling ([85107a0](https://github.com/anarzone/uptime-sentinel/commit/85107a0dc600209063cff5ddfc908304fb8b5694))
+
 ## [1.1.0](https://github.com/anarzone/uptime-sentinel/compare/v1.0.1...v1.1.0) (2026-01-14)
 
 ### Features
