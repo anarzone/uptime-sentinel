@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/anarzone/uptime-sentinel/compare/v1.1.3...v1.1.4) (2026-01-15)
+
+### Bug Fixes
+
+* Enable auto_review in pre-push config ([a0118d4](https://github.com/anarzone/uptime-sentinel/commit/a0118d41fe532e10ca84cfc0b7f900e883a6d242))
+* Include deleted files in pre-push review ([e1681da](https://github.com/anarzone/uptime-sentinel/commit/e1681da56f108d28ac03c08793f55ff9329c01d8))
+
 ## [1.1.3](https://github.com/anarzone/uptime-sentinel/compare/v1.1.2...v1.1.3) (2026-01-15)
 
 ### Bug Fixes
