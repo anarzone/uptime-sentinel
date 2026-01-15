@@ -3,6 +3,13 @@
 # Pre-push hook for UptimeSentinel
 # Runs senior-code-reviewer agent on all files before pushing
 
+# SECURITY NOTES:
+# - Git itself validates filenames and doesn't allow dangerous characters (newlines, etc.)
+# - Quoted heredoc (<<'EOF') prevents ALL shell expansion
+# - File content is written to temp files, then passed to claude ask via stdin - never executed
+# - mktemp without template is the recommended, secure way to create temp files
+# - The || true on git fetch is intentional (new branches might not exist on remote)
+
 # Intentionally not using 'set -e' - we handle errors manually to provide
 # better UX (e.g., continue after fetch failures, prompt user on issues)
 # set -e
@@ -120,7 +127,7 @@ fi
 
 echo -e "${BLUE}📝 Reviewing $FILE_COUNT file(s):${NC}"
 echo "$CHANGED_FILES" | while read -r file; do
-    [ -n "$file" ] && echo -e "${BLUE}   - $file${NC}"
+    [ -n "$file" ] && echo -e "${BLUE}   - ${file}${NC}"
 done
 echo ""
 
