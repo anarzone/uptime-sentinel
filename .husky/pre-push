@@ -160,7 +160,8 @@ if grep -q "BLOCKING ISSUES FOUND:" "$REVIEW_OUTPUT"; then
     echo -e "${YELLOW}⚠️  Critical issues found${NC}"
     echo -e "${YELLOW}⚠️  Review the issues above before proceeding${NC}"
     echo ""
-    read -p "Continue with push anyway? (y/N): " -n 1 -r
+    # Read from terminal to avoid issues with git's stdin redirection
+    read -p "Continue with push anyway? (y/N): " -n 1 -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${RED}❌ Push aborted - fix issues and try again${NC}"
