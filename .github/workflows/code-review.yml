@@ -50,7 +50,7 @@ jobs:
                 anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 claude_args: |
-                  --max-turns 5
+                  --max-turns 15
 
   # Automatic code review on PR open/update
   auto_review:
@@ -89,7 +89,7 @@ jobs:
                     Provide specific, actionable feedback with code examples where relevant.
                     Follow the guidelines in CLAUDE.md for project-specific standards.
                 claude_args: |
-                  --max-turns 10
+                  --max-turns 25
 
   # Manual review with specific focus
   manual_review:
@@ -114,4 +114,4 @@ jobs:
                     Perform a ${{ github.event.inputs.review_type }} review of this codebase.
                     Follow the guidelines in CLAUDE.md and focus on ${{ github.event.inputs.review_type }} aspects.
                 claude_args: |
-                  --max-turns 10
+                  --max-turns 25
