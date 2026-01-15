@@ -12,6 +12,7 @@ namespace App\Tests;
  * PR TEST: Testing GitHub Actions code review on PR
  * FINAL TEST: Verifying local review still works after disabling remote
  * VERIFIED: Local review is working perfectly
+ * RE-ENABLED: Testing local hook after fixing auto_review config
  */
 
 class TestCodeReview
