@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/anarzone/uptime-sentinel/compare/v1.1.1...v1.1.2) (2026-01-15)
+
+### Bug Fixes
+
+* Increase max-turns to allow full review completion ([5b6bbfb](https://github.com/anarzone/uptime-sentinel/commit/5b6bbfb0c68a769443306f4d01f6e244cc4aca73))
+* Use settings parameter to configure GLM API endpoint ([08fa43c](https://github.com/anarzone/uptime-sentinel/commit/08fa43cf1628a003b24b27297db72e1a1f985b8c))
+* Use step-level env for ANTHROPIC_BASE_URL ([37bc021](https://github.com/anarzone/uptime-sentinel/commit/37bc02133de10ede73eae2e9ee3bbe9404bd1655))
+
 ## [1.1.1](https://github.com/anarzone/uptime-sentinel/compare/v1.1.0...v1.1.1) (2026-01-14)
 
 ### Bug Fixes
