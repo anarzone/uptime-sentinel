@@ -9,6 +9,7 @@ namespace App\Tests;
  * This file should be deleted after testing.
  *
  * TESTING: Added another issue to trigger pre-push hook again
+ * PR TEST: Testing GitHub Actions code review on PR
  */
 
 class TestCodeReview
