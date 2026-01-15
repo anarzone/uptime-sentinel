@@ -10,6 +10,7 @@ namespace App\Tests;
  *
  * TESTING: Added another issue to trigger pre-push hook again
  * PR TEST: Testing GitHub Actions code review on PR
+ * FINAL TEST: Verifying local review still works after disabling remote
  */
 
 class TestCodeReview

@@ -112,8 +112,8 @@ if ! command -v claude &> /dev/null; then
     exit 1
 fi
 
-if claude -p --max-turns 5 > "$REVIEW_OUTPUT" 2>&1 <<EOF
-/task subagent_type=senior-code-reviewer description="Review all code changes" prompt="Review these files that are about to be pushed:
+if claude ask > "$REVIEW_OUTPUT" 2>&1 <<EOF
+You are a senior code reviewer. Review these files that are about to be pushed:
 
 $(echo "$CHANGED_FILES" | while read -r file; do
     [ -n "$file" ] && echo "- $file"
@@ -136,10 +136,10 @@ Focus on:
 6. **Testing**: Missing tests for critical paths
 
 **Important**:
-- If you find CRITICAL issues (must-fix), start your response with exactly: \"BLOCKING ISSUES FOUND:\"
-- If only suggestions, start with: \"RECOMMENDATIONS:\"
+- If you find CRITICAL issues (must-fix), start your response with exactly: "BLOCKING ISSUES FOUND:"
+- If only suggestions, start with: "RECOMMENDATIONS:"
 - Keep feedback concise and actionable
-- Reference specific file:line numbers where possible"
+- Reference specific file:line numbers where possible
 EOF
 then
     REVIEW_SUCCESS=true

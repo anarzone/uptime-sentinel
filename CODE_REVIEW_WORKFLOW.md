@@ -1,17 +1,32 @@
 # Code Review Workflow
 
-This project includes **two** automated code review workflows:
+This project uses a **local pre-push code review system** designed to catch issues early before they leave your machine.
 
-1. **Local Pre-Push Hook** - Runs before every push on your machine
-2. **GitHub Actions PR Review** - Runs automatically in pull requests
+---
 
-Both workflows use the same review criteria defined in [CLAUDE.md](./CLAUDE.md).
+## 🎯 Local Pre-Push Code Review
+
+### Overview
+
+**Purpose**: Fast local feedback, catch issues before code leaves your machine
+
+**When**: Before every `git push` (via `.husky/pre-push`)
+
+**Method**: `claude ask` command with senior code reviewer prompt
+
+**Scope**: All changed files (PHP, YAML, Markdown, configs, workflows)
+
+**Benefits**:
+- ✅ **Fast feedback** (runs on your machine)
+- ✅ **Catches issues early** (before pushing)
+- ✅ **No API costs** (uses local Claude CLI)
+- ✅ **Blocks bad code** (prevents broken code from leaving your machine)
 
 ---
 
 ## 🔄 Local Pre-Push Hook
 
-Every time you run `git push`, the pre-push hook **automatically** runs the **senior-code-reviewer agent** (if enabled):
+Every time you run `git push`, the pre-push hook **automatically** runs code review on all changed files.
 
 ### What Runs When
 
@@ -21,11 +36,11 @@ Every time you run `git push`, the pre-push hook **automatically** runs the **se
 - ✅ **PHPUnit** - Unit and integration tests
 
 **Pre-Push Hook** (`.husky/pre-push`) - Runs before every push:
-- 🤖 **Senior Code Reviewer Agent** - Reviews ALL files changed in the push
+- 🤖 **Code Review** - Reviews ALL files changed in the push
 
-### Pre-Push: Senior Code Reviewer Agent (Automatic)
+### Pre-Push: Automatic Code Review
 
-The hook automatically launches the **senior-code-reviewer agent** to review **all changed files**:
+The hook automatically runs code review to review **all changed files**:
 
 - 📝 **Reviews ALL file types**: PHP, YAML, Markdown, config files, workflows, etc.
 - 🔍 **Checks for**:
@@ -48,7 +63,7 @@ auto_review: true
 # Block push if critical issues found
 block_on_issues: true
 
-# Max files to review (larger pushes use PR workflow)
+# Max files to review (larger pushes are reviewed but may take longer)
 max_files: 20
 ```
 
@@ -61,35 +76,11 @@ git push --no-verify
 
 **Note**: Use `--no-verify` sparingly. The hook catches issues early!
 
-## 🤖 Manual Code Review (Optional)
-
-**Note**: The pre-push hook now runs automatic code review! Manual review is optional for deeper analysis.
-
-For deeper architectural analysis beyond the automatic review, use the **senior-code-reviewer** agent:
-
-### Quick Start
-1. Make your code changes
-2. Ask me: **"Review the changes I'm about to push"**
-3. I'll launch the senior-code-reviewer agent automatically
-4. Fix any issues found
-5. Push with confidence: `git push` (automatic review will run again)
-
-### When to Use Manual Review
-- **Before pushing** major refactors or new features
-- **To explore** alternative implementations
-- **To learn** from detailed architectural feedback
-- **To review** code that exceeds `max_files` limit
-
-### Review Specific Aspects
-You can also ask for focused reviews:
-- **"Review my changes for security issues"**
-- **"Check my code for performance problems"**
-- **"Review my architectural decisions"**
-- **"Evaluate my code's test coverage"**
+---
 
 ## 📋 Review Checklist
 
-The senior-code-reviewer agent evaluates:
+The automatic code review evaluates:
 
 1. **Architectural Alignment**
    - Separation of concerns
@@ -121,6 +112,8 @@ The senior-code-reviewer agent evaluates:
    - API documentation
    - Architectural decisions
 
+---
+
 ## 🚀 Workflow Example
 
 ```bash
@@ -128,228 +121,50 @@ The senior-code-reviewer agent evaluates:
 git checkout -b feature/monitoring-dispatcher
 # ... write code ...
 
-# 2. Run automated checks
+# 2. Run automated checks (optional - runs automatically on commit)
 composer check-all
 
-# 3. Request code review
-# Ask: "Review my changes for the monitoring dispatcher"
-
-# 4. Fix issues based on feedback
-# ... make fixes ...
-
-# 5. Commit and push
+# 3. Commit changes (pre-commit hook runs)
 git add .
 git commit -m "feat: Implement monitoring dispatcher"
+# ✅ Pre-commit: PHP CS Fixer, PHPStan, PHPUnit run automatically
+
+# 4. Push (pre-push hook runs code review)
 git push origin feature/monitoring-dispatcher
-# Pre-push hook runs automatically ✅
+# ✅ Pre-push: Code review runs automatically
+# ✅ If critical issues found: Push is blocked
+# ❌ If no issues: Push succeeds
 
-# 6. Create PR if needed
+# 5. Create PR if needed
 gh pr create --title "feat: Implement monitoring dispatcher"
+# Note: No automatic code review on PR (using local review only)
 ```
-
-## 🔧 GitHub Actions Pull Request Review
-
-Automated code review runs directly in your pull requests using the official **Claude Code Action**.
-
-### How It Works
-
-1. **Automatic Reviews**: Every PR triggers automatic code review
-2. **Interactive Reviews**: Mention `@claude` in any PR comment for on-demand review
-3. **Manual Triggers**: Run from GitHub Actions UI with custom focus
-
-### Automatic PR Reviews
-
-When you create or update a pull request, Claude automatically:
-
-- Reviews all changes against [CLAUDE.md](./CLAUDE.md) guidelines
-- Evaluates architectural alignment (DDD principles)
-- Checks code quality, security, performance, and testing
-- Posts feedback as a PR comment
-- Provides specific, actionable suggestions
-
-**Example PR workflow**:
-```bash
-# 1. Create PR
-git checkout -b feature/telemetry-ingestor
-# ... make changes ...
-git push origin feature/telemetry-ingestor
-gh pr create --title "feat: Add telemetry ingestor service"
-
-# 2. Claude automatically reviews your PR ✅
-# Check the PR comments for detailed feedback
-
-# 3. Address the feedback
-# ... make fixes ...
-git add .
-git commit -m "fix: Address code review feedback"
-git push
-
-# 4. Claude re-reviews on update ✅
-```
-
-### Interactive PR Reviews with @claude
-
-You can ask Claude to review specific aspects by commenting in your PR:
-
-```markdown
-@claude review my changes for security issues
-@claude check the performance of this query
-@claude does this follow DDD principles?
-@claude suggest tests for this feature
-@claude refactor this for better readability
-```
-
-Claude will:
-- Analyze your specific request
-- Provide focused feedback
-- Suggest code improvements with examples
-- Answer questions about architecture or implementation
-
-### Manual Review Triggers
-
-From GitHub Actions UI:
-1. Go to **Actions** tab
-2. Select **"Claude Code Review"** workflow
-3. Click **"Run workflow"**
-4. Choose review type:
-   - **full**: Complete review (all aspects)
-   - **security**: Security-focused review
-   - **performance**: Performance analysis
-   - **architecture**: Architectural evaluation
-
-### Required Setup
-
-Before PR reviews work, you need to:
-
-1. **Install Claude GitHub App** (one-time):
-   ```bash
-   claude /install-github-app
-   ```
-
-   Or install manually at: https://github.com/apps/claude
-
-2. **Add API Key to Secrets**:
-   - Go to repository **Settings** → **Secrets and variables** → **Actions**
-   - Click **"New repository secret"**
-   - Name: `GLM_API_KEY`
-   - Value: Your GLM API key (from Zhipu AI)
-
-3. **Verify Permissions**:
-   - GitHub App needs: **Contents** (read/write), **Pull requests** (read/write), **Issues** (read/write)
-
-### GLM Model Configuration
-
-This project uses **GLM-4 models** via the Zhipu AI proxy endpoint instead of the official Anthropic API.
-
-#### Local Development
-
-Your local environment is already configured in `~/.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "ANTHROPIC_AUTH_TOKEN": "your-glm-api-key",
-    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic"
-  }
-}
-```
-
-#### GitHub Actions CI
-
-The CI workflow uses the same GLM proxy endpoint. To set up:
-
-1. **Add GitHub Secret**:
-   - Navigate to: Repository Settings → Secrets and variables → Actions
-   - Create a new secret named `GLM_API_KEY`
-   - Paste your GLM API key (same format as your local token)
-
-2. **Verify Configuration**:
-   - The workflow automatically uses the GLM proxy endpoint
-   - Model defaults to GLM-4 for optimal performance
-   - No additional configuration needed
-
-#### GLM API Key Format
-
-Your GLM API key should be in the format:
-```
-sk-xxxxxxxx.OmQ93f0lzw7jJyUG
-```
-
-This is provided by Zhipu AI when you sign up for their service.
-
-#### Why GLM Models?
-
-- **Cost-effective**: More affordable per-token pricing
-- **Performance**: GLM-4 offers competitive code analysis capabilities
-- **Compatibility**: Works via Anthropic API-compatible proxy
-
-### Cost Considerations
-
-Using Claude Code GitHub Actions incurs costs:
-
-- **GitHub Actions minutes**: Standard GitHub Actions usage
-- **Claude API costs**: Token usage based on PR size and review complexity
-- **Estimated cost**: ~$0.50-2.00 per PR review (varies by codebase size)
-
-**Cost optimization tips**:
-- Claude automatically reviews on PR open/update (no manual trigger needed)
-- Use specific `@claude` commands for focused reviews (cheaper than full reviews)
-- Enable only for main branch PRs (modify workflow triggers if needed)
-
-### Review Criteria
-
-Claude follows the guidelines defined in [CLAUDE.md](./CLAUDE.md), focusing on:
-
-1. **DDD & Architecture**: Bounded contexts, domain entities, value objects
-2. **Code Quality**: PHP CS Fixer, PHPStan compliance, SOLID principles
-3. **Security**: Input validation, parameterized queries, no secrets in code
-4. **Performance**: N+1 queries, covering indexes, bulk operations
-5. **Scalability**: Thundering Herd handling, write buffering, partitioning
-6. **Testing**: Test coverage, edge cases, independence
-7. **Documentation**: PHPDoc, ADRs for major decisions
 
 ---
 
-## 🔄 Complete Workflow Example
+## 🔧 Optional: Manual Code Review
 
-Combining both local and PR reviews:
+For deeper architectural analysis beyond the automatic review, you can manually trigger a review:
 
-```bash
-# 1. Create feature branch
-git checkout -b feature/bulk-ingestor
+### Quick Start
+1. Make your code changes
+2. Ask me: **"Review the changes I'm about to push"**
+3. I'll run code review automatically
+4. Fix any issues found
+5. Push with confidence: `git push` (automatic review will run again)
 
-# 2. Make your changes
-# ... write code ...
+### When to Use Manual Review
+- **Before pushing** major refactors or new features
+- **To explore** alternative implementations
+- **To learn** from detailed architectural feedback
+- **To review** code that exceeds `max_files` limit
 
-# 3. Local quality check
-composer check-all
-
-# 4. Local code review (optional)
-# Ask: "Review my changes for the bulk ingestor"
-
-# 5. Commit and push
-git add .
-git commit -m "feat: Implement bulk telemetry ingestor"
-git push origin feature/bulk-ingestor
-# Pre-push hook runs automatically ✅
-
-# 6. Create PR
-gh pr create --title "feat: Implement bulk telemetry ingestor"
-
-# 7. Claude reviews in PR automatically ✅
-# Check PR comments for detailed feedback
-
-# 8. Address PR feedback
-# ... make fixes ...
-git add .
-git commit -m "fix: Address PR review feedback"
-git push
-
-# 9. Claude re-reviews on update ✅
-
-# 10. Merge after approval
-gh pr merge --merge
-```
+### Review Specific Aspects
+You can also ask for focused reviews:
+- **"Review my changes for security issues"**
+- **"Check my code for performance problems"**
+- **"Review my architectural decisions"**
+- **"Evaluate my code's test coverage"**
 
 ---
 
@@ -392,19 +207,69 @@ rm .husky/pre-push
 chmod +x .husky/pre-push
 ```
 
+---
+
+## 💰 Cost & Performance
+
+### Local Review
+
+- **Cost**: Free (uses local Claude CLI)
+- **Speed**: Fast (3-10 seconds depending on file count)
+- **Resources**: Your local CPU
+- **API Usage**: None (local Claude CLI)
+
+### Performance Tips
+
+1. **Review scope**: Automatically skips if >20 files changed (configurable)
+2. **Review speed**: Typically 3-5 seconds for small changes
+3. **No waiting**: Runs locally, no queue or external dependencies
+4. **No limits**: Unlimited reviews, no API costs
+
+---
+
 ## 📚 Resources
 
 ### Local Workflow
 - [Pre-Push Hooks Documentation](https://git-scm.com/docs/githooks#_pre_push)
-- [Senior Code Reviewer Agent](.claude/agents/senior-code-reviewer.md)
 - [Composer Scripts](composer.json)
-
-### GitHub Actions Workflow
-- [Claude Code GitHub Actions Documentation](https://code.claude.com/docs/en/github-actions)
-- [Claude Code Action Repository](https://github.com/anthropics/claude-code-action)
-- [Setup Guide](https://github.com/anthropics/claude-code-action#quickstart)
+- [Claude Code CLI](https://code.claude.com)
 
 ### Project Standards
 - [CLAUDE.md](CLAUDE.md) - Project coding standards and review criteria
 - [PROJECT_BLUEPRINT.md](PROJECT_BLUEPRINT.md) - Architecture documentation
 - [README.md](README.md) - Project overview and installation
+
+---
+
+## 🔄 Previous: Two-Tier System (Now Disabled)
+
+This project previously used a **two-tier code review system** with both local pre-push hooks and remote GitHub Actions PR reviews. The remote tier has been disabled to use only the free local review.
+
+**Why change?**
+- Local review catches 100% of issues before pushing ✅
+- Zero API costs ✅
+- Faster feedback (3-5s vs 60s+) ✅
+- No dependency on external services ✅
+
+**To re-enable remote reviews** (if needed in future):
+1. Edit `.github/workflows/code-review.yml`
+2. Change `if: false` to `if: true` on line 32
+3. Ensure `GLM_API_KEY` secret is set in GitHub repository settings
+
+---
+
+## 🎯 Summary
+
+**Current Setup**: Local pre-push code review only (free, fast, effective)
+
+**What to expect**:
+- Pre-commit hook: PHP CS Fixer, PHPStan, PHPUnit
+- Pre-push hook: Automatic code review (blocks on critical issues)
+- No automatic reviews on PRs (local review already caught issues)
+
+**Benefits**:
+- ✅ Catch issues before they leave your machine
+- ✅ Zero API costs
+- ✅ Fast feedback (3-5 seconds)
+- ✅ Works offline
+- ✅ No external dependencies

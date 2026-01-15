@@ -1,5 +1,6 @@
-name: Claude Code Review
-# Testing GLM-4 model integration via Zhipu AI proxy
+name: Claude Code Review (DISABLED - Using local pre-push hook instead)
+# GitHub Actions code review disabled to use only local pre-push hook (free option)
+# Re-enable by changing 'if: false' to 'if: true' below
 
 on:
   # Trigger on PR comments mentioning @claude
@@ -25,6 +26,10 @@ on:
               - security
               - performance
               - architecture
+
+# DISABLED - Set to false to use only local pre-push hook
+# Set to true to re-enable GitHub Actions code review
+if: false
 
 permissions:
       contents: read
