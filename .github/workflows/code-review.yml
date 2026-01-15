@@ -1,5 +1,7 @@
-name: Claude Code Review
-# Testing GLM-4 model integration via Zhipu AI proxy
+name: Claude Code Review (DISABLED - Using local pre-push hook instead)
+# GitHub Actions code review disabled to use only local pre-push hook (free option)
+# All jobs below have 'if: false' to prevent execution
+# Re-enable by changing 'if: false' to the appropriate conditions for each job
 
 on:
   # Trigger on PR comments mentioning @claude
@@ -34,7 +36,7 @@ permissions:
 jobs:
   # Respond to @claude mentions in comments
   claude_mention:
-      if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
@@ -54,7 +56,7 @@ jobs:
 
   # Automatic code review on PR open/update
   auto_review:
-      if: github.event_name == 'pull_request'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
@@ -93,7 +95,7 @@ jobs:
 
   # Manual review with specific focus
   manual_review:
-      if: github.event_name == 'workflow_dispatch'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code

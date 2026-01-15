@@ -9,6 +9,10 @@ namespace App\Tests;
  * This file should be deleted after testing.
  *
  * TESTING: Added another issue to trigger pre-push hook again
+ * PR TEST: Testing GitHub Actions code review on PR
+ * FINAL TEST: Verifying local review still works after disabling remote
+ * VERIFIED: Local review is working perfectly
+ * RE-ENABLED: Testing local hook after fixing auto_review config
  */
 
 class TestCodeReview
