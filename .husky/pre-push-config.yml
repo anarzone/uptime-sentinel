@@ -5,7 +5,7 @@
 # NOTE: Requires Claude CLI to be installed
 # Install from: https://code.claude.com
 # Set to 'false' to use composer checks only and skip automatic review
-auto_review: true
+auto_review: false
 
 # Block push if critical issues are found
 # Set to false to warn only (not recommended for production)
