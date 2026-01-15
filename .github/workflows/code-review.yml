@@ -1,6 +1,7 @@
 name: Claude Code Review (DISABLED - Using local pre-push hook instead)
 # GitHub Actions code review disabled to use only local pre-push hook (free option)
-# Re-enable by changing 'if: false' to 'if: true' below
+# All jobs below have 'if: false' to prevent execution
+# Re-enable by changing 'if: false' to the appropriate conditions for each job
 
 on:
   # Trigger on PR comments mentioning @claude
@@ -26,10 +27,6 @@ on:
               - security
               - performance
               - architecture
-
-# DISABLED - Set to false to use only local pre-push hook
-# Set to true to re-enable GitHub Actions code review
-if: false
 
 permissions:
       contents: read
