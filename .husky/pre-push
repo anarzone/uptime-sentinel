@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Helper function for interactive prompts
-# Returns 0 (success) if terminal is interactive, 1 otherwise
+# Returns 0 (success) if user answers yes, 1 otherwise
 prompt_user() {
     local prompt_message="$1"
     local response
@@ -26,9 +26,8 @@ prompt_user() {
         return 1
     fi
 
-    # Prompt user
-    read -p "$prompt_message" -n 1 -r response < /dev/tty
-    echo
+    # Prompt user (waits for Enter key)
+    read -p "$prompt_message" response < /dev/tty
     if [[ $response =~ ^[Yy]$ ]]; then
         return 0
     else
@@ -144,13 +143,24 @@ if ! command -v claude &> /dev/null; then
     exit 1
 fi
 
-if claude ask > "$REVIEW_OUTPUT" 2>&1 <<EOF
+# Create temp file for review output
+REVIEW_OUTPUT=$(mktemp)
+trap "rm -f $REVIEW_OUTPUT" EXIT
+
+# Build the review prompt (using quoted EOF to prevent backtick execution)
+cat > "$REVIEW_OUTPUT" <<'REVIEW_PROMPT'
 You are a strict code reviewer reviewing changes BEFORE they are pushed. You must make a binary decision.
 
 **Files to review**:
-$(echo "$CHANGED_FILES" | while read -r file; do
+REVIEW_PROMPT
+
+# Append file list with shell expansion
+echo "$CHANGED_FILES" | while read -r file; do
     [ -n "$file" ] && echo "- $file"
-done)
+done >> "$REVIEW_OUTPUT"
+
+# Append rest of prompt
+cat >> "$REVIEW_OUTPUT" <<'REVIEW_PROMPT'
 
 **Your task**: Review comprehensively and decide:
 1. Start with "BLOCKING ISSUES FOUND:" if ANY issues exist (typo, bug, security, style, architecture, performance, etc.)
@@ -165,7 +175,6 @@ done)
 - **Documentation**: Incomplete, unclear, or inaccurate docs
 
 **Output format**:
-```
 BLOCKING ISSUES FOUND:
 
 1. [Issue title] (file:line)
@@ -174,11 +183,28 @@ BLOCKING ISSUES FOUND:
 OR
 
 APPROVED: No issues found. Code is ready to merge.
-```
 
 **Be strict**. If unsure, mark as BLOCKING. Better to over-review than let bugs through.
-EOF
-then
+REVIEW_PROMPT
+
+# Run the review using Claude Code CLI
+echo -e "${BLUE}🤖 Calling Claude Code senior-code-reviewer agent...${NC}"
+
+# Check if claude CLI is available
+if ! command -v claude &> /dev/null; then
+    echo -e "${RED}❌ claude CLI not found${NC}"
+    echo -e "${RED}   Automatic review requires the Claude CLI to be installed${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Install from: https://code.claude.com${NC}"
+    echo -e "${YELLOW}   Or disable auto_review in .husky/pre-push-config.yml${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 To bypass this check: git push --no-verify${NC}"
+    exit 1
+fi
+
+# Run claude ask with the prepared prompt
+if claude ask < "$REVIEW_OUTPUT" > "${REVIEW_OUTPUT}.result" 2>&1; then
+    mv "${REVIEW_OUTPUT}.result" "$REVIEW_OUTPUT"
     REVIEW_SUCCESS=true
 else
     REVIEW_SUCCESS=false
