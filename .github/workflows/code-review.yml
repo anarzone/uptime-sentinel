@@ -39,7 +39,7 @@ permissions:
 jobs:
   # Respond to @claude mentions in comments
   claude_mention:
-      if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
@@ -59,7 +59,7 @@ jobs:
 
   # Automatic code review on PR open/update
   auto_review:
-      if: github.event_name == 'pull_request'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
@@ -98,7 +98,7 @@ jobs:
 
   # Manual review with specific focus
   manual_review:
-      if: github.event_name == 'workflow_dispatch'
+      if: false  # DISABLED - Using local pre-push hook only
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
