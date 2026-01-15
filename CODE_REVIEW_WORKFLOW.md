@@ -231,11 +231,57 @@ Before PR reviews work, you need to:
 2. **Add API Key to Secrets**:
    - Go to repository **Settings** → **Secrets and variables** → **Actions**
    - Click **"New repository secret"**
-   - Name: `ANTHROPIC_API_KEY`
-   - Value: Your Claude API key (get from https://console.anthropic.com/)
+   - Name: `GLM_API_KEY`
+   - Value: Your GLM API key (from Zhipu AI)
 
 3. **Verify Permissions**:
    - GitHub App needs: **Contents** (read/write), **Pull requests** (read/write), **Issues** (read/write)
+
+### GLM Model Configuration
+
+This project uses **GLM-4 models** via the Zhipu AI proxy endpoint instead of the official Anthropic API.
+
+#### Local Development
+
+Your local environment is already configured in `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "your-glm-api-key",
+    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic"
+  }
+}
+```
+
+#### GitHub Actions CI
+
+The CI workflow uses the same GLM proxy endpoint. To set up:
+
+1. **Add GitHub Secret**:
+   - Navigate to: Repository Settings → Secrets and variables → Actions
+   - Create a new secret named `GLM_API_KEY`
+   - Paste your GLM API key (same format as your local token)
+
+2. **Verify Configuration**:
+   - The workflow automatically uses the GLM proxy endpoint
+   - Model defaults to GLM-4 for optimal performance
+   - No additional configuration needed
+
+#### GLM API Key Format
+
+Your GLM API key should be in the format:
+```
+sk-xxxxxxxx.OmQ93f0lzw7jJyUG
+```
+
+This is provided by Zhipu AI when you sign up for their service.
+
+#### Why GLM Models?
+
+- **Cost-effective**: More affordable per-token pricing
+- **Performance**: GLM-4 offers competitive code analysis capabilities
+- **Compatibility**: Works via Anthropic API-compatible proxy
 
 ### Cost Considerations
 
