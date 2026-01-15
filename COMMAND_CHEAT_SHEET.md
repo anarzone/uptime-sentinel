@@ -102,6 +102,169 @@ dmm
 bc doctrine:migrations:status
 ```
 
+---
+
+## GitHub CLI (gh) Commands
+
+### Pull Request Management
+
+| Command | Description | Example Usage |
+|---------|-------------|---------------|
+| `gh pr list` | List all open PRs | `gh pr list` |
+| `gh pr view <num>` | View PR details | `gh pr view 2` |
+| `gh pr create` | Create PR from current branch | `gh pr create --title "Title" --body "Description"` |
+| `gh pr merge <num>` | Merge PR | `gh pr merge 2 --merge` |
+| `gh pr close <num>` | Close PR without merging | `gh pr close 2` |
+| `gh pr checks <num>` | View CI status for PR | `gh pr checks 2` |
+
+### GitHub CLI Examples
+
+```bash
+# List all open PRs
+gh pr list
+
+# List all PRs (including closed)
+gh pr list --state all
+
+# View specific PR
+gh pr view 2
+
+# Create PR from current branch
+gh pr create --title "feat: Add new feature" --body "Description here"
+
+# Create PR as draft
+gh pr create --draft --title "WIP: Feature" --body "Work in progress"
+
+# Merge PR (default: merge commit)
+gh pr merge 2
+
+# Squash merge
+gh pr merge 2 --squash
+
+# Rebase merge
+gh pr merge 2 --rebase
+
+# Merge with branch deletion
+gh pr merge 2 --merge --delete-branch
+
+# Close PR without merging
+gh pr close 2
+
+# Check if PR is mergeable
+gh pr view 2 --json mergeable
+
+# Batch merge all open PRs (use with caution!)
+gh pr list --json number --jq '.[].number' | xargs -I {} gh pr merge {} --merge
+```
+
+### Repository Management
+
+```bash
+# Set default repository for gh CLI
+gh repo set-default anarzone/uptime-sentinel
+
+# View repository info
+gh repo view
+
+# View repository with JSON output
+gh repo view --json name,owner,defaultBranchRef
+```
+
+### Issue Management
+
+```bash
+# List issues
+gh issue list
+
+# Create issue
+gh issue create --title "Bug: Error in login" --body "Description here"
+
+# View issue
+gh issue view 15
+
+# Close issue
+gh issue close 15 --comment "Fixed in PR #42"
+```
+
+### Workflow Run Management
+
+```bash
+# List recent workflow runs
+gh run list
+
+# View specific workflow run
+gh run view 21031687322
+
+# Watch workflow run in real-time
+gh run watch
+
+# Re-run failed workflow
+gh run rerun 21031687322
+
+# View workflow logs
+gh run view 21031687322 --log
+```
+
+### GitHub CLI Workflow
+
+```bash
+# 1. Check for open PRs
+gh pr list
+
+# 2. Create feature branch
+git checkout -b feature/new-feature
+
+# 3. Make changes and commit
+ga .
+gc "feat: Add new feature"
+
+# 4. Push branch
+gp
+
+# 5. Create PR
+gh pr create --title "feat: Add new feature" --body "Description"
+
+# 6. List PRs to find the number
+gh pr list
+
+# 7. Merge PR when ready (use the PR number from the list)
+gh pr merge <PR_NUMBER> --merge --delete-branch
+
+# OR: If your current branch has an open PR, you can merge without specifying the number
+gh pr merge --merge --delete-branch
+```
+
+### How to Know Which PR to Merge
+
+**Method 1: List PRs to see the numbers**
+```bash
+gh pr list
+# Output:
+# 2  feat: Add new feature        2 hours ago
+# 3  fix: Resolve login issue     1 hour ago
+
+# Then merge by number
+gh pr merge 2 --merge
+```
+
+**Method 2: View PR for current branch**
+```bash
+# Shows PR for the current branch (if one exists)
+gh pr view
+
+# Then merge it
+gh pr merge --merge
+```
+
+**Method 3: Search PRs by branch name**
+```bash
+# Find PR for a specific branch
+gh pr list --head feature/new-feature
+
+# Then merge by the number shown
+gh pr merge 2 --merge
+```
+
 ## Notes
 
 - All aliases are automatically available in new terminal sessions
