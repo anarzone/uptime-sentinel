@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/anarzone/uptime-sentinel/compare/v1.1.4...v1.2.0) (2026-01-15)
+
+### Features
+
+* Add interactive pre-push code review hook ([1c480b0](https://github.com/anarzone/uptime-sentinel/commit/1c480b0d0a3222e93e53fc16d95fa49f257bd701))
+
 ## [1.1.4](https://github.com/anarzone/uptime-sentinel/compare/v1.1.3...v1.1.4) (2026-01-15)
 
 ### Bug Fixes
