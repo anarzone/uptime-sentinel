@@ -1,4 +1,5 @@
 name: Claude Code Review
+# Testing GLM-4 model integration via Zhipu AI proxy
 
 on:
   # Trigger on PR comments mentioning @claude
@@ -35,6 +36,8 @@ jobs:
   claude_mention:
       if: github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment'
       runs-on: ubuntu-latest
+      env:
+          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
       steps:
           - name: Checkout code
             uses: actions/checkout@v4
@@ -44,16 +47,17 @@ jobs:
           - name: Claude Code Response
             uses: anthropics/claude-code-action@v1
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 claude_args: |
                   --max-turns 5
-                  --model claude-sonnet-4-5-20250929
 
   # Automatic code review on PR open/update
   auto_review:
       if: github.event_name == 'pull_request'
       runs-on: ubuntu-latest
+      env:
+          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
       steps:
           - name: Checkout code
             uses: actions/checkout@v4
@@ -69,7 +73,7 @@ jobs:
           - name: Claude Code Review
             uses: anthropics/claude-code-action@v1
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 prompt: |
                     /review
@@ -86,12 +90,13 @@ jobs:
                     Follow the guidelines in CLAUDE.md for project-specific standards.
                 claude_args: |
                   --max-turns 10
-                  --model claude-sonnet-4-5-20250929
 
   # Manual review with specific focus
   manual_review:
       if: github.event_name == 'workflow_dispatch'
       runs-on: ubuntu-latest
+      env:
+          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
       steps:
           - name: Checkout code
             uses: actions/checkout@v4
@@ -101,7 +106,7 @@ jobs:
           - name: Claude Code Review - ${{ github.event.inputs.review_type }}
             uses: anthropics/claude-code-action@v1
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 prompt: |
                     /review
@@ -110,4 +115,3 @@ jobs:
                     Follow the guidelines in CLAUDE.md and focus on ${{ github.event.inputs.review_type }} aspects.
                 claude_args: |
                   --max-turns 10
-                  --model claude-sonnet-4-5-20250929
