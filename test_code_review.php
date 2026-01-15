@@ -32,10 +32,10 @@ class TestCodeReview
         return "SELECT * FROM users WHERE id = " . $userId;
     }
 
-    // ISSUE: Hardcoded secret
+    // ISSUE: Hardcoded secret (fake key for testing)
     public function getApiKey(): string
     {
-        return 'sk-9b316e6b3e5f442f930ff34f53babe4c.OmQ93f0lzw7jJyUG';
+        return 'fake-api-key-12345-for-testing-only';
     }
 
     // ISSUE: Missing input validation
