@@ -27,35 +27,50 @@ if [ -f "$CONFIG_FILE" ]; then
     MAX_FILES=$(grep -E "^max_files:\s*[0-9]+" "$CONFIG_FILE" 2>/dev/null | awk '{print $2}' || echo 20)
 fi
 
-echo -e "${BLUE}🤖 Running pre-push code review...${NC}"
+echo -e "${BLUE}🤖 Running pre-push checks...${NC}"
 echo ""
 
 # Get the current and remote refs
 read local_ref local_sha1 remote_ref remote_sha1
+
+# Check if we're behind remote BEFORE running review
+if [ -n "$remote_sha1" ] && [ "$remote_sha1" != "0000000000000000000000000000000000000000" ]; then
+    if ! git cat-file -e $remote_sha1 2>/dev/null; then
+        echo -e "${YELLOW}⚠️  Remote has new commits - fetching...${NC}"
+        git fetch origin $remote_ref 2>/dev/null || true
+
+        # Check if local is behind remote after fetch
+        LOCAL_COMMIT_COUNT=$(git rev-list --count $local_sha1 ^origin/${remote_ref#refs/heads/} 2>/dev/null || echo 0)
+        if [ "$LOCAL_COMMIT_COUNT" -gt 0 ]; then
+            echo ""
+            echo -e "${RED}❌ Your branch is behind ${remote_ref#refs/heads/} by $LOCAL_COMMIT_COUNT commit(s)${NC}"
+            echo -e "${YELLOW}💡 Run 'git pull' first to update your branch${NC}"
+            echo ""
+            read -p "Continue anyway? (y/N): " -n 1 -r < /dev/tty
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${RED}❌ Push aborted${NC}"
+                exit 1
+            fi
+        fi
+    fi
+fi
+
+echo ""
+echo -e "${BLUE}🤖 Running pre-push code review...${NC}"
+echo ""
 
 # Get list of all changed files in this push (including additions, modifications, and deletions)
 if [ -z "$remote_sha1" ] || [ "$remote_sha1" = "0000000000000000000000000000000000000000" ]; then
     # New branch or no remote - compare against main
     CHANGED_FILES=$(git diff --name-only --diff-filter=AMD "$(git merge-base $local_sha1 main 2>/dev/null || echo main)" $local_sha1 2>/dev/null || git diff --name-only --diff-filter=AMD $local_sha1)
 else
-    # Existing branch - check if remote_sha1 exists locally
+    # Existing branch - remote_sha1 should exist locally now (we fetched above)
     if git cat-file -e $remote_sha1 2>/dev/null; then
-        # Remote SHA exists locally - use it
         CHANGED_FILES=$(git diff --name-only --diff-filter=AMD ${remote_sha1}..${local_sha1})
     else
-        # Remote SHA doesn't exist locally - fetch and retry, or use remote branch
-        echo -e "${YELLOW}⚠️  Remote has new commits - fetching...${NC}"
-        git fetch origin $remote_ref 2>/dev/null || true
-
-        # Try to get the merge base with the remote tracking branch
-        MERGE_BASE=$(git merge-base $local_sha1 origin/${remote_ref#refs/heads/} 2>/dev/null)
-
-        if [ -n "$MERGE_BASE" ]; then
-            CHANGED_FILES=$(git diff --name-only --diff-filter=AMD ${MERGE_BASE}..${local_sha1})
-        else
-            # Fallback: compare against origin/main
-            CHANGED_FILES=$(git diff --name-only --diff-filter=AMD origin/main ${local_sha1} 2>/dev/null || git diff --name-only --diff-filter=AMD $local_sha1)
-        fi
+        # Fallback: compare against remote tracking branch
+        CHANGED_FILES=$(git diff --name-only --diff-filter=AMD origin/${remote_ref#refs/heads/} ${local_sha1} 2>/dev/null || git diff --name-only --diff-filter=AMD $local_sha1)
     fi
 fi
 
@@ -109,33 +124,38 @@ if ! command -v claude &> /dev/null; then
 fi
 
 if claude ask > "$REVIEW_OUTPUT" 2>&1 <<EOF
-You are a senior code reviewer. Review these files that are about to be pushed:
+You are a strict code reviewer reviewing changes BEFORE they are pushed. You must make a binary decision.
 
+**Files to review**:
 $(echo "$CHANGED_FILES" | while read -r file; do
     [ -n "$file" ] && echo "- $file"
 done)
 
-**Review Scope**: Review ALL files comprehensively:
-- **PHP Files**: DDD violations, code quality, security, performance, testing
-- **YAML Files**: Configuration correctness, syntax, best practices
-- **Markdown/Docs**: Clarity, completeness, accuracy
-- **Design System**: Consistency, proper patterns, accessibility
-- **CI/CD Files**: Workflow correctness, security, best practices
-- **Config Files**: Proper settings, no secrets, environment-specific checks
+**Your task**: Review comprehensively and decide:
+1. Start with "BLOCKING ISSUES FOUND:" if ANY issues exist (typo, bug, security, style, architecture, performance, etc.)
+2. Start with "APPROVED:" ONLY if code is perfect and ready to merge
 
-Focus on:
-1. **Critical Issues**: Security vulnerabilities, breaking changes, obvious bugs
-2. **Architecture**: DDD violations, design patterns, scalability
-3. **Code Quality**: Standards violations per CLAUDE.md, maintainability
-4. **Configuration**: YAML syntax, environment variables, secrets detection
-5. **Documentation**: Completeness, clarity, accuracy
-6. **Testing**: Missing tests for critical paths
+**Review criteria** (ANY issue means BLOCKING):
+- **YAML**: Syntax errors, invalid keys, typos, wrong indentation, missing required fields
+- **Security**: Secrets exposed, injection vulnerabilities, missing validation
+- **Code Quality**: Style violations, missing types, unclear naming, complexity
+- **Architecture**: DDD violations, wrong patterns, scalability concerns
+- **Configuration**: Wrong values, environment-specific issues, missing settings
+- **Documentation**: Incomplete, unclear, or inaccurate docs
 
-**Important**:
-- If you find CRITICAL issues (must-fix), start your response with exactly: "BLOCKING ISSUES FOUND:"
-- If only suggestions, start with: "RECOMMENDATIONS:"
-- Keep feedback concise and actionable
-- Reference specific file:line numbers where possible
+**Output format**:
+```
+BLOCKING ISSUES FOUND:
+
+1. [Issue title] (file:line)
+   [Why it's blocking]
+
+OR
+
+APPROVED: No issues found. Code is ready to merge.
+```
+
+**Be strict**. If unsure, mark as BLOCKING. Better to over-review than let bugs through.
 EOF
 then
     REVIEW_SUCCESS=true
@@ -157,23 +177,33 @@ echo ""
 # Interactive prompt after review
 if grep -q "BLOCKING ISSUES FOUND:" "$REVIEW_OUTPUT"; then
     echo ""
-    echo -e "${YELLOW}⚠️  Critical issues found${NC}"
-    echo -e "${YELLOW}⚠️  Review the issues above before proceeding${NC}"
+    echo -e "${RED}⚠️  ISSUES FOUND - Review blocked${NC}"
+    echo -e "${YELLOW}⚠️  You must fix these issues before pushing${NC}"
     echo ""
     # Read from terminal to avoid issues with git's stdin redirection
-    read -p "Continue with push anyway? (y/N): " -n 1 -r < /dev/tty
+    read -p "Continue anyway despite issues? (y/N): " -n 1 -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${RED}❌ Push aborted - fix issues and try again${NC}"
         echo ""
-        echo -e "${YELLOW}💡 To bypass this check: git push --no-verify${NC}"
+        echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
         exit 1
     fi
-    echo -e "${GREEN}✅ Proceeding with push despite issues...${NC}"
-elif grep -q "RECOMMENDATIONS:" "$REVIEW_OUTPUT"; then
-    echo -e "${GREEN}✅ No blocking issues - some suggestions provided above${NC}"
-else
+    echo -e "${YELLOW}⚠️  Proceeding with push despite issues...${NC}"
+elif grep -q "APPROVED:" "$REVIEW_OUTPUT"; then
+    echo ""
     echo -e "${GREEN}✅ Code review passed - no issues found!${NC}"
+else
+    echo ""
+    echo -e "${YELLOW}⚠️  Review output unclear - treating as blocking${NC}"
+    echo -e "${YELLOW}⚠️  (Expected 'APPROVED:' or 'BLOCKING ISSUES FOUND:')${NC}"
+    echo ""
+    read -p "Continue anyway? (y/N): " -n 1 -r < /dev/tty
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}❌ Push aborted${NC}"
+        exit 1
+    fi
 fi
 
 echo ""
