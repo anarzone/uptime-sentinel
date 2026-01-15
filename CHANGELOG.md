@@ -1,3 +1,12 @@
+## [1.2.2](https://github.com/anarzone/uptime-sentinel/compare/v1.2.1...v1.2.2) (2026-01-15)
+
+### Bug Fixes
+
+* Improve pre-push hook error handling and security ([e873b2b](https://github.com/anarzone/uptime-sentinel/commit/e873b2b576c453d5bfa4254c403bdffca189a698))
+* Improve pre-push hook to catch issues early ([b90c7df](https://github.com/anarzone/uptime-sentinel/commit/b90c7df2c731e26c99365d8dcfe355e91eaf6c06))
+* Prevent shell command injection in heredoc and improve prompts ([de42386](https://github.com/anarzone/uptime-sentinel/commit/de423865c1fc0ee673d125c88f58c47f336fa851))
+* Remove duplicate code and improve error handling ([8f507fd](https://github.com/anarzone/uptime-sentinel/commit/8f507fd77e907bccc0e21f8c61d6d44eca02d8e8))
+
 ## [1.2.1](https://github.com/anarzone/uptime-sentinel/compare/v1.2.0...v1.2.1) (2026-01-15)
 
 ### Bug Fixes
