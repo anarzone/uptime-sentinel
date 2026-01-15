@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/anarzone/uptime-sentinel/compare/v1.1.2...v1.1.3) (2026-01-15)
+
+### Bug Fixes
+
+* Handle diverged history in pre-push hook ([01f1764](https://github.com/anarzone/uptime-sentinel/commit/01f1764c7b1cdd0d908ad04c9d699cde1f859257))
+
 ## [1.1.2](https://github.com/anarzone/uptime-sentinel/compare/v1.1.1...v1.1.2) (2026-01-15)
 
 ### Bug Fixes
