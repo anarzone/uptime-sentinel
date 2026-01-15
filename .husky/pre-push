@@ -42,8 +42,25 @@ if [ -z "$remote_sha1" ] || [ "$remote_sha1" = "00000000000000000000000000000000
     # New branch or no remote - compare against main
     CHANGED_FILES=$(git diff --name-only --diff-filter=d "$(git merge-base $local_sha1 main 2>/dev/null || echo main)" $local_sha1 2>/dev/null || git diff --name-only --diff-filter=d $local_sha1)
 else
-    # Existing branch
-    CHANGED_FILES=$(git diff --name-only --diff-filter=d ${remote_sha1}..${local_sha1})
+    # Existing branch - check if remote_sha1 exists locally
+    if git cat-file -e $remote_sha1 2>/dev/null; then
+        # Remote SHA exists locally - use it
+        CHANGED_FILES=$(git diff --name-only --diff-filter=d ${remote_sha1}..${local_sha1})
+    else
+        # Remote SHA doesn't exist locally - fetch and retry, or use remote branch
+        echo -e "${YELLOW}⚠️  Remote has new commits - fetching...${NC}"
+        git fetch origin $remote_ref 2>/dev/null || true
+
+        # Try to get the merge base with the remote tracking branch
+        MERGE_BASE=$(git merge-base $local_sha1 origin/${remote_ref#refs/heads/} 2>/dev/null)
+
+        if [ -n "$MERGE_BASE" ]; then
+            CHANGED_FILES=$(git diff --name-only --diff-filter=d ${MERGE_BASE}..${local_sha1})
+        else
+            # Fallback: compare against origin/main
+            CHANGED_FILES=$(git diff --name-only --diff-filter=d origin/main ${local_sha1} 2>/dev/null || git diff --name-only --diff-filter=d $local_sha1)
+        fi
+    fi
 fi
 
 # Count all changed files
