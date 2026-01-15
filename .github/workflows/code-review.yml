@@ -1,4 +1,5 @@
 name: Claude Code Review
+# Testing GLM-4 model integration via Zhipu AI proxy
 
 on:
   # Trigger on PR comments mentioning @claude
@@ -43,12 +44,13 @@ jobs:
 
           - name: Claude Code Response
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 claude_args: |
-                  --max-turns 5
-                  --model claude-sonnet-4-5-20250929
+                  --max-turns 15
 
   # Automatic code review on PR open/update
   auto_review:
@@ -68,8 +70,10 @@ jobs:
 
           - name: Claude Code Review
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 prompt: |
                     /review
@@ -85,8 +89,7 @@ jobs:
                     Provide specific, actionable feedback with code examples where relevant.
                     Follow the guidelines in CLAUDE.md for project-specific standards.
                 claude_args: |
-                  --max-turns 10
-                  --model claude-sonnet-4-5-20250929
+                  --max-turns 25
 
   # Manual review with specific focus
   manual_review:
@@ -100,8 +103,10 @@ jobs:
 
           - name: Claude Code Review - ${{ github.event.inputs.review_type }}
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
-                anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+                anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
                 prompt: |
                     /review
@@ -109,5 +114,4 @@ jobs:
                     Perform a ${{ github.event.inputs.review_type }} review of this codebase.
                     Follow the guidelines in CLAUDE.md and focus on ${{ github.event.inputs.review_type }} aspects.
                 claude_args: |
-                  --max-turns 10
-                  --model claude-sonnet-4-5-20250929
+                  --max-turns 25
