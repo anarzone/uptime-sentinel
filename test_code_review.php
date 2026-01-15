@@ -7,6 +7,8 @@ namespace App\Tests;
 /**
  * This file contains intentional code issues to test the code review system.
  * This file should be deleted after testing.
+ *
+ * TESTING: Added another issue to trigger pre-push hook again
  */
 
 class TestCodeReview
