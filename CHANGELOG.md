@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/anarzone/uptime-sentinel/compare/v1.2.0...v1.2.1) (2026-01-15)
+
+### Bug Fixes
+
+* Read interactive prompt from /dev/tty to avoid stdin conflict ([248d1ab](https://github.com/anarzone/uptime-sentinel/commit/248d1aba30deb0245d12cd2a5637724f158ead0c))
+
 ## [1.2.0](https://github.com/anarzone/uptime-sentinel/compare/v1.1.4...v1.2.0) (2026-01-15)
 
 ### Features
