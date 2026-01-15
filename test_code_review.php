@@ -47,4 +47,16 @@ class TestCodeReview
     {
         // Email sending logic
     }
+
+    // ISSUE: N+1 query problem in loop
+    public function fetchUsers(array $userIds): array
+    {
+        $users = [];
+        foreach ($userIds as $id) {
+            // This creates N+1 queries - should fetch all at once
+            $user = $this->db->query("SELECT * FROM users WHERE id = " . $id);
+            $users[] = $user;
+        }
+        return $users;
+    }
 }
