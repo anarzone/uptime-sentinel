@@ -44,15 +44,11 @@ jobs:
 
           - name: Claude Code Response
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
                 anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
-                settings: |
-                  {
-                    "env": {
-                      "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic"
-                    }
-                  }
                 claude_args: |
                   --max-turns 5
 
@@ -74,15 +70,11 @@ jobs:
 
           - name: Claude Code Review
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
                 anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
-                settings: |
-                  {
-                    "env": {
-                      "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic"
-                    }
-                  }
                 prompt: |
                     /review
 
@@ -111,15 +103,11 @@ jobs:
 
           - name: Claude Code Review - ${{ github.event.inputs.review_type }}
             uses: anthropics/claude-code-action@v1
+            env:
+                ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
             with:
                 anthropic_api_key: ${{ secrets.GLM_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
-                settings: |
-                  {
-                    "env": {
-                      "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic"
-                    }
-                  }
                 prompt: |
                     /review
 
