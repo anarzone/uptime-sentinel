@@ -43,3 +43,4 @@ docker compose up -d
 symfony server:start
 # Test hook
 # Test hook again
+# Test GLM Integration
