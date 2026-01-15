@@ -3,7 +3,8 @@
 # Pre-push hook for UptimeSentinel
 # Runs senior-code-reviewer agent on all files before pushing
 
-# Don't exit on error - we want to handle errors gracefully
+# Intentionally not using 'set -e' - we handle errors manually to provide
+# better UX (e.g., continue after fetch failures, prompt user on issues)
 # set -e
 
 # Colors for output
@@ -12,6 +13,28 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Helper function for interactive prompts
+# Returns 0 (success) if terminal is interactive, 1 otherwise
+prompt_user() {
+    local prompt_message="$1"
+    local response
+
+    # Check if /dev/tty is accessible
+    if [ ! -t 0 ] && [ ! -c /dev/tty ]; then
+        echo -e "${RED}❌ Not an interactive terminal - cannot prompt${NC}" >&2
+        return 1
+    fi
+
+    # Prompt user
+    read -p "$prompt_message" -n 1 -r response < /dev/tty
+    echo
+    if [[ $response =~ ^[Yy]$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 # Configuration
 CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/pre-push-config.yml"
@@ -46,9 +69,7 @@ if [ -n "$remote_sha1" ] && [ "$remote_sha1" != "0000000000000000000000000000000
             echo -e "${RED}❌ Your branch is behind ${remote_ref#refs/heads/} by $LOCAL_COMMIT_COUNT commit(s)${NC}"
             echo -e "${YELLOW}💡 Run 'git pull' first to update your branch${NC}"
             echo ""
-            read -p "Continue anyway? (y/N): " -n 1 -r < /dev/tty
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            if ! prompt_user "Continue anyway? (y/N): "; then
                 echo -e "${RED}❌ Push aborted${NC}"
                 exit 1
             fi
@@ -163,6 +184,17 @@ else
     REVIEW_SUCCESS=false
 fi
 
+# Check if Claude CLI command failed
+if [ "$REVIEW_SUCCESS" = false ]; then
+    echo ""
+    echo -e "${RED}❌ Claude CLI command failed${NC}"
+    echo -e "${YELLOW}⚠️  Unable to complete code review${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Check that Claude CLI is installed and working${NC}"
+    echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
+    exit 1
+fi
+
 # Display review output (with nice formatting)
 echo ""
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
@@ -180,10 +212,7 @@ if grep -q "BLOCKING ISSUES FOUND:" "$REVIEW_OUTPUT"; then
     echo -e "${RED}⚠️  ISSUES FOUND - Review blocked${NC}"
     echo -e "${YELLOW}⚠️  You must fix these issues before pushing${NC}"
     echo ""
-    # Read from terminal to avoid issues with git's stdin redirection
-    read -p "Continue anyway despite issues? (y/N): " -n 1 -r < /dev/tty
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! prompt_user "Continue anyway despite issues? (y/N): "; then
         echo -e "${RED}❌ Push aborted - fix issues and try again${NC}"
         echo ""
         echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
@@ -195,15 +224,13 @@ elif grep -q "APPROVED:" "$REVIEW_OUTPUT"; then
     echo -e "${GREEN}✅ Code review passed - no issues found!${NC}"
 else
     echo ""
-    echo -e "${YELLOW}⚠️  Review output unclear - treating as blocking${NC}"
+    echo -e "${RED}❌ Review output unclear - blocking push${NC}"
     echo -e "${YELLOW}⚠️  (Expected 'APPROVED:' or 'BLOCKING ISSUES FOUND:')${NC}"
     echo ""
-    read -p "Continue anyway? (y/N): " -n 1 -r < /dev/tty
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}❌ Push aborted${NC}"
-        exit 1
-    fi
+    echo -e "${YELLOW}💡 This usually means the Claude CLI failed or timed out${NC}"
+    echo -e "${YELLOW}💡 Check the review output above for errors${NC}"
+    echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
+    exit 1
 fi
 
 echo ""
