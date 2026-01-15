@@ -126,26 +126,7 @@ echo ""
 
 # Create temp file for review output
 REVIEW_OUTPUT=$(mktemp)
-trap "rm -f $REVIEW_OUTPUT" EXIT
-
-# Run the review using Claude Code CLI
-echo -e "${BLUE}🤖 Calling Claude Code senior-code-reviewer agent...${NC}"
-
-# Check if claude CLI is available
-if ! command -v claude &> /dev/null; then
-    echo -e "${RED}❌ claude CLI not found${NC}"
-    echo -e "${RED}   Automatic review requires the Claude CLI to be installed${NC}"
-    echo ""
-    echo -e "${YELLOW}💡 Install from: https://code.claude.com${NC}"
-    echo -e "${YELLOW}   Or disable auto_review in .husky/pre-push-config.yml${NC}"
-    echo ""
-    echo -e "${YELLOW}💡 To bypass this check: git push --no-verify${NC}"
-    exit 1
-fi
-
-# Create temp file for review output
-REVIEW_OUTPUT=$(mktemp)
-trap "rm -f $REVIEW_OUTPUT" EXIT
+trap 'rm -f "$REVIEW_OUTPUT" "${REVIEW_OUTPUT}.result"' EXIT
 
 # Build the review prompt (using quoted EOF to prevent backtick execution)
 cat > "$REVIEW_OUTPUT" <<'REVIEW_PROMPT'
@@ -205,16 +186,14 @@ fi
 # Run claude ask with the prepared prompt
 if claude ask < "$REVIEW_OUTPUT" > "${REVIEW_OUTPUT}.result" 2>&1; then
     mv "${REVIEW_OUTPUT}.result" "$REVIEW_OUTPUT"
-    REVIEW_SUCCESS=true
 else
-    REVIEW_SUCCESS=false
-fi
-
-# Check if Claude CLI command failed
-if [ "$REVIEW_SUCCESS" = false ]; then
+    # Claude CLI failed - show the error output
     echo ""
     echo -e "${RED}❌ Claude CLI command failed${NC}"
     echo -e "${YELLOW}⚠️  Unable to complete code review${NC}"
+    echo ""
+    echo -e "${YELLOW}📋 Error output:${NC}"
+    cat "${REVIEW_OUTPUT}.result" 2>/dev/null || echo "(no error output available)"
     echo ""
     echo -e "${YELLOW}💡 Check that Claude CLI is installed and working${NC}"
     echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
