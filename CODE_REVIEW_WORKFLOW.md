@@ -38,7 +38,7 @@ Every time you run `git push`, the pre-push hook **automatically** runs code rev
 **Pre-Push Hook** (`.husky/pre-push`) - Runs before every push:
 - 🤖 **Code Review** - Reviews ALL files changed in the push
 
-### Pre-Push: Automatic Code Review
+### Pre-Push: Interactive Code Review
 
 The hook automatically runs code review to review **all changed files**:
 
@@ -51,7 +51,10 @@ The hook automatically runs code review to review **all changed files**:
   - Documentation completeness
   - Design system consistency
   - CI/CD workflow correctness
-- 🚫 **Blocks push** if critical issues found
+- 🤔 **Interactive prompt** if critical issues found
+  - Asks if you want to continue or abort
+  - Gives you control over whether to fix issues first
+  - Forces acknowledgment before proceeding with issues
 - ⚡ **Fast feedback** before code leaves your machine
 - ⚙️ **Configurable** via `.husky/pre-push-config.yml`
 
@@ -60,21 +63,56 @@ The hook automatically runs code review to review **all changed files**:
 # Enable/disable automatic code review
 auto_review: true
 
-# Block push if critical issues found
-block_on_issues: true
+# Interactive mode: Ask before proceeding with issues
+# When true, the hook will prompt you to continue or abort if issues are found
+# When false, the hook will proceed automatically without prompting
+interactive: true
 
 # Max files to review (larger pushes are reviewed but may take longer)
 max_files: 20
 ```
 
+### Interactive Workflow Example
+
+When you push code with issues, you'll see:
+
+```bash
+$ git push origin feature-branch
+
+🤖 Running pre-push code review...
+
+📝 Reviewing 3 file(s):
+   - src/Monitor/MonitorService.php
+   - config/services.yaml
+   - README.md
+
+🤖 Calling Claude Code senior-code-reviewer agent...
+
+═══════════════════════════════════════════════════════
+📊 CODE REVIEW RESULTS
+═══════════════════════════════════════════════════════
+
+BLOCKING ISSUES FOUND:
+1. SQL injection vulnerability in MonitorService.php:42
+   - Concatenating user input into query string
+   - Use parameterized queries instead
+
+═══════════════════════════════════════════════════════
+
+⚠️  Critical issues found
+⚠️  Review the issues above before proceeding
+
+Continue with push anyway? (y/N): [Type 'y' to proceed, any other key to abort]
+```
+
 ### Bypassing the Hook
 
-If any check fails, the push is blocked. You can bypass with:
+If you need to skip the review entirely:
 ```bash
 git push --no-verify
 ```
 
-**Note**: Use `--no-verify` sparingly. The hook catches issues early!
+**Note**: Use `--no-verify` sparingly. The interactive prompt is designed to give you control while still catching issues early!
 
 ---
 
@@ -129,15 +167,20 @@ git add .
 git commit -m "feat: Implement monitoring dispatcher"
 # ✅ Pre-commit: PHP CS Fixer, PHPStan, PHPUnit run automatically
 
-# 4. Push (pre-push hook runs code review)
+# 4. Push (pre-push hook runs interactive code review)
 git push origin feature/monitoring-dispatcher
 # ✅ Pre-push: Code review runs automatically
-# ✅ If critical issues found: Push is blocked
-# ❌ If no issues: Push succeeds
+# ✅ If critical issues found: Interactive prompt asks to continue or abort
+# ✅ If no issues: Push proceeds automatically
 
-# 5. Create PR if needed
+# 5a. If issues were found and you aborted:
+#    - Fix the issues
+#    - Commit again: git commit -am "fix: Address review feedback"
+#    - Push again: git push origin feature/monitoring-dispatcher
+
+# 5b. If you want to review PR after pushing:
 gh pr create --title "feat: Implement monitoring dispatcher"
-# Note: No automatic code review on PR (using local review only)
+./scripts/review-pr.sh  # Manual PR review (optional)
 ```
 
 ---
@@ -178,8 +221,8 @@ Edit `.husky/pre-push-config.yml`:
 # Disable automatic review (use only composer checks)
 auto_review: false
 
-# Don't block push, just warn
-block_on_issues: false
+# Disable interactive prompts (proceed automatically even with issues)
+interactive: false
 
 # Review up to 50 files (default: 20)
 max_files: 50
@@ -195,6 +238,13 @@ If you want to keep composer checks but skip automatic review:
 ```yaml
 # In .husky/pre-push-config.yml
 auto_review: false
+```
+
+### Disable Interactive Prompts
+If you want the hook to proceed automatically without prompting (not recommended):
+```yaml
+# In .husky/pre-push-config.yml
+interactive: false
 ```
 
 ### Skip Pre-Push Hook Permanently
@@ -260,15 +310,16 @@ This project previously used a **two-tier code review system** with both local p
 
 ## 🎯 Summary
 
-**Current Setup**: Local pre-push code review only (free, fast, effective)
+**Current Setup**: Local pre-push code review only (free, fast, interactive)
 
 **What to expect**:
 - Pre-commit hook: PHP CS Fixer, PHPStan, PHPUnit
-- Pre-push hook: Automatic code review (blocks on critical issues)
-- No automatic reviews on PRs (local review already caught issues)
+- Pre-push hook: Automatic interactive code review (asks before proceeding with issues)
+- Optional manual PR review: Use `./scripts/review-pr.sh` for deeper analysis
 
 **Benefits**:
 - ✅ Catch issues before they leave your machine
+- ✅ Interactive control over whether to fix or proceed
 - ✅ Zero API costs
 - ✅ Fast feedback (3-5 seconds)
 - ✅ Works offline

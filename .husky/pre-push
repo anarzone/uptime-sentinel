@@ -15,7 +15,6 @@ NC='\033[0m' # No Color
 
 # Configuration
 CONFIG_FILE="$(git rev-parse --show-toplevel)/.husky/pre-push-config.yml"
-BLOCK_ON_ISSUES=true
 AUTO_REVIEW=true
 MAX_FILES=20
 
@@ -24,9 +23,6 @@ if [ -f "$CONFIG_FILE" ]; then
     # Check for auto_review setting (more robust YAML parsing)
     if grep -E "^auto_review:\s*false" "$CONFIG_FILE" 2>/dev/null; then
         AUTO_REVIEW=false
-    fi
-    if grep -E "^block_on_issues:\s*false" "$CONFIG_FILE" 2>/dev/null; then
-        BLOCK_ON_ISSUES=false
     fi
     MAX_FILES=$(grep -E "^max_files:\s*[0-9]+" "$CONFIG_FILE" 2>/dev/null | awk '{print $2}' || echo 20)
 fi
@@ -158,18 +154,21 @@ echo ""
 echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
 echo ""
 
-# Check if blocking issues were found
+# Interactive prompt after review
 if grep -q "BLOCKING ISSUES FOUND:" "$REVIEW_OUTPUT"; then
     echo ""
-    if [ "$BLOCK_ON_ISSUES" = true ]; then
-        echo -e "${RED}❌ Push BLOCKED: Critical issues found${NC}"
-        echo -e "${RED}   Please address the issues above before pushing.${NC}"
+    echo -e "${YELLOW}⚠️  Critical issues found${NC}"
+    echo -e "${YELLOW}⚠️  Review the issues above before proceeding${NC}"
+    echo ""
+    read -p "Continue with push anyway? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}❌ Push aborted - fix issues and try again${NC}"
         echo ""
-        echo -e "${YELLOW}💡 To bypass: git push --no-verify${NC}"
+        echo -e "${YELLOW}💡 To bypass this check: git push --no-verify${NC}"
         exit 1
-    else
-        echo -e "${YELLOW}⚠️  Warning: Critical issues found (push not blocked per config)${NC}"
     fi
+    echo -e "${GREEN}✅ Proceeding with push despite issues...${NC}"
 elif grep -q "RECOMMENDATIONS:" "$REVIEW_OUTPUT"; then
     echo -e "${GREEN}✅ No blocking issues - some suggestions provided above${NC}"
 else

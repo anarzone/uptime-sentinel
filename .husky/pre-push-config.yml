@@ -7,9 +7,10 @@
 # Set to 'false' to use composer checks only and skip automatic review
 auto_review: true
 
-# Block push if critical issues are found
-# Set to false to warn only (not recommended for production)
-block_on_issues: true
+# Interactive mode: Ask before proceeding with issues
+# When true, the hook will prompt you to continue or abort if issues are found
+# When false, the hook will proceed automatically without prompting
+interactive: true
 
 # Maximum number of files to review in one push
 # Larger changes will skip automatic review and use PR workflow instead
