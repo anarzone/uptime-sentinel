@@ -9,9 +9,6 @@ use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Service\UrlCheckerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-/**
- * Symfony HttpClient implementation of URL checker.
- */
 final readonly class SymfonyHttpUrlChecker implements UrlCheckerInterface
 {
     public function __construct(
@@ -21,7 +18,6 @@ final readonly class SymfonyHttpUrlChecker implements UrlCheckerInterface
 
     public function check(Monitor $monitor): CheckResultDto
     {
-        // ... (existing implementation)
         $startTime = microtime(true);
         $checkedAt = new \DateTimeImmutable();
 

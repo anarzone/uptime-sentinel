@@ -6,7 +6,7 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
-    ->in(__DIR__.'/src')
+    ->in(__DIR__ . '/src')
     ->exclude('vendor')
     ->exclude('var')
     ->exclude('public/bundles');
@@ -24,7 +24,15 @@ return (new Config())
                 'extra',
                 'throw',
                 'use',
-                'use_trait',
+            ],
+        ],
+        'method_argument_space' => [
+            'on_multiline' => 'ignore',
+        ],
+        'class_attributes_separation' => [
+            'elements' => [
+                'property' => 'one',
+                'trait_import' => 'one',
             ],
         ],
         'yoda_style' => [

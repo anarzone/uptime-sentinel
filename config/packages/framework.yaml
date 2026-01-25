@@ -10,7 +10,11 @@ framework:
 
     # Enable serializer for MapRequestPayload attribute
     serializer:
+        enabled: true
         enable_attributes: true
+
+    property_access:
+        enabled: true
 
 when@test:
     framework:

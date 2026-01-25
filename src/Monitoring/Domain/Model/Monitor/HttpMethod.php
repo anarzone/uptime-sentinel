@@ -10,4 +10,9 @@ enum HttpMethod: string
     case POST = 'POST';
     case HEAD = 'HEAD';
     case PUT = 'PUT';
+
+    public static function getValues(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
 }
