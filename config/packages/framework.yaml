@@ -8,6 +8,10 @@ framework:
     #esi: true
     #fragments: true
 
+    # Enable serializer for MapRequestPayload attribute
+    serializer:
+        enable_attributes: true
+
 when@test:
     framework:
         test: true

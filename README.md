@@ -6,13 +6,13 @@
 
 ## 🏗 Architecture Highlights
 
-| Component | Technology | Role |
-| :--- | :--- | :--- |
-| **Core Framework** | Symfony 7 (PHP 8.3) | Modular Monolith architecture |
-| **Orchestration** | Docker Compose | Service isolation (Web vs. Worker) |
-| **Queue Broker** | RabbitMQ | Handling the "Thundering Herd" of scheduled checks |
-| **Database** | MySQL 8.0 | Using **Table Partitioning** for 10M+ log rows/month |
-| **Write Buffer** | Redis | Buffering high-velocity writes before disk persistence |
+| Component | Technology          | Role |
+| :--- |:--------------------| :--- |
+| **Core Framework** | Symfony 7 (PHP 8.4) | Modular Monolith architecture |
+| **Orchestration** | Docker Compose      | Service isolation (Web vs. Worker) |
+| **Queue Broker** | RabbitMQ            | Handling the "Thundering Herd" of scheduled checks |
+| **Database** | MySQL 8.0           | Using **Table Partitioning** for 10M+ log rows/month |
+| **Write Buffer** | Redis               | Buffering high-velocity writes before disk persistence |
 
 ## 🚀 Key Engineering Challenges Solved
 
@@ -28,7 +28,7 @@ To query "Average Latency over 30 days" across millions of rows, we utilize **My
 ## 🛠 Installation (Hybrid Mode)
 
 **Prerequisites:**
-* PHP 8.3+
+* PHP 8.4+
 * Composer
 * Docker (for Infrastructure only)
 

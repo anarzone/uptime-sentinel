@@ -71,8 +71,7 @@ The codebase is organized into **bounded contexts**:
 // Example: Monitor entity with DDD patterns
 namespace App\Monitor\Domain\Entity;
 
-use App\Monitor\Domain\ValueObject\MonitorId;
-use App\Monitor\Domain\ValueObject\Url;
+use App\Monitor\Domain\Model\Monitoring\ValueObject\MonitorId;use App\Monitor\Domain\ValueObject\Url;
 
 final class Monitor
 {
@@ -261,10 +260,7 @@ CREATE INDEX idx_telemetry_monitor_latency ON telemetry (monitor_id, latency, cr
 // Example: Unit test with Zenstruck Foundry
 namespace App\Tests\Unit\Monitor\Domain\Entity;
 
-use App\Monitor\Domain\Entity\Monitor;
-use App\Monitor\Domain\ValueObject\MonitorId;
-use App\Monitor\Domain\ValueObject\Url;
-use PHPUnit\Framework\TestCase;
+use App\Monitor\Domain\Model\Monitoring\Monitor;use App\Monitor\Domain\Model\Monitoring\ValueObject\MonitorId;use App\Monitor\Domain\ValueObject\Url;use PHPUnit\Framework\TestCase;
 
 class MonitorTest extends TestCase
 {

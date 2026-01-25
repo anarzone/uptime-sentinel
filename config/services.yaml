@@ -19,5 +19,40 @@ services:
     App\:
         resource: '../src/'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # repository bindings
+    App\Monitoring\Domain\Repository\MonitorRepositoryInterface:
+        alias: App\Monitoring\Infrastructure\Persistence\MonitorRepository
+
+    App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface:
+        alias: App\Monitoring\Infrastructure\Persistence\AlertRuleRepository
+
+    # Redis Client for Monitoring Infrastructure
+    redis_client:
+        class: 'object'
+        factory: ['Symfony\Component\Cache\Adapter\RedisAdapter', 'createConnection']
+        arguments:
+            - '%env(REDIS_URL)%'
+
+    App\Monitoring\Infrastructure\Redis\RedisTelemetryBuffer:
+        arguments:
+            $redis: '@redis_client'
+
+    # Notification Senders
+    App\Monitoring\Domain\Service\NotificationSenderInterface:
+        class: App\Monitoring\Infrastructure\Notification\EmailNotificationSender
+
+    App\Monitoring\Infrastructure\Notification\EmailNotificationSender:
+        tags: ['app.notification_sender']
+        arguments:
+            $fromAddress: '%env(string:default::MAILER_FROM)%' 
+
+    App\Monitoring\Infrastructure\Notification\SlackNotificationSender:
+        tags: ['app.notification_sender']
+
+    App\Monitoring\Infrastructure\Notification\WebhookNotificationSender:
+        tags: ['app.notification_sender']
+
+    # AlertNotificationService with all senders injected
+    App\Monitoring\Application\Service\AlertNotificationService:
+        arguments:
+            $senders: !tagged_iterator app.notification_sender

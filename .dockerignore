@@ -1,0 +1,16 @@
+vendor/
+var/
+.env.local
+.env.*.local
+.phpunit.result.cache
+.php-cs-fixer.cache
+node_modules/
+public/bundles/
+public/uploads/
+.idea/
+.vscode/
+.git/
+.dockerignore
+Dockerfile
+compose.yaml
+docker-compose.override.yaml

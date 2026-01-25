@@ -2,6 +2,7 @@
   "enabledPlugins": {
     "php-lsp@claude-plugins-official": true,
     "code-review@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true
   }
 }
