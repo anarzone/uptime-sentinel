@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/anarzone/uptime-sentinel/compare/v1.2.2...v1.2.3) (2026-01-25)
+
+### Bug Fixes
+
+* Fix tests by adding serialier support in framework ([21e4677](https://github.com/anarzone/uptime-sentinel/commit/21e467706ee04531e455413b9df57bfcdae81cf2))
+
 ## [1.2.2](https://github.com/anarzone/uptime-sentinel/compare/v1.2.1...v1.2.2) (2026-01-15)
 
 ### Bug Fixes
