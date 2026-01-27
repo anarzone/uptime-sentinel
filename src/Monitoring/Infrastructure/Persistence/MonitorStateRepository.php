@@ -6,6 +6,8 @@ namespace App\Monitoring\Infrastructure\Persistence;
 
 use App\Monitoring\Domain\Model\Monitor\MonitorHealth;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
+use App\Monitoring\Domain\Repository\MonitorStateRepositoryInterface;
+use Redis;
 
 /**
  * Tracks monitor state transitions in Redis for notification detection.
@@ -13,13 +15,14 @@ use App\Monitoring\Domain\Model\Monitor\MonitorId;
  * This repository stores the previous health status of monitors to detect
  * transitions (e.g., DOWN → UP for recovery notifications).
  */
-final readonly class MonitorStateRepository
+final readonly class MonitorStateRepository implements MonitorStateRepositoryInterface
 {
     private const string KEY_PREFIX = 'monitor:state:';
     private const int DEFAULT_TTL = 86400; // 24 hours
 
     public function __construct(
-        private object $redis,
+        private \Redis $redis,
+        private int $ttl = self::DEFAULT_TTL,
     ) {
     }
 
@@ -55,7 +58,7 @@ final readonly class MonitorStateRepository
 
         $this->redis->setex(
             self::KEY_PREFIX.$monitorId->toString(),
-            self::DEFAULT_TTL,
+            $this->ttl,
             $data
         );
     }

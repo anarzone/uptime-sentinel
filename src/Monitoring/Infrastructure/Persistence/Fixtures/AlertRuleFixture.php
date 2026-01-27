@@ -6,6 +6,7 @@ namespace App\Monitoring\Infrastructure\Persistence\Fixtures;
 
 use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\HttpMethod;
+use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 use App\Monitoring\Infrastructure\Persistence\MonitorRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;

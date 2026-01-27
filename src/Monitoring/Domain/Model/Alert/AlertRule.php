@@ -90,6 +90,11 @@ class AlertRule
         $this->failureThreshold = $failureThreshold;
     }
 
+    public function updateType(NotificationType $type): void
+    {
+        $this->type = $type;
+    }
+
     /**
      * Get the cooldown interval as a DateInterval object.
      */

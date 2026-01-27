@@ -26,9 +26,9 @@ final readonly class AlertRuleResponseDto
         return new self(
             $rule->id->toString(),
             $rule->monitorId->toString(),
-            $rule->channel->value,
+            $rule->notificationChannel->type->value,
             $rule->type->value,
-            $rule->target,
+            $rule->notificationChannel->dsn,
             $rule->failureThreshold,
             $rule->cooldownInterval,
             $rule->isEnabled,

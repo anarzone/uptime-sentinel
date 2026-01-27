@@ -58,3 +58,4 @@ services:
     App\Monitoring\Application\Service\AlertNotificationService:
         arguments:
             $mailer: '@mailer.mailer'
+            $mailerFrom: '%env(string:MAILER_FROM)%'

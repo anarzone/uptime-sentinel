@@ -11,7 +11,7 @@ use App\Monitoring\Domain\Model\Monitor\MonitorHealth;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
 use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
-use App\Monitoring\Infrastructure\Persistence\MonitorStateRepository;
+use App\Monitoring\Domain\Repository\MonitorStateRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -31,11 +31,12 @@ final readonly class AlertNotificationService
     public function __construct(
         private AlertRuleRepositoryInterface $alertRuleRepository,
         private EscalationPolicyRepositoryInterface $escalationPolicyRepository,
-        private MonitorStateRepository $monitorStateRepository,
+        private MonitorStateRepositoryInterface $monitorStateRepository,
         private StorageInterface $rateLimiterStorage,
         private HttpClientInterface $httpClient,
         private MailerInterface $mailer,
         private LoggerInterface $logger,
+        private string $mailerFrom,
         private ?EventDispatcherInterface $eventDispatcher = null,
     ) {
     }
@@ -72,8 +73,6 @@ final readonly class AlertNotificationService
     private function handleFailureNotifications(Monitor $monitor): void
     {
         $this->handleAlertRules($monitor, NotificationType::FAILURE);
-        // TODO: Fix escalation policy query
-        // $this->handleEscalationNotifications($monitor);
     }
 
     private function handleRecoveryNotifications(Monitor $monitor): void
@@ -84,11 +83,6 @@ final readonly class AlertNotificationService
     private function handleAlertRules(Monitor $monitor, NotificationType $type): void
     {
         $alertRules = $this->alertRuleRepository->findEnabledByMonitorId($monitor->id);
-
-        // Convert to array if needed
-        if ($alertRules instanceof \Traversable) {
-            $alertRules = iterator_to_array($alertRules);
-        }
 
         $this->logger->info(\sprintf(
             'Processing alert rules: count=%d, type=%s, monitor=%s, failures=%d',
@@ -211,7 +205,7 @@ final readonly class AlertNotificationService
         try {
             if ($channel->type === AlertChannel::EMAIL) {
                 $email = new Email()
-                    ->from($_ENV['MAILER_FROM'] ?? 'alerts@uptime-sentinel.test')
+                    ->from($this->mailerFrom)
                     ->to($channel->dsn)
                     ->subject($subject)
                     ->text($body);
@@ -230,8 +224,19 @@ final readonly class AlertNotificationService
                 'monitor' => $monitor->name,
                 'context' => $contextId,
             ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to dispatch notification', [
+        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+            // Log mailer errors but don't re-throw in message handler context
+            // Messenger will retry for transient failures, but will permanently fail
+            // for configuration errors (e.g. invalid DSN)
+            $this->logger->error('Failed to dispatch email notification', [
+                'type' => $channel->type->value,
+                'channel' => $channel->name,
+                'error' => $e->getMessage(),
+                'monitor' => $monitor->id->toString(),
+            ]);
+        } catch (\Symfony\Component\Notifier\Exception\TransportException $e) {
+            // Log notifier errors but don't re-throw in message handler context
+            $this->logger->error('Failed to dispatch chat notification', [
                 'type' => $channel->type->value,
                 'channel' => $channel->name,
                 'error' => $e->getMessage(),

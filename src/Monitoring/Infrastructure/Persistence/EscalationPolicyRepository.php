@@ -24,18 +24,11 @@ class EscalationPolicyRepository extends ServiceEntityRepository implements Esca
 
     public function findApplicableForMonitor(MonitorId $monitorId): array
     {
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT ep.uuid FROM escalation_policies ep WHERE ep.monitor_id_uuid = :monitorId AND ep.is_enabled = 1 ORDER BY ep.level ASC';
-        $result = $conn->executeQuery($sql, ['monitorId' => $monitorId->toString()]);
-        $ids = $result->fetchFirstColumn();
-
-        if (empty($ids)) {
-            return [];
-        }
-
         return $this->createQueryBuilder('ep')
-            ->where('ep.id.value IN (:ids)')
-            ->setParameter('ids', $ids)
+            ->where('ep.monitorId.value = :monitorId')
+            ->andWhere('ep.isEnabled = :enabled')
+            ->setParameter('monitorId', $monitorId->toString())
+            ->setParameter('enabled', true)
             ->orderBy('ep.level', 'ASC')
             ->getQuery()
             ->getResult();
@@ -47,18 +40,9 @@ class EscalationPolicyRepository extends ServiceEntityRepository implements Esca
             return parent::findAll();
         }
 
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = 'SELECT ep.uuid FROM escalation_policies ep WHERE ep.monitor_id_uuid = :monitorId ORDER BY ep.level ASC';
-        $result = $conn->executeQuery($sql, ['monitorId' => $monitorId->toString()]);
-        $ids = $result->fetchFirstColumn();
-
-        if (empty($ids)) {
-            return [];
-        }
-
         return $this->createQueryBuilder('ep')
-            ->where('ep.id.value IN (:ids)')
-            ->setParameter('ids', $ids)
+            ->where('ep.monitorId.value = :monitorId')
+            ->setParameter('monitorId', $monitorId->toString())
             ->orderBy('ep.level', 'ASC')
             ->getQuery()
             ->getResult();

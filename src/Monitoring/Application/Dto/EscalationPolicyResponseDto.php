@@ -10,7 +10,7 @@ final readonly class EscalationPolicyResponseDto
 {
     public function __construct(
         public string $id,
-        public ?string $monitorId,
+        public string $monitorId,
         public int $level,
         public int $consecutiveFailures,
         public string $channel,
@@ -24,11 +24,11 @@ final readonly class EscalationPolicyResponseDto
     {
         return new self(
             $policy->id->toString(),
-            $policy->monitorId?->toString(),
+            $policy->monitorId->toString(),
             $policy->level,
             $policy->consecutiveFailures,
-            $policy->channel->value,
-            $policy->target,
+            $policy->notificationChannel->type->value,
+            $policy->notificationChannel->dsn,
             $policy->isEnabled,
             $policy->createdAt->format(\DateTimeInterface::ATOM),
         );
