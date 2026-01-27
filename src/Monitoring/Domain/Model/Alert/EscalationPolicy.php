@@ -13,13 +13,13 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EscalationPolicyRepository::class)]
 #[ORM\Table(name: 'escalation_policies')]
-#[ORM\Index(name: 'idx_monitor_level', columns: ['monitor_id_uuid', 'level'])]
+#[ORM\Index(name: 'idx_escalation_policies_monitor_level', columns: ['monitor_id', 'level'])]
 final class EscalationPolicy
 {
     #[ORM\Embedded(class: EscalationPolicyId::class, columnPrefix: false)]
     public readonly EscalationPolicyId $id;
 
-    #[ORM\Embedded(class: MonitorId::class, columnPrefix: 'monitor_id_')]
+    #[ORM\Embedded(class: MonitorId::class, columnPrefix: 'monitor_')]
     public readonly MonitorId $monitorId;
 
     #[ORM\Column(type: Types::INTEGER)]
@@ -29,7 +29,12 @@ final class EscalationPolicy
     public readonly int $consecutiveFailures;
 
     #[ORM\ManyToOne(targetEntity: NotificationChannel::class)]
-    #[ORM\JoinColumn(name: 'notification_channel_id', referencedColumnName: 'uuid', nullable: false)]
+    #[ORM\JoinColumn(
+        name: 'notification_channel_id',
+        referencedColumnName: 'id',
+        nullable: false,
+        onDelete: 'CASCADE'
+    )]
     public private(set) NotificationChannel $notificationChannel;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]

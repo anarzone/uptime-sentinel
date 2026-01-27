@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Embeddable]
 final readonly class Url
 {
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(name: 'url', type: Types::STRING)]
     public string $value;
 
     private function __construct(string $value)

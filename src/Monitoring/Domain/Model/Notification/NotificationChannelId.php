@@ -11,7 +11,7 @@ use Symfony\Component\Uid\UuidV7;
 final readonly class NotificationChannelId
 {
     #[ORM\Id]
-    #[ORM\Column(name: 'uuid', type: 'string', length: 36)]
+    #[ORM\Column(name: 'id', type: 'string', length: 36)]
     public string $value;
 
     public function __construct(string $value)

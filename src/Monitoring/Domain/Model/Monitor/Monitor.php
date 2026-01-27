@@ -17,7 +17,7 @@ final class Monitor
     #[ORM\Column(type: Types::STRING)]
     public private(set) string $name;
 
-    #[ORM\Embedded(class: Url::class)]
+    #[ORM\Embedded(class: Url::class, columnPrefix: false)]
     public private(set) Url $url;
 
     #[ORM\Column(type: Types::STRING, enumType: HttpMethod::class)]

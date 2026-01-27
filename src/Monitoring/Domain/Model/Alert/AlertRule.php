@@ -17,11 +17,16 @@ class AlertRule
     #[ORM\Embedded(class: AlertRuleId::class, columnPrefix: false)]
     public readonly AlertRuleId $id;
 
-    #[ORM\Embedded(class: MonitorId::class, columnPrefix: 'monitor_id_')]
+    #[ORM\Embedded(class: MonitorId::class, columnPrefix: 'monitor_')]
     public readonly MonitorId $monitorId;
 
     #[ORM\ManyToOne(targetEntity: NotificationChannel::class)]
-    #[ORM\JoinColumn(name: 'notification_channel_id', referencedColumnName: 'uuid', nullable: false)]
+    #[ORM\JoinColumn(
+        name: 'notification_channel_id',
+        referencedColumnName: 'id',
+        nullable: false,
+        onDelete: 'CASCADE'
+    )]
     public private(set) NotificationChannel $notificationChannel;
 
     #[ORM\Column(type: Types::STRING, length: 20, enumType: NotificationType::class)]
