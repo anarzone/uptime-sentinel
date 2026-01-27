@@ -6,10 +6,9 @@ namespace App\Monitoring\Domain\Repository;
 
 use App\Monitoring\Domain\Model\Alert\AlertRule;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
-use Symfony\Component\Uid\UuidV7;
 
 /**
- * @method AlertRule|null find(UuidV7 $uuid)
+ * @method AlertRule|null find(string $id)
  */
 interface AlertRuleRepositoryInterface
 {

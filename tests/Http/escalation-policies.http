@@ -1,0 +1,493 @@
+###
+# UptimeSentinel Escalation Policies API Tests
+#
+# This file contains HTTP requests to test escalation policy management endpoints
+#
+# Prerequisites:
+# 1. Run: php bin/console doctrine:migrations:migrate
+# 2. Start Symfony server: php bin/console server:run
+# 3. Create monitors first (see monitors.http)
+#
+# Variables:
+# - baseUrl: http://localhost:8000
+# - monitorId: ID of an existing monitor (use null for global policies)
+###
+@contentType = application/json
+@baseUrl = http://localhost:8000
+
+###############################################################################
+# ESCALATION POLICY CREATION
+###############################################################################
+
+### 1. Create Global Escalation Policy - Level 1 (Email)
+# @name createGlobalLevel1Email
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "level1@example.com"
+}
+
+### 2. Create Global Escalation Policy - Level 2 (Slack)
+# @name createGlobalLevel2Slack
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 2,
+    "consecutiveFailures": 5,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+}
+
+### 3. Create Global Escalation Policy - Level 3 (Webhook - Critical)
+# @name createGlobalLevel3Webhook
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 3,
+    "consecutiveFailures": 10,
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/critical-alert"
+}
+
+### 4. Create Monitor-Specific Escalation Policy
+# @name createMonitorSpecificPolicy
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "monitor-alerts@example.com"
+}
+
+### 5. Create Multi-Level Escalation Chain for Monitor
+# @name createEscalationChainLevel1
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "team@example.com"
+}
+
+###
+# @name createEscalationChainLevel2
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 2,
+    "consecutiveFailures": 5,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+}
+
+###
+# @name createEscalationChainLevel3
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 3,
+    "consecutiveFailures": 10,
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/emergency"
+}
+
+###
+
+### 6. Create Escalation Policy - Invalid Channel
+# @name createInvalidChannel
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "sms",
+    "target": "+1234567890"
+}
+
+### 7. Create Escalation Policy - Negative Level
+# @name createNegativeLevel
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": -1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 8. Create Escalation Policy - Zero Level
+# @name createZeroLevel
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 0,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 9. Create Escalation Policy - Negative Consecutive Failures
+# @name createNegativeFailures
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": -1,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 10. Create Escalation Policy - Zero Consecutive Failures
+# @name createZeroFailures
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 0,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 11. Create Escalation Policy - Missing Required Field (level)
+# @name createMissingLevel
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 12. Create Escalation Policy - Missing Required Field (consecutiveFailures)
+# @name createMissingFailures
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+### 13. Create Escalation Policy - Missing Required Field (channel)
+# @name createMissingChannel
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 3,
+    "target": "test@example.com"
+}
+
+### 14. Create Escalation Policy - Missing Required Field (target)
+# @name createMissingTarget
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email"
+}
+
+### 15. Create Escalation Policy - Non-existent Monitor
+# @name createNonExistentMonitor
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "01234567-89ab-cdef-0123-456789abcdef",
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "test@example.com"
+}
+
+###############################################################################
+# ESCALATION POLICY RETRIEVAL
+###############################################################################
+
+### 16. List All Escalation Policies (Global + Monitor-Specific)
+# @name listAllPolicies
+GET {{baseUrl}}/api/escalation-policies
+
+### 17. List Escalation Policies for Specific Monitor
+# @name listPoliciesForMonitor
+GET {{baseUrl}}/api/escalation-policies/monitor/{{monitorId}}
+
+### 18. Get Specific Escalation Policy by ID
+# @name getEscalationPolicy
+# Replace {{policyId}} with actual ID from creation response
+@policyId = 01234567-89ab-cdef-0123-456789abcdef
+GET {{baseUrl}}/api/escalation-policies/{{policyId}}
+
+### 19. Get Non-existent Escalation Policy
+# @name getNonExistentPolicy
+GET {{baseUrl}}/api/escalation-policies/00000000-0000-0000-0000-000000000000
+
+### 20. List Policies for Non-existent Monitor
+# @name listPoliciesNonExistentMonitor
+GET {{baseUrl}}/api/escalation-policies/monitor/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# ESCALATION POLICY ENABLE/DISABLE
+###############################################################################
+
+### 21. Enable Escalation Policy
+# @name enablePolicy
+PATCH {{baseUrl}}/api/escalation-policies/{{policyId}}/enable
+
+### 22. Disable Escalation Policy
+# @name disablePolicy
+PATCH {{baseUrl}}/api/escalation-policies/{{policyId}}/disable
+
+### 23. Enable Non-existent Policy
+# @name enableNonExistentPolicy
+PATCH {{baseUrl}}/api/escalation-policies/00000000-0000-0000-0000-000000000000/enable
+
+### 24. Disable Non-existent Policy
+# @name disableNonExistentPolicy
+PATCH {{baseUrl}}/api/escalation-policies/00000000-0000-0000-0000-000000000000/disable
+
+###############################################################################
+# ESCALATION POLICY DELETION
+###############################################################################
+
+### 25. Delete Escalation Policy
+# @name deletePolicy
+DELETE {{baseUrl}}/api/escalation-policies/{{policyId}}
+
+### 26. Delete Non-existent Escalation Policy
+# @name deleteNonExistentPolicy
+DELETE {{baseUrl}}/api/escalation-policies/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# WORKFLOW EXAMPLES
+###############################################################################
+
+### Workflow: Complete Escalation Setup
+# Step 1: Create global escalation policies (apply to all monitors)
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 3,
+    "channel": "email",
+    "target": "global-level1@example.com"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 2,
+    "consecutiveFailures": 5,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 3,
+    "consecutiveFailures": 10,
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/critical"
+}
+
+###
+
+# Step 2: Create monitor-specific override policies
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 1,
+    "consecutiveFailures": 5,
+    "channel": "email",
+    "target": "monitor-specific@example.com"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 2,
+    "consecutiveFailures": 8,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/YYYYYYYYYYYYYYYYYYYY"
+}
+
+###
+
+# Step 3: View all policies for the specific monitor
+GET {{baseUrl}}/api/escalation-policies/monitor/{{monitorId}}
+
+###
+
+# Step 4: Disable a specific policy
+PATCH {{baseUrl}}/api/escalation-policies/{{policyId}}/disable
+
+###
+
+# Step 5: Re-enable the policy
+PATCH {{baseUrl}}/api/escalation-policies/{{policyId}}/enable
+
+###
+
+# Step 6: Delete a policy
+DELETE {{baseUrl}}/api/escalation-policies/{{policyId}}
+
+###
+
+### Workflow: Test Escalation Triggering
+# This demonstrates how escalation policies would trigger based on failures
+#
+# Scenario: Monitor fails 3 times → Level 1 triggers (email)
+#           Monitor fails 5 times → Level 2 triggers (slack)
+#           Monitor fails 10 times → Level 3 triggers (webhook)
+#
+# Note: Actual triggering happens during monitor checks, but you can test the setup:
+GET {{baseUrl}}/api/escalation-policies/monitor/{{monitorId}}
+
+###############################################################################
+# SCENARIOS
+###############################################################################
+
+### Scenario 1: Production Monitoring Setup
+# 3-level escalation for critical production monitors
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 2,
+    "channel": "email",
+    "target": "oncall-team@example.com"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 2,
+    "consecutiveFailures": 5,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 3,
+    "consecutiveFailures": 10,
+    "channel": "webhook",
+    "target": "https://pagerduty.example.com/webhooks/alert"
+}
+
+###
+
+### Scenario 2: Gradual Escalation (Slow Build-up)
+# For less critical systems with more tolerance
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 1,
+    "consecutiveFailures": 5,
+    "channel": "email",
+    "target": "devops@example.com"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 2,
+    "consecutiveFailures": 15,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+}
+
+###
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": null,
+    "level": 3,
+    "consecutiveFailures": 30,
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/escalate"
+}
+
+###
+
+### Scenario 3: Monitor-Specific Override
+# Override global policy for a specific critical monitor
+POST {{baseUrl}}/api/escalation-policies
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "level": 1,
+    "consecutiveFailures": 1,
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/CCCCCCCCCCCCCCCCCCCC"
+}
+
+###

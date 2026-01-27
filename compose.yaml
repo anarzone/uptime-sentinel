@@ -7,21 +7,81 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: uptime_sentinel
     ports:
-      - "3306:3306" # Expose to your local PHP
+      - "3307:3306" # Use 3307 to avoid conflict with local MySQL
     command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      # Named volume persists data across container lifecycle (bind mounts lose data on docker compose down)
+      - mysql_data:/var/lib/mysql
+    # Automatic recovery: Container restarts on failure but respects manual stops
+    restart: unless-stopped
 
   # 2. The Queue (The Thundering Herd Gym)
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "5672:5672"   # App connects here
+      - "5672:5672" # App connects here
       - "15672:15672" # You see the dashboard here (http://localhost:15672)
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: anar
+      RABBITMQ_DEFAULT_PASS: 1234
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
 
   # 3. The Cache (The Speed Gym)
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # 4. The Scheduler (The Alarm Clock)
+  scheduler:
+    build: .
+    restart: always
+    env_file:
+      - .env.docker
+    environment:
+      APP_ENV: dev
+    command: php bin/console messenger:consume scheduler_monitoring -vv
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - .:/var/www
+      - /var/www/vendor # Preserve container's vendor directory
+
+  # 5. The Workers (Scaling Simulation)
+  worker:
+    build: .
+    restart: always
+    env_file:
+      - .env.docker
+    environment:
+      APP_ENV: dev
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - .:/var/www
+      - /var/www/vendor # Preserve container's vendor directory
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+  redis_data:

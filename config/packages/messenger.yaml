@@ -17,11 +17,15 @@ framework:
                     #         binding_keys: [App\Monitoring\Application\Command\CheckMonitor\CheckMonitorCommand]
 
             failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+            sync: 'sync://'
 
         routing:
             # Route your messages to the transports
-            'App\Monitoring\Application\Command\CheckMonitorBatch\CheckMonitorBatchCommand': async
+            # DEV: Send emails synchronously for immediate delivery
+            Symfony\Component\Mailer\Messenger\SendEmailMessage: sync
+            Symfony\Component\Notifier\Message\ChatMessage: async
+            Symfony\Component\Notifier\Message\SmsMessage: async
+            App\Monitoring\Application\Command\CheckMonitorBatch\CheckMonitorBatchCommand: async
 
 # when@test:
 #    framework:

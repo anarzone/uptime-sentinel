@@ -1,0 +1,391 @@
+###
+# UptimeSentinel Alert Rules API Tests
+#
+# This file contains HTTP requests to test alert rule management endpoints
+#
+# Prerequisites:
+# 1. Run: php bin/console doctrine:migrations:migrate
+# 2. Start Symfony server: php bin/console server:run
+# 3. Create a monitor first (see monitors.http)
+#
+# Variables:
+# - baseUrl: http://localhost:8000
+# - monitorId: ID of an existing monitor
+###
+@contentType = application/json
+
+###############################################################################
+# ALERT RULE CREATION
+###############################################################################
+
+@monitorId = "019bf6d3-19c3-7997-adb3-3c3abb864a4a"
+
+### 1. Create Alert Rule - Email with Failure Notifications Only
+# @name createEmailFailureAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "019bfb98-32e8-76a8-baff-66dd0b64f0d7",
+    "channel": "email",
+    "target": "alerts@example.com",
+    "failureThreshold": 3,
+    "type": "failure",
+    "cooldownInterval": "PT1H"
+}
+
+### 2. Create Alert Rule - Slack with Recovery Notifications
+# @name createSlackRecoveryAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX",
+    "failureThreshold": 5,
+    "type": "recovery",
+    "cooldownInterval": "PT30M"
+}
+
+### 3. Create Alert Rule - Webhook with Both Failure and Recovery
+# @name createWebhookBothAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/alerts",
+    "failureThreshold": 3,
+    "type": "both",
+    "cooldownInterval": "PT2H"
+}
+
+### 4. Create Alert Rule - Minimal (Default Values)
+# @name createMinimalAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "admin@example.com"
+}
+
+### 5. Create Alert Rule - High Threshold with Long Cooldown
+# @name createHighThresholdAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX",
+    "failureThreshold": 10,
+    "type": "both",
+    "cooldownInterval": "PT24H"
+}
+
+### 6. Create Alert Rule - No Cooldown (Rate Limiting Disabled)
+# @name createNoCooldownAlert
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "urgent@example.com",
+    "failureThreshold": 1,
+    "type": "failure"
+}
+
+### 7. Create Alert Rule - Invalid Channel
+# @name createInvalidChannel
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "sms",
+    "target": "+1234567890",
+    "failureThreshold": 3
+}
+
+### 8. Create Alert Rule - Invalid Threshold (Negative)
+# @name createInvalidThresholdNegative
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "test@example.com",
+    "failureThreshold": -1
+}
+
+### 9. Create Alert Rule - Invalid Threshold (Zero)
+# @name createInvalidThresholdZero
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "test@example.com",
+    "failureThreshold": 0
+}
+
+### 10. Create Alert Rule - Invalid Type
+# @name createInvalidType
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "test@example.com",
+    "failureThreshold": 3,
+    "type": "invalid"
+}
+
+### 11. Create Alert Rule - Invalid Cooldown Interval
+# @name createInvalidCooldown
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "test@example.com",
+    "failureThreshold": 3,
+    "cooldownInterval": "invalid"
+}
+
+### 12. Create Alert Rule - Missing Required Field (channel)
+# @name createMissingChannel
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "target": "test@example.com",
+    "failureThreshold": 3
+}
+
+### 13. Create Alert Rule - Missing Required Field (target)
+# @name createMissingTarget
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "failureThreshold": 3
+}
+
+### 14. Create Alert Rule - Non-existent Monitor
+# @name createNonExistentMonitor
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "01234567-89ab-cdef-0123-456789abcdef",
+    "channel": "email",
+    "target": "test@example.com",
+    "failureThreshold": 3
+}
+
+###############################################################################
+# ALERT RETRIEVAL
+###############################################################################
+
+### 15. List All Alert Rules for a Monitor
+# @name listAlertRulesForMonitor
+GET {{baseUrl}}/api/alert-rules/monitor/{{monitorId}}
+
+### 16. Get Specific Alert Rule by ID
+# @name getAlertRule
+# Replace {{alertRuleId}} with actual ID from creation response
+@alertRuleId = 01234567-89ab-cdef-0123-456789abcdef
+GET {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+
+### 17. Get Non-existent Alert Rule
+# @name getNonExistentAlertRule
+GET {{baseUrl}}/api/alert-rules/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# ALERT RULE UPDATE
+###############################################################################
+
+### 18. Update Alert Rule - All Fields
+# @name updateAlertRuleAll
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "target": "updated@example.com",
+    "failureThreshold": 5,
+    "type": "both",
+    "cooldownInterval": "PT4H"
+}
+
+### 19. Update Alert Rule - Target Only
+# @name updateAlertRuleTarget
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "target": "new-target@example.com"
+}
+
+### 20. Update Alert Rule - Threshold Only
+# @name updateAlertRuleThreshold
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "failureThreshold": 7
+}
+
+### 21. Update Alert Rule - Type Only
+# @name updateAlertRuleType
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "type": "both"
+}
+
+### 22. Update Alert Rule - Cooldown Only
+# @name updateAlertRuleCooldown
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "cooldownInterval": "PT6H"
+}
+
+### 23. Update Alert Rule - Remove Cooldown
+# @name updateAlertRuleRemoveCooldown
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "cooldownInterval": null
+}
+
+### 24. Update Alert Rule - Invalid Type
+# @name updateInvalidType
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+Content-Type: {{contentType}}
+
+{
+    "type": "invalid-type"
+}
+
+### 25. Update Non-existent Alert Rule
+# @name updateNonExistentAlertRule
+PATCH {{baseUrl}}/api/alert-rules/00000000-0000-0000-0000-000000000000
+Content-Type: {{contentType}}
+
+{
+    "target": "test@example.com"
+}
+
+###############################################################################
+# ALERT RULE ENABLE/DISABLE
+###############################################################################
+
+### 26. Enable Alert Rule
+# @name enableAlertRule
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}/enable
+
+### 27. Disable Alert Rule
+# @name disableAlertRule
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}/disable
+
+### 28. Enable Non-existent Alert Rule
+# @name enableNonExistentAlertRule
+PATCH {{baseUrl}}/api/alert-rules/00000000-0000-0000-0000-000000000000/enable
+
+### 29. Disable Non-existent Alert Rule
+# @name disableNonExistentAlertRule
+PATCH {{baseUrl}}/api/alert-rules/00000000-0000-0000-0000-000000000000/disable
+
+###############################################################################
+# ALERT RULE DELETION
+###############################################################################
+
+### 30. Delete Alert Rule
+# @name deleteAlertRule
+DELETE {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+
+### 31. Delete Non-existent Alert Rule
+# @name deleteNonExistentAlertRule
+DELETE {{baseUrl}}/api/alert-rules/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# WORKFLOW EXAMPLES
+###############################################################################
+
+### Workflow: Create Complete Alert Rule Setup
+# Step 1: Create multiple alert rules for a monitor
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "primary@example.com",
+    "failureThreshold": 3,
+    "type": "both",
+    "cooldownInterval": "PT1H"
+}
+
+###
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "slack",
+    "target": "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX",
+    "failureThreshold": 5,
+    "type": "failure",
+    "cooldownInterval": "PT30M"
+}
+
+###
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "webhook",
+    "target": "https://example.com/webhooks/critical",
+    "failureThreshold": 1,
+    "type": "failure"
+}
+
+###
+
+# Step 2: List all rules for the monitor
+GET {{baseUrl}}/api/alert-rules/monitor/{{monitorId}}
+
+###
+
+# Step 3: Disable one rule (replace with actual ID)
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}/disable
+
+###
+
+# Step 4: Re-enable the rule
+PATCH {{baseUrl}}/api/alert-rules/{{alertRuleId}}/enable
+
+###
+
+# Step 5: Delete a rule
+DELETE {{baseUrl}}/api/alert-rules/{{alertRuleId}}
+
+###

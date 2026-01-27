@@ -32,7 +32,7 @@ final readonly class CheckMonitorBatchHandler
             return;
         }
 
-        // Create a map of monitorId -> Monitor for quick lookup
+        // Create a map of monitorId -> Monitor for a quick lookup
         $monitorMap = [];
         foreach ($monitors as $monitor) {
             $monitorMap[$monitor->id->toString()] = $monitor;
@@ -44,15 +44,15 @@ final readonly class CheckMonitorBatchHandler
         // 3. Process results as they stream in
         foreach ($results as $result) {
             try {
-                // Push result to telemetry buffer (fast, async to Redis)
-                $this->telemetryBuffer->push($result);
-
                 // Find the corresponding monitor and update state
                 $monitor = $monitorMap[$result->monitorId] ?? null;
                 if ($monitor) {
                     $monitor->markChecked($result->checkedAt, $result->isSuccess);
 
-                    // 4. Check if any alert rules should be triggered
+                    // 4. Buffer the result for telemetry
+                    $this->telemetryBuffer->push($result);
+
+                    // 5. Check if any alert rules should be triggered
                     $this->alertNotificationService->checkAndNotify($monitor);
                 }
             } catch (\Throwable $e) {

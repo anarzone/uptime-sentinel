@@ -5,30 +5,35 @@ declare(strict_types=1);
 namespace App\Monitoring\Domain\Model\Alert;
 
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
+use App\Monitoring\Domain\Model\Notification\NotificationChannel;
+use App\Monitoring\Infrastructure\Persistence\AlertRuleRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: \App\Monitoring\Infrastructure\Persistence\AlertRuleRepository::class)]
+#[ORM\Entity(repositoryClass: AlertRuleRepository::class)]
 #[ORM\Table(name: 'alert_rules')]
 class AlertRule
 {
-    #[ORM\Id]
-    #[ORM\Embedded(class: AlertRuleId::class)]
+    #[ORM\Embedded(class: AlertRuleId::class, columnPrefix: false)]
     public readonly AlertRuleId $id;
 
-    #[ORM\Embedded(class: MonitorId::class)]
-    public private(set) MonitorId $monitorId;
+    #[ORM\Embedded(class: MonitorId::class, columnPrefix: 'monitor_id_')]
+    public readonly MonitorId $monitorId;
 
-    #[ORM\Column(type: Types::STRING, length: 20, enumType: AlertChannel::class)]
-    public private(set) AlertChannel $channel;
+    #[ORM\ManyToOne(targetEntity: NotificationChannel::class)]
+    #[ORM\JoinColumn(name: 'notification_channel_id', referencedColumnName: 'uuid', nullable: false)]
+    public private(set) NotificationChannel $notificationChannel;
 
-    /** The notification target (email address, Slack webhook URL, etc.) */
-    #[ORM\Column(type: Types::STRING, length: 255)]
-    public private(set) string $target;
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: NotificationType::class)]
+    public private(set) NotificationType $type = NotificationType::FAILURE;
 
     /** Number of consecutive failures required before sending an alert */
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 3])]
     public private(set) int $failureThreshold = 3;
+
+    /** Cooldown interval in ISO 8601 duration format (e.g., PT1H for 1 hour) */
+    #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
+    public private(set) ?string $cooldownInterval = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     public private(set) bool $isEnabled = true;
@@ -39,34 +44,30 @@ class AlertRule
     public function __construct(
         AlertRuleId $id,
         MonitorId $monitorId,
-        AlertChannel $channel,
-        string $target,
-        int $failureThreshold = 3,
-        bool $isEnabled = true,
-        ?\DateTimeImmutable $createdAt = null,
+        NotificationChannel $notificationChannel,
+        \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
     ) {
         $this->id = $id;
         $this->monitorId = $monitorId;
-        $this->channel = $channel;
-        $this->target = $target;
-        $this->failureThreshold = $failureThreshold;
-        $this->isEnabled = $isEnabled;
-        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
+        $this->notificationChannel = $notificationChannel;
+        $this->createdAt = $createdAt;
     }
 
     public static function create(
         MonitorId $monitorId,
-        AlertChannel $channel,
-        string $target,
+        NotificationChannel $notificationChannel,
         int $failureThreshold = 3,
+        NotificationType $type = NotificationType::FAILURE,
     ): self {
-        return new self(
-            AlertRuleId::generate(),
-            $monitorId,
-            $channel,
-            $target,
-            $failureThreshold,
+        $rule = new self(
+            id: AlertRuleId::generate(),
+            monitorId: $monitorId,
+            notificationChannel: $notificationChannel,
         );
+        $rule->failureThreshold = $failureThreshold;
+        $rule->type = $type;
+
+        return $rule;
     }
 
     public function enable(): void
@@ -79,13 +80,37 @@ class AlertRule
         $this->isEnabled = false;
     }
 
-    public function updateTarget(string $target): void
-    {
-        $this->target = $target;
-    }
-
     public function updateThreshold(int $failureThreshold): void
     {
         $this->failureThreshold = $failureThreshold;
+    }
+
+    /**
+     * Get the cooldown interval as a DateInterval object.
+     */
+    public function getCooldownInterval(): ?\DateInterval
+    {
+        if ($this->cooldownInterval === null) {
+            return null;
+        }
+
+        return new \DateInterval($this->cooldownInterval);
+    }
+
+    /**
+     * Set the cooldown interval.
+     */
+    public function setCooldownInterval(string $interval): void
+    {
+        try {
+            new \DateInterval($interval);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException(\sprintf(
+                'Invalid cooldown interval format: "%s". Expected ISO 8601 duration format (e.g., PT1H, PT30M).',
+                $interval
+            ), 0, $e);
+        }
+
+        $this->cooldownInterval = $interval;
     }
 }

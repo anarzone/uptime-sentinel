@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Infrastructure\Controller;
 
+use App\Monitoring\Application\Command\CheckMonitor\CheckMonitorCommand;
 use App\Monitoring\Application\Command\CreateMonitor\CreateMonitorCommand;
 use App\Monitoring\Application\Command\UpdateMonitor\UpdateMonitorCommand;
 use App\Monitoring\Application\Dto\CreateMonitorRequestDto;
@@ -69,6 +70,20 @@ class MonitorController extends AbstractController
 
         return new JsonResponse([
             'message' => 'Monitor update request accepted',
+            'data' => [
+                'monitorId' => $uuid,
+            ],
+        ], Response::HTTP_ACCEPTED);
+    }
+
+    #[Route('/{uuid}/check', methods: ['POST'])]
+    public function check(string $uuid): JsonResponse
+    {
+        $command = new CheckMonitorCommand($uuid);
+        $this->bus->dispatch($command);
+
+        return new JsonResponse([
+            'message' => 'Monitor check request accepted',
             'data' => [
                 'monitorId' => $uuid,
             ],

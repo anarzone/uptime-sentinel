@@ -4,25 +4,39 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Service;
 
+use App\Monitoring\Domain\Model\Alert\AlertChannel;
+use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Model\Monitor\MonitorHealth;
+use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
-use App\Monitoring\Domain\Service\NotificationSenderInterface;
+use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
+use App\Monitoring\Infrastructure\Persistence\MonitorStateRepository;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Notifier\Message\ChatMessage;
+use Symfony\Component\Notifier\Transport;
+use Symfony\Component\RateLimiter\Policy\FixedWindowLimiter;
+use Symfony\Component\RateLimiter\Storage\StorageInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * Checks if a monitor has reached the failure threshold for any alert rule
- * and dispatches notifications if necessary.
+ * and dispatches notifications via Symfony Notifier (Chat) or Mailer (Email).
  */
 final readonly class AlertNotificationService
 {
-    /**
-     * @param iterable<NotificationSenderInterface> $senders
-     */
     public function __construct(
         private AlertRuleRepositoryInterface $alertRuleRepository,
-        private iterable $senders,
+        private EscalationPolicyRepositoryInterface $escalationPolicyRepository,
+        private MonitorStateRepository $monitorStateRepository,
+        private StorageInterface $rateLimiterStorage,
+        private HttpClientInterface $httpClient,
+        private MailerInterface $mailer,
         private LoggerInterface $logger,
+        private ?EventDispatcherInterface $eventDispatcher = null,
     ) {
     }
 
@@ -31,45 +45,198 @@ final readonly class AlertNotificationService
      */
     public function checkAndNotify(Monitor $monitor): void
     {
-        // Only send alerts for DOWN status
-        if ($monitor->healthStatus !== MonitorHealth::DOWN) {
-            return;
+        $previousHealth = $this->monitorStateRepository->getLastHealthStatus($monitor->id);
+        $currentHealth = $monitor->healthStatus;
+
+        $this->logger->info('AlertNotificationService called', [
+            'monitor' => $monitor->name,
+            'health' => $currentHealth->value,
+            'failures' => $monitor->consecutiveFailures,
+        ]);
+
+        // Handle failure notifications
+        if ($currentHealth === MonitorHealth::DOWN) {
+            $this->handleFailureNotifications($monitor);
+            $this->handleEscalationNotifications($monitor);
         }
 
-        // Find all enabled alert rules for this monitor
+        // Handle recovery notifications (transition from DOWN to UP)
+        if ($previousHealth === MonitorHealth::DOWN && $currentHealth === MonitorHealth::UP) {
+            $this->handleRecoveryNotifications($monitor);
+        }
+
+        // Save current state for next time
+        $this->monitorStateRepository->saveHealthStatus($monitor->id, $currentHealth);
+    }
+
+    private function handleFailureNotifications(Monitor $monitor): void
+    {
+        $this->handleAlertRules($monitor, NotificationType::FAILURE);
+        // TODO: Fix escalation policy query
+        // $this->handleEscalationNotifications($monitor);
+    }
+
+    private function handleRecoveryNotifications(Monitor $monitor): void
+    {
+        $this->handleAlertRules($monitor, NotificationType::RECOVERY);
+    }
+
+    private function handleAlertRules(Monitor $monitor, NotificationType $type): void
+    {
         $alertRules = $this->alertRuleRepository->findEnabledByMonitorId($monitor->id);
 
+        // Convert to array if needed
+        if ($alertRules instanceof \Traversable) {
+            $alertRules = iterator_to_array($alertRules);
+        }
+
+        $this->logger->info(\sprintf(
+            'Processing alert rules: count=%d, type=%s, monitor=%s, failures=%d',
+            \count($alertRules),
+            $type->value,
+            $monitor->name,
+            $monitor->consecutiveFailures
+        ));
+
         foreach ($alertRules as $rule) {
-            // Check if the failure threshold has been reached
-            if ($monitor->consecutiveFailures < $rule->failureThreshold) {
+            $this->logger->info(\sprintf(
+                'Checking rule: id=%s, type=%s, threshold=%d',
+                $rule->id->toString(),
+                $rule->type->value,
+                $rule->failureThreshold
+            ));
+
+            if ($rule->type !== $type && $rule->type !== NotificationType::BOTH) {
+                $this->logger->info('Skipping - type mismatch');
                 continue;
             }
 
-            // Only send alert on the exact threshold (not every time after)
-            if ($monitor->consecutiveFailures !== $rule->failureThreshold) {
+            if ($type === NotificationType::FAILURE && $monitor->consecutiveFailures < $rule->failureThreshold) {
+                $this->logger->info('Skipping - threshold not met');
                 continue;
             }
 
+            // Rate Limit
+            $interval = $rule->getCooldownInterval() ?? new \DateInterval('PT1H');
+            $limitKey = 'notification:rule:'.$monitor->id->toString().':'.$rule->id->toString();
+
+            if ($this->isRateLimited($limitKey, $interval)) {
+                $this->logger->info('Skipping - rate limited: '.$limitKey);
+                continue;
+            }
+
+            $this->logger->info('Dispatching notification!', ['ruleId' => $rule->id->toString()]);
+
+            if ($type === NotificationType::FAILURE) {
+                $subject = \sprintf("Monitor '%s' is DOWN", $monitor->name);
+                $message = \sprintf(
+                    "Monitor '%s' (%s) has been DOWN for %d consecutive checks.\nLast checked at: %s",
+                    $monitor->name,
+                    $monitor->url->toString(),
+                    $monitor->consecutiveFailures,
+                    $monitor->lastCheckedAt?->format('Y-m-d H:i:s') ?? 'N/A'
+                );
+            } else {
+                $subject = \sprintf("Monitor '%s' Recovered", $monitor->name);
+                $message = \sprintf(
+                    "Monitor '%s' (%s) has recovered!\nIt is now UP as of %s.",
+                    $monitor->name,
+                    $monitor->url->toString(),
+                    $monitor->lastCheckedAt?->format('Y-m-d H:i:s') ?? 'N/A'
+                );
+            }
+
+            $this->dispatchNotification(
+                $rule->notificationChannel,
+                $subject,
+                $message,
+                $monitor,
+                'rule-'.$rule->id->toString()
+            );
+        }
+    }
+
+    private function handleEscalationNotifications(Monitor $monitor): void
+    {
+        $policies = $this->escalationPolicyRepository->findApplicableForMonitor($monitor->id);
+
+        foreach ($policies as $policy) {
+            if (!$policy->shouldTrigger($monitor)) {
+                continue;
+            }
+
+            // Rate Limit
+            $limitKey = 'notification:escalation:'.$monitor->id->toString().':'.$policy->id->toString();
+
+            if ($this->isRateLimited($limitKey, new \DateInterval('PT1H'))) {
+                continue;
+            }
+
+            $subject = \sprintf("ESCALATION (Level %d): Monitor '%s' DOWN", $policy->level, $monitor->name);
             $message = \sprintf(
-                "Monitor '%s' (%s) has been DOWN for %d consecutive checks.\n\nLast checked at: %s",
+                "ESCALATION (Level %d): Monitor '%s' (%s) has been DOWN for %d consecutive checks.",
+                $policy->level,
                 $monitor->name,
                 $monitor->url->toString(),
-                $monitor->consecutiveFailures,
-                $monitor->lastCheckedAt?->format('Y-m-d H:i:s') ?? 'N/A'
+                $monitor->consecutiveFailures
             );
 
-            // Find the appropriate sender for this rule
-            foreach ($this->senders as $sender) {
-                if ($sender->supports($rule)) {
-                    $sender->send($rule, $monitor, $message);
-                    $this->logger->info('Alert notification dispatched', [
-                        'monitorId' => $monitor->id->toString(),
-                        'channel' => $rule->channel->value,
-                        'target' => $rule->target,
-                    ]);
-                    break;
-                }
+            $this->dispatchNotification(
+                $policy->notificationChannel,
+                $subject,
+                $message,
+                $monitor,
+                'escalation-'.$policy->id->toString()
+            );
+        }
+    }
+
+    private function isRateLimited(string $key, \DateInterval $interval): bool
+    {
+        $limiter = new FixedWindowLimiter($key, 1, $interval, $this->rateLimiterStorage);
+        $result = $limiter->consume();
+
+        $this->logger->info("Rate limiter: key=$key, accepted=".($result->isAccepted() ? 'true' : 'false').', tokens='.$result->getRemainingTokens());
+
+        return $result->isAccepted() === false;
+    }
+
+    private function dispatchNotification(
+        NotificationChannel $channel,
+        string $subject,
+        string $body,
+        Monitor $monitor,
+        string $contextId
+    ): void {
+        try {
+            if ($channel->type === AlertChannel::EMAIL) {
+                $email = new Email()
+                    ->from($_ENV['MAILER_FROM'] ?? 'alerts@uptime-sentinel.test')
+                    ->to($channel->dsn)
+                    ->subject($subject)
+                    ->text($body);
+
+                $this->mailer->send($email);
+            } else {
+                $transport = Transport::fromDsn($channel->dsn, $this->eventDispatcher, $this->httpClient);
+
+                $chatMessage = new ChatMessage($subject."\n\n".$body);
+                $transport->send($chatMessage);
             }
+
+            $this->logger->info('Notification dispatched', [
+                'type' => $channel->type->value,
+                'channel' => $channel->name,
+                'monitor' => $monitor->name,
+                'context' => $contextId,
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to dispatch notification', [
+                'type' => $channel->type->value,
+                'channel' => $channel->name,
+                'error' => $e->getMessage(),
+                'monitor' => $monitor->id->toString(),
+            ]);
         }
     }
 }

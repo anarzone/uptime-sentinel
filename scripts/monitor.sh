@@ -104,13 +104,14 @@ while true; do
     printf "\n${GREEN}👷 WORKER FLEET${NC}${CLEAR_LINE}\n"
     echo "$WORKER_PS" | python3 -c "
 import sys, json
+CLEAR_LINE = '\033[K'
 try:
     data = json.load(sys.stdin)
     if isinstance(data, dict): data = [data]
     for w in data[:5]:
-        print(f'  {w.get(\"Name\")}: {w.get(\"Status\")}')
+        print(f'  {w.get(\"Name\")}: {w.get(\"Status\")}{CLEAR_LINE}')
 except:
-    print('  Waiting for workers...')
+    print(f'  Waiting for workers...{CLEAR_LINE}')
 "
     printf "${CLEAR_LINE}"
     

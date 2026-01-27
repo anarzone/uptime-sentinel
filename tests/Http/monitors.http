@@ -1,0 +1,296 @@
+###
+# UptimeSentinel Monitors API Tests
+#
+# This file contains HTTP requests to test monitor management endpoints
+#
+# Prerequisites:
+# 1. Run: php bin/console doctrine:migrations:migrate
+# 2. Start Symfony server: php bin/console server:run
+#
+# Variables:
+# - baseUrl: http://localhost:8000
+###
+@contentType = application/json
+@baseUrl = http://localhost:8000
+
+###############################################################################
+# MONITOR CREATION
+###############################################################################
+
+### 1. Create Monitor - Minimal (HTTP GET)
+# @name createMinimalMonitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Google",
+    "url": "https://www.google.com",
+    "method": "GET",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 10,
+    "expectedStatusCode": 200
+}
+
+### 2. Create Monitor - Full Configuration
+# @name createFullMonitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "API Health Check",
+    "url": "https://api.example.com/v1/health",
+    "method": "POST",
+    "intervalSeconds": 120,
+    "timeoutSeconds": 30,
+    "expectedStatusCode": 201,
+    "headers": {
+        "Authorization": "Bearer token123",
+        "Content-Type": "application/json"
+    },
+    "body": "{\"test\": \"data\"}"
+}
+
+### 3. Create Monitor - HEAD Request
+# @name createHeadMonitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Fast Check",
+    "url": "https://example.com",
+    "method": "HEAD",
+    "intervalSeconds": 30,
+    "timeoutSeconds": 5,
+    "expectedStatusCode": 200
+}
+
+### 4. Create Monitor - With Custom Headers
+# @name createMonitorWithHeaders
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Authenticated API",
+    "url": "https://api.example.com/status",
+    "method": "GET",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 15,
+    "expectedStatusCode": 200,
+    "headers": {
+        "X-API-Key": "secret-key",
+        "User-Agent": "UptimeSentinel/1.0"
+    }
+}
+
+### 5. Create Monitor - Long Interval
+# @name createLongIntervalMonitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Daily Check",
+    "url": "https://example.com/daily",
+    "method": "GET",
+    "intervalSeconds": 86400,
+    "timeoutSeconds": 30,
+    "expectedStatusCode": 200
+}
+
+### 6. Create Monitor - Invalid URL
+# @name createInvalidUrl
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Bad URL",
+    "url": "not-a-valid-url",
+    "method": "GET",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 10,
+    "expectedStatusCode": 200
+}
+
+### 7. Create Monitor - Invalid Method
+# @name createInvalidMethod
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Bad Method",
+    "url": "https://example.com",
+    "method": "INVALID",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 10,
+    "expectedStatusCode": 200
+}
+
+### 8. Create Monitor - Negative Interval
+# @name createNegativeInterval
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Negative Interval",
+    "url": "https://example.com",
+    "method": "GET",
+    "intervalSeconds": -60,
+    "timeoutSeconds": 10,
+    "expectedStatusCode": 200
+}
+
+### 9. Create Monitor - Missing Required Fields
+# @name createMissingFields
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Incomplete"
+}
+
+###############################################################################
+# MONITOR RETRIEVAL
+###############################################################################
+
+### 10. List All Monitors
+# @name listMonitors
+GET {{baseUrl}}/api/monitors
+
+### 11. Get Specific Monitor by ID
+# @name getMonitor
+# Replace {{monitorId}} with actual ID from creation response
+@monitorId = 01234567-89ab-cdef-0123-456789abcdef
+GET {{baseUrl}}/api/monitors/{{monitorId}}
+
+### 12. Get Non-existent Monitor
+# @name getNonExistentMonitor
+GET {{baseUrl}}/api/monitors/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# MONITOR UPDATE
+###############################################################################
+
+### 13. Update Monitor - Name Only
+# @name updateMonitorName
+PUT {{baseUrl}}/api/monitors/{{monitorId}}
+Content-Type: {{contentType}}
+
+{
+    "name": "Updated Monitor Name"
+}
+
+### 14. Update Monitor - URL and Method
+# @name updateMonitorUrl
+PUT {{baseUrl}}/api/monitors/{{monitorId}}
+Content-Type: {{contentType}}
+
+{
+    "url": "https://updated.example.com",
+    "method": "POST"
+}
+
+### 15. Update Monitor - All Fields
+# @name updateMonitorAll
+PUT {{baseUrl}}/api/monitors/{{monitorId}}
+Content-Type: {{contentType}}
+
+{
+    "name": "Fully Updated Monitor",
+    "url": "https://fully-updated.com",
+    "method": "GET",
+    "intervalSeconds": 90,
+    "timeoutSeconds": 20,
+    "expectedStatusCode": 204,
+    "headers": {
+        "X-Custom": "value"
+    },
+    "body": "{\"updated\": true}"
+}
+
+### 16. Update Monitor - Remove Body and Headers
+# @name updateMonitorRemoveOptional
+PUT {{baseUrl}}/api/monitors/{{monitorId}}
+Content-Type: {{contentType}}
+
+{
+    "body": null,
+    "headers": null
+}
+
+###############################################################################
+# MONITOR ACTIONS
+###############################################################################
+
+### 17. Pause Monitor
+# @name pauseMonitor
+PATCH {{baseUrl}}/api/monitors/{{monitorId}}/pause
+
+### 18. Resume Monitor
+# @name resumeMonitor
+PATCH {{baseUrl}}/api/monitors/{{monitorId}}/resume
+
+### 19. Pause Non-existent Monitor
+# @name pauseNonExistentMonitor
+PATCH {{baseUrl}}/api/monitors/00000000-0000-0000-0000-000000000000/pause
+
+###############################################################################
+# MONITOR DELETION
+###############################################################################
+
+### 20. Delete Monitor
+# @name deleteMonitor
+DELETE {{baseUrl}}/api/monitors/{{monitorId}}
+
+### 21. Delete Non-existent Monitor
+# @name deleteNonExistentMonitor
+DELETE {{baseUrl}}/api/monitors/00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# WORKFLOW EXAMPLES
+###############################################################################
+
+### Workflow: Complete Monitor Lifecycle
+# Step 1: Create a monitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Production API",
+    "url": "https://api.example.com/health",
+    "method": "GET",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 10,
+    "expectedStatusCode": 200
+}
+
+###
+
+# Step 2: Get the monitor (replace with actual ID from response)
+GET {{baseUrl}}/api/monitors/{{monitorId}}
+
+###
+
+# Step 3: Pause the monitor
+PATCH {{baseUrl}}/api/monitors/{{monitorId}}/pause
+
+###
+
+# Step 4: Resume the monitor
+PATCH {{baseUrl}}/api/monitors/{{monitorId}}/resume
+
+###
+
+# Step 5: Update configuration
+PUT {{baseUrl}}/api/monitors/{{monitorId}}
+Content-Type: {{contentType}}
+
+{
+    "intervalSeconds": 120,
+    "timeoutSeconds": 15
+}
+
+###
+
+# Step 6: Delete the monitor
+DELETE {{baseUrl}}/api/monitors/{{monitorId}}
+
+###

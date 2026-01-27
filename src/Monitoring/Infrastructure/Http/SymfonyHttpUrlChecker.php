@@ -53,6 +53,7 @@ final readonly class SymfonyHttpUrlChecker implements UrlCheckerInterface
     {
         // 💡 Refactored to a simpler loop to avoid internal HttpClient 'stream'
         // destructor issues in CLI/Docker environments.
+        // Todo: Try stream again
         foreach ($monitors as $monitor) {
             yield $this->check($monitor);
         }

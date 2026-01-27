@@ -26,6 +26,15 @@ services:
     App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface:
         alias: App\Monitoring\Infrastructure\Persistence\AlertRuleRepository
 
+    App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface:
+        alias: App\Monitoring\Infrastructure\Persistence\EscalationPolicyRepository
+
+    App\Monitoring\Domain\Repository\NotificationTemplateRepositoryInterface:
+        alias: App\Monitoring\Infrastructure\Persistence\NotificationTemplateRepository
+
+    App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface:
+        alias: App\Monitoring\Infrastructure\Persistence\NotificationChannelRepository
+
     # Redis Client for Monitoring Infrastructure
     redis_client:
         class: 'object'
@@ -37,22 +46,15 @@ services:
         arguments:
             $redis: '@redis_client'
 
-    # Notification Senders
-    App\Monitoring\Domain\Service\NotificationSenderInterface:
-        class: App\Monitoring\Infrastructure\Notification\EmailNotificationSender
-
-    App\Monitoring\Infrastructure\Notification\EmailNotificationSender:
-        tags: ['app.notification_sender']
+    App\Monitoring\Infrastructure\Persistence\MonitorStateRepository:
         arguments:
-            $fromAddress: '%env(string:default::MAILER_FROM)%' 
+            $redis: '@redis_client'
 
-    App\Monitoring\Infrastructure\Notification\SlackNotificationSender:
-        tags: ['app.notification_sender']
+    # Native Symfony Rate Limiter Storage
+    Symfony\Component\RateLimiter\Storage\StorageInterface:
+        class: Symfony\Component\RateLimiter\Storage\CacheStorage
+        arguments: ['@cache.rate_limiter']
 
-    App\Monitoring\Infrastructure\Notification\WebhookNotificationSender:
-        tags: ['app.notification_sender']
-
-    # AlertNotificationService with all senders injected
     App\Monitoring\Application\Service\AlertNotificationService:
         arguments:
-            $senders: !tagged_iterator app.notification_sender
+            $mailer: '@mailer.mailer'

@@ -10,7 +10,8 @@ use Symfony\Component\Uid\UuidV7;
 #[ORM\Embeddable]
 final readonly class AlertRuleId
 {
-    #[ORM\Column(type: 'string', length: 36)]
+    #[ORM\Id]
+    #[ORM\Column(name: 'uuid', type: 'string', length: 36)]
     public string $value;
 
     public function __construct(string $value)
@@ -33,6 +34,16 @@ final readonly class AlertRuleId
     }
 
     public function toString(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->value === $other->value;
+    }
+
+    public function __toString(): string
     {
         return $this->value;
     }

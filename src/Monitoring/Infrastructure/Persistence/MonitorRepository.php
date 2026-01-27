@@ -79,6 +79,6 @@ class MonitorRepository extends ServiceEntityRepository implements MonitorReposi
 
     public function exists(MonitorId $id): bool
     {
-        return $this->find($id) !== null;
+        return $this->find($id->toString()) !== null;
     }
 }

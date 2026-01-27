@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'monitors')]
 final class Monitor
 {
-    #[ORM\Embedded(class: MonitorId::class)]
+    #[ORM\Embedded(class: MonitorId::class, columnPrefix: false)]
     public readonly MonitorId $id;
 
     #[ORM\Column(type: Types::STRING)]
@@ -35,15 +35,6 @@ final class Monitor
     #[ORM\Column(type: Types::INTEGER)]
     public private(set) int $expectedStatusCode;
 
-    #[ORM\Column(type: Types::STRING, enumType: MonitorHealth::class)]
-    public private(set) MonitorHealth $healthStatus;
-
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    public private(set) ?\DateTimeImmutable $lastStatusChangeAt;
-
-    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
-    public private(set) int $consecutiveFailures = 0;
-
     #[ORM\Column(type: Types::JSON, nullable: true)]
     public private(set) ?array $headers;
 
@@ -62,6 +53,15 @@ final class Monitor
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     public private(set) \DateTimeImmutable $updatedAt;
 
+    #[ORM\Column(type: Types::STRING, enumType: MonitorHealth::class)]
+    public private(set) MonitorHealth $healthStatus = MonitorHealth::UNKNOWN;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    public private(set) ?\DateTimeImmutable $lastStatusChangeAt = null;
+
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    public private(set) int $consecutiveFailures = 0;
+
     public function __construct(
         MonitorId $id,
         string $name,
@@ -76,7 +76,7 @@ final class Monitor
         ?\DateTimeImmutable $lastCheckedAt,
         \DateTimeImmutable $nextCheckAt,
         \DateTimeImmutable $createdAt,
-        \DateTimeImmutable $updatedAt
+        \DateTimeImmutable $updatedAt,
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -92,9 +92,6 @@ final class Monitor
         $this->nextCheckAt = $nextCheckAt;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
-        $this->healthStatus = MonitorHealth::UNKNOWN;
-        $this->lastStatusChangeAt = null;
-        $this->consecutiveFailures = 0;
     }
 
     public function updateConfiguration(

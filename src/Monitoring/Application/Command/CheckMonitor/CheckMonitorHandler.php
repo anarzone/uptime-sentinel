@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Command\CheckMonitor;
 
+use App\Monitoring\Application\Service\AlertNotificationService;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
@@ -24,6 +25,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class CheckMonitorHandler
 {
     public function __construct(
+        private AlertNotificationService $alertNotificationService,
         private MonitorRepositoryInterface $monitorRepository,
         private UrlCheckerInterface $urlChecker,
         private TelemetryBufferInterface $telemetryBuffer,
@@ -53,6 +55,8 @@ final readonly class CheckMonitorHandler
         // Update monitor's state
         $isSuccess = $result->statusCode >= 200 && $result->statusCode < 300;
         $monitor->markChecked($result->checkedAt, $isSuccess);
+        $this->alertNotificationService->checkAndNotify($monitor);
+
         $this->monitorRepository->save($monitor);
     }
 }

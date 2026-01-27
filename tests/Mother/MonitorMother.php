@@ -34,25 +34,27 @@ final class MonitorMother
         ?MonitorStatus $status = null,
         ?int $expectedStatusCode = null,
         ?array $headers = null,
-        ?string $body = null
+        ?string $body = null,
+        ?MonitorId $id = null,
     ): Monitor {
         $now = new \DateTimeImmutable();
+        $interval = $intervalSeconds ?? self::DEFAULT_INTERVAL_SECONDS;
 
         return new Monitor(
-            id: self::createMonitorId(),
+            id: $id ?? self::createMonitorId(),
             name: $name ?? self::DEFAULT_NAME,
             url: self::createUrl($url ?? self::DEFAULT_URL),
             method: $method ?? HttpMethod::GET,
-            intervalSeconds: $intervalSeconds ?? self::DEFAULT_INTERVAL_SECONDS,
+            intervalSeconds: $interval,
             timeoutSeconds: $timeoutSeconds ?? self::DEFAULT_TIMEOUT_SECONDS,
             status: $status ?? MonitorStatus::ACTIVE,
             expectedStatusCode: $expectedStatusCode ?? self::DEFAULT_EXPECTED_STATUS_CODE,
             headers: $headers,
             body: $body,
             lastCheckedAt: null,
-            nextCheckAt: $now->modify('+'.($intervalSeconds ?? self::DEFAULT_INTERVAL_SECONDS).' seconds'),
+            nextCheckAt: $now->modify("+{$interval} seconds"),
             createdAt: $now,
-            updatedAt: $now
+            updatedAt: $now,
         );
     }
 
@@ -78,8 +80,8 @@ final class MonitorMother
     public static function random(): Monitor
     {
         return self::create(
-            name: 'Monitor '.rand(1, 1000),
-            url: 'https://'.rand(1, 1000).'.example.com',
+            name: 'Monitor ' . rand(1, 1000),
+            url: 'https://' . rand(1, 1000) . '.example.com',
             method: HttpMethod::cases()[array_rand(HttpMethod::cases())],
             intervalSeconds: rand(30, 300),
             timeoutSeconds: rand(5, 30),

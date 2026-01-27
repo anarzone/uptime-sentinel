@@ -1,0 +1,73 @@
+###
+# UptimeSentinel Notifications Testing
+#
+# This file demonstrates a full cycle: 
+# 1. Create a Monitor that fails
+# 2. Create an Alert Rule
+# 3. Trigger manual checks to reach failure threshold
+# 4. Verify notification is sent (check worker logs or Mailpit)
+###
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+
+### 1. List Existing Notification Channels
+# @name listChannels
+GET {{baseUrl}}/api/notification-channels
+Accept: {{contentType}}
+
+### 2. Create a Failing Monitor
+# @name createFailingMonitor
+POST {{baseUrl}}/api/monitors
+Content-Type: {{contentType}}
+
+{
+    "name": "Failing Service",
+    "url": "https://httpbin.org/status/500",
+    "method": "GET",
+    "intervalSeconds": 60,
+    "timeoutSeconds": 5,
+    "expectedStatusCode": 200
+}
+
+### Capture monitorId from response
+@monitorId = {{createFailingMonitor.response.body.data.monitorId}}
+
+### 3. Create Alert Rule for the failing monitor
+# @name createAlertRule
+POST {{baseUrl}}/api/alert-rules
+Content-Type: {{contentType}}
+
+{
+    "monitorId": "{{monitorId}}",
+    "channel": "email",
+    "target": "dev-team@uptime-sentinel.local",
+    "failureThreshold": 2,
+    "type": "failure",
+    "cooldownInterval": "PT5M"
+}
+
+### 4. Trigger First Manual Check
+# This will set consecutiveFailures to 1
+POST {{baseUrl}}/api/monitors/{{monitorId}}/check
+Accept: {{contentType}}
+
+### 5. Wait a few seconds and Trigger Second Manual Check
+# This will set consecutiveFailures to 2 (threshold reached)
+# Notification should be dispatched now
+POST {{baseUrl}}/api/monitors/{{monitorId}}/check
+Accept: {{contentType}}
+
+### 6. Verify Channels (an auto-created channel for dev-team@... should appear)
+GET {{baseUrl}}/api/notification-channels
+Accept: {{contentType}}
+
+### 7. Trigger Third Manual Check
+# Notification should BE RATE LIMITED because threshold was reached and cooldown is active
+POST {{baseUrl}}/api/monitors/{{monitorId}}/check
+Accept: {{contentType}}
+
+### 9. Check Mailpit for the sent notification
+# Use the port mapped in compose.override.yaml (8025)
+GET http://localhost:8025/api/v1/messages
+Accept: {{contentType}}
