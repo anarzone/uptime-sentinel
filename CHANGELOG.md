@@ -2,6 +2,13 @@
 
 ### Features
 
+* Establish clean naming convention for database schema ([aa976ff](https://github.com/anarzone/uptime-sentinel/commit/aa976ff4f8e66624e77cb138b072413bc63c5de8))
+* Implement comprehensive code quality and monitoring improvements ([7797858](https://github.com/anarzone/uptime-sentinel/commit/7797858a1a44fed2ca557e6b642fbf0b6af464d8))
+
+## [1.3.0](https://github.com/anarzone/uptime-sentinel/compare/v1.2.3...v1.3.0) (2026-01-28)
+
+### Features
+
 * Add MonitorState value object for DDD compliance ([5e9c788](https://github.com/anarzone/uptime-sentinel/commit/5e9c7886f6dbfbdb835a61d642f21d9f7e221377))
 * Add updateNotificationChannel method to AlertRule entity ([68025a4](https://github.com/anarzone/uptime-sentinel/commit/68025a4933b09395f40592fa8e98bcbbeddca84b))
 * Establish clean naming convention for database schema ([aa976ff](https://github.com/anarzone/uptime-sentinel/commit/aa976ff4f8e66624e77cb138b072413bc63c5de8))
