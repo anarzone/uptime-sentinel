@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Infrastructure\Persistence;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\NotificationEventType;
 use App\Monitoring\Domain\Model\Alert\NotificationTemplate;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\NotificationTemplateRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -23,7 +23,7 @@ class NotificationTemplateRepository extends ServiceEntityRepository implements 
         parent::__construct($registry, NotificationTemplate::class);
     }
 
-    public function findDefault(AlertChannel $channel, NotificationEventType $eventType): ?NotificationTemplate
+    public function findDefault(NotificationChannelType $channel, NotificationEventType $eventType): ?NotificationTemplate
     {
         return $this->createQueryBuilder('nt')
             ->where('nt.channel = :channel')
@@ -41,7 +41,7 @@ class NotificationTemplateRepository extends ServiceEntityRepository implements 
         return $this->find($id);
     }
 
-    public function findAll(?AlertChannel $channel = null, ?NotificationEventType $eventType = null): array
+    public function findAll(?NotificationChannelType $channel = null, ?NotificationEventType $eventType = null): array
     {
         $qb = $this->createQueryBuilder('nt');
 

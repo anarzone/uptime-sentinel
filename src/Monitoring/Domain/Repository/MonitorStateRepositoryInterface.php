@@ -27,8 +27,8 @@ interface MonitorStateRepositoryInterface
     /**
      * Save the current health status for a monitor.
      *
-     * @param MonitorId     $monitorId    The monitor ID
-     * @param MonitorHealth $healthStatus The current health status to save
+     * @param MonitorId     $monitorId The monitor ID
+     * @param MonitorHealth $health    The current health status to save
      */
-    public function saveHealthStatus(MonitorId $monitorId, MonitorHealth $healthStatus): void;
+    public function saveHealthStatus(MonitorId $monitorId, MonitorHealth $health): void;
 }

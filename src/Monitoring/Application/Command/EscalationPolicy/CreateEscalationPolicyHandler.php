@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Command\EscalationPolicy;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\EscalationPolicy;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
@@ -36,7 +36,7 @@ final readonly class CreateEscalationPolicyHandler
         }
 
         // Find notification channel by type and target
-        $channelType = AlertChannel::from($command->channel);
+        $channelType = NotificationChannelType::from($command->channel);
         $notificationChannel = $this->notificationChannelRepository->findByTypeAndTarget(
             $channelType,
             $command->target

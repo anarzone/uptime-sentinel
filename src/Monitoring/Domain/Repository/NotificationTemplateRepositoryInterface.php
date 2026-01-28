@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Domain\Repository;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\NotificationEventType;
 use App\Monitoring\Domain\Model\Alert\NotificationTemplate;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 
 /**
  * Repository for managing notification templates.
@@ -16,7 +16,7 @@ interface NotificationTemplateRepositoryInterface
     /**
      * Find the default template for a specific channel and event type.
      */
-    public function findDefault(AlertChannel $channel, NotificationEventType $eventType): ?NotificationTemplate;
+    public function findDefault(NotificationChannelType $channel, NotificationEventType $eventType): ?NotificationTemplate;
 
     /**
      * Find a template by its ID.
@@ -28,7 +28,7 @@ interface NotificationTemplateRepositoryInterface
      *
      * @return array<NotificationTemplate>
      */
-    public function findAll(?AlertChannel $channel = null, ?NotificationEventType $eventType = null): array;
+    public function findAll(?NotificationChannelType $channel = null, ?NotificationEventType $eventType = null): array;
 
     /**
      * Save a template (create or update).

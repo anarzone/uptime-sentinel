@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Service;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Model\Monitor\MonitorHealth;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
 use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorStateRepositoryInterface;
@@ -23,8 +23,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * Checks if a monitor has reached the failure threshold for any alert rule
- * and dispatches notifications via Symfony Notifier (Chat) or Mailer (Email).
+ * Service for checking monitor health and sending alert notifications.
+ *
+ * This service monitors changes in monitor health status (UP ↔ DOWN) and
+ * dispatches notifications based on configured alert rules and escalation
+ * policies. Supports email (Symfony Mailer) and chat (Symfony Notifier)
+ * notifications with rate limiting and template rendering.
  */
 final readonly class AlertNotificationService
 {
@@ -37,12 +41,25 @@ final readonly class AlertNotificationService
         private MailerInterface $mailer,
         private LoggerInterface $logger,
         private string $mailerFrom,
-        private ?EventDispatcherInterface $eventDispatcher = null,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
     /**
-     * Check if the monitor should trigger any alerts and send notifications.
+     * Check if a monitor has reached the failure threshold for any alert rule
+     * and dispatches notifications via Symfony Notifier (Chat) or Mailer (Email).
+     *
+     * This method:
+     * 1. Retrieves the last known health status from Redis
+     * 2. Checks if the health status has changed (UP ↔ DOWN)
+     * 3. Evaluates alert rules against the new health status
+     * 4. Applies rate limiting to prevent notification spam
+     * 5. Renders notification templates and dispatches notifications
+     * 6. Updates the monitor state in Redis for next check
+     *
+     * @param Monitor $monitor The monitor to check
+     *
+     * @throws \RuntimeException When notification dispatch fails
      */
     public function checkAndNotify(Monitor $monitor): void
     {
@@ -203,7 +220,7 @@ final readonly class AlertNotificationService
         string $contextId
     ): void {
         try {
-            if ($channel->type === AlertChannel::EMAIL) {
+            if ($channel->type === NotificationChannelType::EMAIL) {
                 $email = new Email()
                     ->from($this->mailerFrom)
                     ->to($channel->dsn)

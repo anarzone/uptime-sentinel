@@ -95,6 +95,11 @@ class AlertRule
         $this->type = $type;
     }
 
+    public function updateNotificationChannel(NotificationChannel $channel): void
+    {
+        $this->notificationChannel = $channel;
+    }
+
     /**
      * Get the cooldown interval as a DateInterval object.
      */

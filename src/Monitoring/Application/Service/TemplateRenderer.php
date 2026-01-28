@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Service;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\NotificationEventType;
 use App\Monitoring\Domain\Model\Alert\NotificationRendered;
 use App\Monitoring\Domain\Model\Monitor\Monitor;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\NotificationTemplateRepositoryInterface;
 
 /**
@@ -23,17 +23,17 @@ final readonly class TemplateRenderer
     /**
      * Render a notification message for a monitor.
      *
-     * @param Monitor               $monitor         The monitor to extract variables from
-     * @param NotificationEventType $eventType       The type of notification event
-     * @param AlertChannel          $channel         The notification channel
-     * @param string|null           $fallbackMessage Fallback message if no template is found
+     * @param Monitor                 $monitor         The monitor to extract variables from
+     * @param NotificationEventType   $eventType       The type of notification event
+     * @param NotificationChannelType $channel         The notification channel
+     * @param string|null             $fallbackMessage Fallback message if no template is found
      *
      * @return NotificationRendered Rendered notification with subject and body
      */
     public function renderForMonitor(
         Monitor $monitor,
         NotificationEventType $eventType,
-        AlertChannel $channel,
+        NotificationChannelType $channel,
         ?string $fallbackMessage = null,
     ): NotificationRendered {
         $template = $this->templateRepository->findDefault($channel, $eventType);

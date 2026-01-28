@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\UuidV7;
 
 #[Route('/api/escalation-policies')]
 final class EscalationPolicyController extends AbstractController
@@ -33,7 +34,8 @@ final class EscalationPolicyController extends AbstractController
     #[Route('', methods: ['POST'])]
     public function create(#[MapRequestPayload] CreateEscalationPolicyRequestDto $dto): JsonResponse
     {
-        $command = CreateEscalationPolicyCommand::create(
+        $command = new CreateEscalationPolicyCommand(
+            new UuidV7()->toRfc4122(),
             $dto->monitorId,
             $dto->level,
             $dto->consecutiveFailures,
@@ -83,7 +85,6 @@ final class EscalationPolicyController extends AbstractController
     #[Route('/{id}', methods: ['GET'])]
     public function get(string $id): JsonResponse
     {
-        /** @var \App\Monitoring\Domain\Model\Alert\EscalationPolicy|null $policy */
         $policy = $this->escalationPolicyRepository->find($id);
 
         if ($policy === null) {

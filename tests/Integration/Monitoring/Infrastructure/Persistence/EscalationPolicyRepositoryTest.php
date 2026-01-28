@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Monitoring\Infrastructure\Persistence;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Model\Alert\EscalationPolicy;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
@@ -32,7 +32,7 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
         // 1. Create a Notification Channel (needed for policies)
         $channel = NotificationChannel::create(
             'Test Channel',
-            AlertChannel::EMAIL,
+            NotificationChannelType::EMAIL,
             'test@example.com'
         );
         $this->entityManager->persist($channel);
@@ -85,7 +85,7 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
     {
         $channel = NotificationChannel::create(
             'Test Channel',
-            AlertChannel::EMAIL,
+            NotificationChannelType::EMAIL,
             'test@example.com'
         );
         $this->entityManager->persist($channel);

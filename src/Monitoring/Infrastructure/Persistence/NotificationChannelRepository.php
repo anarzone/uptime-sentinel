@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Infrastructure\Persistence;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelId;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -31,7 +31,7 @@ final class NotificationChannelRepository extends ServiceEntityRepository implem
         return $this->findOneBy(['dsn' => $target]);
     }
 
-    public function findByTypeAndTarget(AlertChannel $type, string $target): ?NotificationChannel
+    public function findByTypeAndTarget(NotificationChannelType $type, string $target): ?NotificationChannel
     {
         return $this->findOneBy(['type' => $type, 'dsn' => $target]);
     }

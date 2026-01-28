@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Monitoring\Domain\Model\Alert;
+namespace App\Monitoring\Domain\Model\Notification;
 
-enum AlertChannel: string
+enum NotificationChannelType: string
 {
     case EMAIL = 'email';
     case SLACK = 'slack';

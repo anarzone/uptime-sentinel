@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Command\AlertRule;
 
+use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
+use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -12,6 +14,7 @@ final readonly class UpdateAlertRuleHandler
 {
     public function __construct(
         private AlertRuleRepositoryInterface $alertRuleRepository,
+        private NotificationChannelRepositoryInterface $notificationChannelRepository,
     ) {
     }
 
@@ -24,8 +27,19 @@ final readonly class UpdateAlertRuleHandler
         }
 
         // Update notification channel if target provided
-        // TODO: Implement notification channel lookup and update
-        // For now, skip target updates as it requires NotificationChannelRepository
+        if ($command->target !== null) {
+            $channel = $this->notificationChannelRepository->findByTarget($command->target);
+
+            if ($channel === null) {
+                $channel = NotificationChannel::fromDsn(
+                    name: \sprintf('Channel for %s', $command->target),
+                    dsn: $command->target,
+                );
+                $this->notificationChannelRepository->save($channel);
+            }
+
+            $alertRule->updateNotificationChannel($channel);
+        }
 
         if ($command->failureThreshold !== null) {
             $alertRule->updateThreshold($command->failureThreshold);

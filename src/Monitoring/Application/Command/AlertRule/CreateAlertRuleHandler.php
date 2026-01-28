@@ -7,8 +7,10 @@ namespace App\Monitoring\Application\Command\AlertRule;
 use App\Monitoring\Domain\Model\Alert\AlertRule;
 use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
+use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -17,7 +19,7 @@ final readonly class CreateAlertRuleHandler
     public function __construct(
         private AlertRuleRepositoryInterface $alertRuleRepository,
         private MonitorRepositoryInterface $monitorRepository,
-        private \App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface $channelRepository,
+        private NotificationChannelRepositoryInterface $channelRepository,
     ) {
     }
 
@@ -32,7 +34,7 @@ final readonly class CreateAlertRuleHandler
         }
 
         // Find or create notification channel
-        $channelType = \App\Monitoring\Domain\Model\Alert\AlertChannel::from($command->channel);
+        $channelType = NotificationChannelType::from($command->channel);
         $notificationChannel = $this->channelRepository->findByTypeAndTarget($channelType, $command->target);
 
         if ($notificationChannel === null) {

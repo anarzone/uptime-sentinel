@@ -12,6 +12,8 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRepositoryInterface
 {
+    use RepositoryHelperTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, AlertRule::class);
@@ -20,7 +22,9 @@ class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRe
     public function findByMonitorId(MonitorId $monitorId): array
     {
         return $this->createQueryBuilder('ar')
-            ->where('ar.monitorId = :monitorId')
+            ->join('ar.notificationChannel', 'nc')
+            ->addSelect('nc')
+            ->where('ar.monitorId.value = :monitorId')
             ->setParameter('monitorId', $monitorId->toString())
             ->orderBy('ar.createdAt', 'DESC')
             ->getQuery()
@@ -30,7 +34,9 @@ class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRe
     public function findEnabledByMonitorId(MonitorId $monitorId): array
     {
         return $this->createQueryBuilder('ar')
-            ->where('ar.monitorId = :monitorId')
+            ->join('ar.notificationChannel', 'nc')
+            ->addSelect('nc')
+            ->where('ar.monitorId.value = :monitorId')
             ->andWhere('ar.isEnabled = :enabled')
             ->setParameter('monitorId', $monitorId->toString())
             ->setParameter('enabled', true)
@@ -49,10 +55,5 @@ class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRe
     {
         $this->getEntityManager()->remove($alertRule);
         $this->getEntityManager()->flush();
-    }
-
-    public function exists(string $id): bool
-    {
-        return $this->find($id) !== null;
     }
 }

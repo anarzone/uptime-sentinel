@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Infrastructure\Persistence\Fixtures;
 
+use App\Monitoring\Domain\Model\Alert\AlertRule;
 use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\HttpMethod;
 use App\Monitoring\Domain\Model\Monitor\Monitor;
+use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
+use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Infrastructure\Persistence\MonitorRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Uid\UuidV7;
 
 /**
  * Comprehensive alert rule fixture covering various scenarios.
@@ -34,14 +36,12 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager): void
     {
-        if (!$manager instanceof \Doctrine\ORM\EntityManagerInterface) {
+        if (!$manager instanceof EntityManagerInterface) {
             throw new \RuntimeException('Fixture requires an EntityManager');
         }
 
-        $connection = $manager->getConnection();
-
-        // Fetch notification channel IDs
-        $channels = $this->getChannelIds($connection);
+        // Fetch notification channels
+        $channels = $this->getChannels($manager);
         if (empty($channels)) {
             echo "No notification channels found. Skipping alert rule creation.\n";
 
@@ -65,7 +65,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // 1. Varying Failure Thresholds (use first 10 active monitors)
         $rulesCreated += $this->createThresholdRules(
-            $connection,
+            $manager,
             $monitorGroups['active'],
             $channels['email'],
             10
@@ -73,7 +73,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // 2. Varying Notification Types (use monitors 11-25)
         $rulesCreated += $this->createNotificationTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['active'],
             $channels['email'],
             15,
@@ -82,7 +82,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // 3. Varying Channels (use monitors 26-55)
         $rulesCreated += $this->createChannelRules(
-            $connection,
+            $manager,
             $monitorGroups['active'],
             $channels,
             30,
@@ -91,7 +91,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // 4. Varying Cooldown Intervals (use monitors 56-65)
         $rulesCreated += $this->createCooldownRules(
-            $connection,
+            $manager,
             $monitorGroups['active'],
             $channels['slack'],
             10,
@@ -101,7 +101,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
         // 5. Different Monitor Types
         // Paused monitors
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['paused'],
             $channels['email'],
             3,
@@ -110,7 +110,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // POST method monitors
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['post'],
             $channels['slack'],
             3,
@@ -119,7 +119,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // PUT method monitors
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['put'],
             $channels['webhook'],
             3,
@@ -128,7 +128,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // Status 201 monitors
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['status201'],
             $channels['email'],
             3,
@@ -137,7 +137,7 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // Fast interval monitors (30s)
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['fast'],
             $channels['slack'],
             3,
@@ -146,12 +146,15 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
         // Slow interval monitors (300s)
         $rulesCreated += $this->createTypeRules(
-            $connection,
+            $manager,
             $monitorGroups['slow'],
             $channels['webhook'],
             3,
             NotificationType::RECOVERY
         );
+
+        // Flush all pending entities to database
+        $manager->flush();
 
         echo "Alert rule fixtures loaded successfully. Total rules created: {$rulesCreated}\n";
     }
@@ -165,22 +168,20 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Get notification channel IDs from database.
+     * Get notification channels from database.
      *
-     * @return array<string, string> Array of channel type => UUID
+     * @return array<string, NotificationChannel> Array of channel type => channel entity
      */
-    private function getChannelIds(Connection $connection): array
+    private function getChannels(EntityManagerInterface $manager): array
     {
-        $sql = 'SELECT uuid, type FROM notification_channels';
-        $result = $connection->executeQuery($sql);
-        $rows = $result->fetchAllAssociative();
+        $channels = $manager->getRepository(NotificationChannel::class)->findAll();
 
-        $channels = [];
-        foreach ($rows as $row) {
-            $channels[$row['type']] = $row['uuid'];
+        $indexed = [];
+        foreach ($channels as $channel) {
+            $indexed[$channel->type->value] = $channel;
         }
 
-        return $channels;
+        return $indexed;
     }
 
     /**
@@ -244,9 +245,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
      * @param array<Monitor> $monitors
      */
     private function createThresholdRules(
-        Connection $connection,
+        EntityManagerInterface $manager,
         array $monitors,
-        string $channelId,
+        NotificationChannel $channel,
         int $maxMonitors
     ): int {
         $thresholds = [1, 3, 3, 3, 5, 5, 5, 10]; // Distribution of thresholds
@@ -260,9 +261,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
             $monitor = $monitors[$monitorIdx];
             $this->insertAlertRule(
-                $connection,
+                $manager,
                 $monitor->id->toString(),
-                $channelId,
+                $channel,
                 NotificationType::FAILURE,
                 $threshold,
                 null
@@ -283,9 +284,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
      * @param array<Monitor> $monitors
      */
     private function createNotificationTypeRules(
-        Connection $connection,
+        EntityManagerInterface $manager,
         array $monitors,
-        string $channelId,
+        NotificationChannel $channel,
         int $maxMonitors,
         int $offset
     ): int {
@@ -317,9 +318,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
             $monitor = $monitors[$monitorIdx];
             $this->insertAlertRule(
-                $connection,
+                $manager,
                 $monitor->id->toString(),
-                $channelId,
+                $channel,
                 $type,
                 3, // default threshold
                 null
@@ -337,11 +338,11 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
     /**
      * Create rules with varying channels.
      *
-     * @param array<Monitor>        $monitors
-     * @param array<string, string> $channels
+     * @param array<Monitor>                     $monitors
+     * @param array<string, NotificationChannel> $channels
      */
     private function createChannelRules(
-        Connection $connection,
+        EntityManagerInterface $manager,
         array $monitors,
         array $channels,
         int $maxMonitors,
@@ -358,12 +359,12 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
             $monitor = $monitors[$monitorIdx];
             $channelType = $channelTypes[$i % \count($channelTypes)];
-            $channelId = $channels[$channelType];
+            $channel = $channels[$channelType];
 
             $this->insertAlertRule(
-                $connection,
+                $manager,
                 $monitor->id->toString(),
-                $channelId,
+                $channel,
                 NotificationType::FAILURE,
                 3,
                 null
@@ -384,9 +385,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
      * @param array<Monitor> $monitors
      */
     private function createCooldownRules(
-        Connection $connection,
+        EntityManagerInterface $manager,
         array $monitors,
-        string $channelId,
+        NotificationChannel $channel,
         int $maxMonitors,
         int $offset
     ): int {
@@ -401,9 +402,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
 
             $monitor = $monitors[$monitorIdx];
             $this->insertAlertRule(
-                $connection,
+                $manager,
                 $monitor->id->toString(),
-                $channelId,
+                $channel,
                 NotificationType::FAILURE,
                 3,
                 $cooldown
@@ -424,9 +425,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
      * @param array<Monitor> $monitors
      */
     private function createTypeRules(
-        Connection $connection,
+        EntityManagerInterface $manager,
         array $monitors,
-        string $channelId,
+        NotificationChannel $channel,
         int $count,
         NotificationType $type
     ): int {
@@ -438,9 +439,9 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
             }
 
             $this->insertAlertRule(
-                $connection,
+                $manager,
                 $monitor->id->toString(),
-                $channelId,
+                $channel,
                 $type,
                 3,
                 null
@@ -457,39 +458,27 @@ class AlertRuleFixture extends Fixture implements DependentFixtureInterface
     }
 
     /**
-     * Insert a single alert rule using raw SQL.
+     * Insert a single alert rule using ORM.
      */
     private function insertAlertRule(
-        Connection $connection,
+        EntityManagerInterface $manager,
         string $monitorId,
-        string $channelId,
+        NotificationChannel $channel,
         NotificationType $type,
         int $failureThreshold,
         ?string $cooldownInterval
     ): void {
-        $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-        $uuid = (new UuidV7())->toRfc4122();
-
-        $sql = 'INSERT INTO alert_rules (
-            uuid,
-            monitor_id_uuid,
-            notification_channel_id,
-            type,
-            failure_threshold,
-            cooldown_interval,
-            is_enabled,
-            created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-
-        $connection->executeStatement($sql, [
-            $uuid,
-            $monitorId,
-            $channelId,
-            $type->value,
+        $alertRule = AlertRule::create(
+            MonitorId::fromString($monitorId),
+            $channel,
             $failureThreshold,
-            $cooldownInterval,
-            1, // is_enabled
-            $now,
-        ]);
+            $type,
+        );
+
+        if ($cooldownInterval !== null) {
+            $alertRule->setCooldownInterval($cooldownInterval);
+        }
+
+        $manager->persist($alertRule);
     }
 }

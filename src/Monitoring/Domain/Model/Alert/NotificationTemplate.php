@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Domain\Model\Alert;
 
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,8 +26,8 @@ final class NotificationTemplate
     #[ORM\Column(type: Types::STRING, length: 100)]
     public private(set) string $name;
 
-    #[ORM\Column(type: Types::STRING, length: 20, enumType: AlertChannel::class)]
-    public readonly AlertChannel $channel;
+    #[ORM\Column(type: Types::STRING, length: 20, enumType: NotificationChannelType::class)]
+    public readonly NotificationChannelType $channel;
 
     #[ORM\Column(type: Types::STRING, length: 20, enumType: NotificationEventType::class)]
     public readonly NotificationEventType $eventType;
@@ -49,7 +50,7 @@ final class NotificationTemplate
     public function __construct(
         string $id,
         string $name,
-        AlertChannel $channel,
+        NotificationChannelType $channel,
         NotificationEventType $eventType,
         ?string $subjectTemplate,
         string $bodyTemplate,
@@ -68,7 +69,7 @@ final class NotificationTemplate
 
     public static function create(
         string $name,
-        AlertChannel $channel,
+        NotificationChannelType $channel,
         NotificationEventType $eventType,
         ?string $subjectTemplate,
         string $bodyTemplate,

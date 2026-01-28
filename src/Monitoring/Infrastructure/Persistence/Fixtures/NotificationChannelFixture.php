@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Infrastructure\Persistence\Fixtures;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -19,7 +19,7 @@ class NotificationChannelFixture extends Fixture
     {
         $emailChannel = NotificationChannel::create(
             'System Administrators',
-            AlertChannel::EMAIL,
+            NotificationChannelType::EMAIL,
             'admin@uptime-sentinel.local' // DSN for email is the target address
         );
 
@@ -28,7 +28,7 @@ class NotificationChannelFixture extends Fixture
 
         $slackChannel = NotificationChannel::create(
             'DevOps Slack',
-            AlertChannel::SLACK,
+            NotificationChannelType::SLACK,
             'slack://token@default?channel=alerts' // Dummy DSN
         );
         $manager->persist($slackChannel);
@@ -36,7 +36,7 @@ class NotificationChannelFixture extends Fixture
 
         $webhookChannel = NotificationChannel::create(
             'Incident Webhook',
-            AlertChannel::WEBHOOK,
+            NotificationChannelType::WEBHOOK,
             'https://webhook.site/uptime-sentinel-alerts' // Example webhook endpoint
         );
         $manager->persist($webhookChannel);

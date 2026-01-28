@@ -59,6 +59,10 @@ final readonly class CheckMonitorBatchHandler
                 $this->logger->error('Failed to process check result', [
                     'monitorId' => $result->monitorId,
                     'error' => $e->getMessage(),
+                    'exception' => $e::class,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
             }
         }

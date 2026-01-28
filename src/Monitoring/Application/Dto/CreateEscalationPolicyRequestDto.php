@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Dto;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateEscalationPolicyRequestDto
 {
-    public const ALLOWED_CHANNELS = ['email', 'slack', 'webhook'];
+    public const array ALLOWED_CHANNELS = ['email', 'slack', 'webhook'];
 
     public function __construct(
         public ?string $monitorId, // null for global policies
@@ -34,9 +34,9 @@ final readonly class CreateEscalationPolicyRequestDto
     ) {
     }
 
-    public function getChannel(): AlertChannel
+    public function getChannel(): NotificationChannelType
     {
-        return AlertChannel::from($this->channel);
+        return NotificationChannelType::from($this->channel);
     }
 
     public function getMonitorId(): ?\App\Monitoring\Domain\Model\Monitor\MonitorId

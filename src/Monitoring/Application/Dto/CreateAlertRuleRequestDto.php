@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Dto;
 
-use App\Monitoring\Domain\Model\Alert\AlertChannel;
 use App\Monitoring\Domain\Model\Alert\NotificationType;
+use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateAlertRuleRequestDto
@@ -38,9 +38,9 @@ final readonly class CreateAlertRuleRequestDto
     ) {
     }
 
-    public function getChannel(): AlertChannel
+    public function getChannel(): NotificationChannelType
     {
-        return AlertChannel::from($this->channel);
+        return NotificationChannelType::from($this->channel);
     }
 
     public function getType(): NotificationType

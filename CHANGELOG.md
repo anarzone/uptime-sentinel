@@ -1,3 +1,19 @@
+## [1.3.0](https://github.com/anarzone/uptime-sentinel/compare/v1.2.3...v1.3.0) (2026-01-28)
+
+### Features
+
+* Add MonitorState value object for DDD compliance ([5e9c788](https://github.com/anarzone/uptime-sentinel/commit/5e9c7886f6dbfbdb835a61d642f21d9f7e221377))
+* Add updateNotificationChannel method to AlertRule entity ([68025a4](https://github.com/anarzone/uptime-sentinel/commit/68025a4933b09395f40592fa8e98bcbbeddca84b))
+* Establish clean naming convention for database schema ([aa976ff](https://github.com/anarzone/uptime-sentinel/commit/aa976ff4f8e66624e77cb138b072413bc63c5de8))
+* Implement notification channel update in UpdateAlertRuleHandler ([012454e](https://github.com/anarzone/uptime-sentinel/commit/012454e766beeb6e618ebf40ffd88786cc21381d))
+
+### Bug Fixes
+
+* Add detailed exception logging to batch handler ([ab7b878](https://github.com/anarzone/uptime-sentinel/commit/ab7b8787c160489909780187ff85b501ca56cfbc))
+* Add JOIN FETCH to EscalationPolicyRepository to prevent N+1 queries ([76fc43d](https://github.com/anarzone/uptime-sentinel/commit/76fc43db8c41159541058d500fd2854310cbad49))
+* Add Redis error handling with graceful degradation ([cbd1cc1](https://github.com/anarzone/uptime-sentinel/commit/cbd1cc1dbd55c6e4c6c931dc27e941cc057017ae))
+* Prevent N+1 queries with JOIN FETCH in AlertRuleRepository ([2cc0a3a](https://github.com/anarzone/uptime-sentinel/commit/2cc0a3aec44c480b0da8a15d431cdd286b7db5a8))
+
 ## [1.2.3](https://github.com/anarzone/uptime-sentinel/compare/v1.2.2...v1.2.3) (2026-01-25)
 
 ### Bug Fixes

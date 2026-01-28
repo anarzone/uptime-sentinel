@@ -17,6 +17,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class EscalationPolicyRepository extends ServiceEntityRepository implements EscalationPolicyRepositoryInterface
 {
+    use RepositoryHelperTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, EscalationPolicy::class);
@@ -25,6 +27,8 @@ class EscalationPolicyRepository extends ServiceEntityRepository implements Esca
     public function findApplicableForMonitor(MonitorId $monitorId): array
     {
         return $this->createQueryBuilder('ep')
+            ->join('ep.notificationChannel', 'nc')
+            ->addSelect('nc')
             ->where('ep.monitorId.value = :monitorId')
             ->andWhere('ep.isEnabled = :enabled')
             ->setParameter('monitorId', $monitorId->toString())
@@ -41,6 +45,8 @@ class EscalationPolicyRepository extends ServiceEntityRepository implements Esca
         }
 
         return $this->createQueryBuilder('ep')
+            ->join('ep.notificationChannel', 'nc')
+            ->addSelect('nc')
             ->where('ep.monitorId.value = :monitorId')
             ->setParameter('monitorId', $monitorId->toString())
             ->orderBy('ep.level', 'ASC')
@@ -58,10 +64,5 @@ class EscalationPolicyRepository extends ServiceEntityRepository implements Esca
     {
         $this->getEntityManager()->remove($policy);
         $this->getEntityManager()->flush();
-    }
-
-    public function exists(string $id): bool
-    {
-        return $this->find($id) !== null;
     }
 }
