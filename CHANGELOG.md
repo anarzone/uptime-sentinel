@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/anarzone/uptime-sentinel/compare/v1.4.0...v1.5.0) (2026-01-31)
+
+### Features
+
+* **telemetry:** implement resilient queue and lag monitoring command ([fd0c1e7](https://github.com/anarzone/uptime-sentinel/commit/fd0c1e79457b0119f6b51fd5c29654b603290ab3))
+
 ## [1.4.0](https://github.com/anarzone/uptime-sentinel/compare/v1.3.0...v1.4.0) (2026-01-31)
 
 ### Features
