@@ -494,20 +494,37 @@ php bin/console messenger:consume async -vv  # Worker 3
 
 ## Part 9: Telemetry Ingestion Flow (The Write Accelerator)
 
-To handle 10,000 results per minute without crashing the database, we use **Write Buffering**.
+To handle 10,000 results per minute without crashing the database, we use **Write Buffering** and a **Three-Tier Aggregation** strategy.
 
-1.  **Buffer**: Workers push results to a Redis List (`LPUSH telemetery_queue`). This is lightning fast (<1ms).
-2.  **Ingestor**: A separate background process runs every few seconds.
-3.  **Bulk Insert**: The Ingestor grabs 1,000 items from Redis and performs a **single SQL statement** to MySQL.
+1.  **Buffer**: Workers push results to a Redis List (`telemetry_buffer`). This is lightning fast (<1ms).
+2.  **Ingestor**: A separate background process (`TelemetryIngestor`) pops batches from Redis every 10 seconds.
+3.  **Bulk Insert**: The Ingestor grabs up to 1,000 items and performs a **single SQL statement** to the `ping_results` table.
 
 ```sql
 -- One query instead of 1,000!
-INSERT INTO check_results (id, monitor_id, status_code, latency, created_at) 
+INSERT INTO ping_results (id, monitor_id, status_code, latency_ms, is_successful, created_at) 
 VALUES 
-(..., 200, 150, ...),
-(..., 503, 0, ...),
+(..., 200, 150, 1, ...),
+(..., 503, 0, 0, ...),
 ... (998 more) ...
 ```
+
+---
+
+## Part 10: Three-Tier Aggregation (The Storage Strategy)
+
+Raw data is huge. We aggregate it to keep queries fast while retaining historical trends.
+
+| Tier | Table | Retention | Purpose |
+|------|-------|-----------|---------|
+| **Tier 1 (Raw)** | `ping_results` | 30 Days | Detailed troubleshooting and raw logs. |
+| **Tier 2 (Hourly)**| `ping_stats_hourly`| 1 Year | Performance trends and availability metrics. |
+| **Tier 3 (Daily)** | `ping_stats_daily` | Indefinite | Long-term SLA reporting and year-over-year growth. |
+
+**Automation**: 
+- `RollupHourlyHandler` runs every hour to move Tier 1 → Tier 2.
+- `RollupDailyHandler` runs every night to move Tier 2 → Tier 3.
+- `MaintainPartitionsHandler` automatically prunes Tier 1 data older than 30 days.
 
 ---
 

@@ -50,21 +50,22 @@ This service runs immediately after a check result is processed:
 
 ---
 
-## 3. Telemetry Flow (The Memory - Planned)
+## 3. Telemetry Flow (The Memory)
 
-We are preparing to implement a high-throughput telemetry system to provide historical insights.
+The Telemetry system provides high-throughput data ingestion and long-term analytical storage through a Three-Tier strategy.
 
-### A. Ingestion (Current)
-- Inside `CheckMonitorBatchHandler`, every check result is pushed to a **Redis List** (`telemetry_buffer`).
-- This is a "fire-and-forget" push, ensuring the monitoring loop remains extremely fast.
+### A. Ingestion (Real-Time)
+1.  **Buffering**: Inside `CheckMonitorBatchHandler`, every check result is pushed to a **Redis List** (`telemetry_buffer`). This is a "fire-and-forget" operation to minimize latency in the monitoring loop.
+2.  **Ingestion**: The `TelemetryIngestor` service (scheduled every 10 seconds) pops batches from Redis and performs bulk `INSERT` operations into the `ping_results` table.
 
-### B. Processing (Proposed)
-1.  **`TelemetryConsumer`**: A dedicated long-running process that use `RPOP` or `BLPOP` to consume results from Redis.
-2.  **Persistence**: Data is written to a specialized storage engine (e.g., **TimescaleDB** or **InfluxDB**) to handle millions of data points.
-3.  **Aggregator**: Periodically calculates metrics:
-    - **Uptime Percentage**: (e.g., 99.9% over 30 days).
-    - **Latency Metrics**: P95/P99 response times for dashboards.
-    - **Outage Reports**: Correlating multiple alerts into single "events".
+### B. Aggregation (Rollups)
+To enable fast long-term queries, we use a three-tier storage model:
+1.  **Tier 1: `ping_results` (Raw)**: Detailed check logs. Managed by `MaintainPartitionsHandler` which automatically creates future partitions and drops data older than 30 days.
+2.  **Tier 2: `ping_stats_hourly` (Mid-Term)**: `RollupHourlyHandler` aggregates raw pings into hourly buckets (min/max/avg latency, uptime counts).
+3.  **Tier 3: `ping_stats_daily` (Long-Term)**: `RollupDailyHandler` further aggregates hourly stats into daily summaries for indefinite retention.
+
+### C. Maintenance
+- **Dynamic Partitioning**: `MaintainPartitionsMessage` (scheduled daily) ensures `ping_results` table has partitions for the next 7 days and removes those older than 30 days, keeping the database performing at peak efficiency.
 
 ---
 

@@ -1,6 +1,6 @@
 # 📡 UptimeSentinel
 
-**UptimeSentinel** is a distributed system for monitoring service availability at scale. It is engineered to handle **10,000+ concurrent checks per minute** using a hybrid architecture that combines Domain-Driven Design (DDD) for configuration with raw, high-performance data pipelines for telemetry.
+**UptimeSentinel** is a distributed system for monitoring service availability at scale. It utilizes a three-tier aggregation strategy and high-performance data pipelines to handle telemetry data with long-term analytical storage.
 
 > **Project Goal:** This is a "System Design Gym" implementation focused on solving real-world scalability problems like the Thundering Herd effect, massive table growth, and high-concurrency write buffering.
 
@@ -8,22 +8,27 @@
 
 | Component | Technology          | Role |
 | :--- |:--------------------| :--- |
-| **Core Framework** | Symfony 7 (PHP 8.4) | Modular Monolith architecture |
-| **Orchestration** | Docker Compose      | Service isolation (Web vs. Worker) |
-| **Queue Broker** | RabbitMQ            | Handling the "Thundering Herd" of scheduled checks |
-| **Database** | MySQL 8.0           | Using **Table Partitioning** for 10M+ log rows/month |
-| **Write Buffer** | Redis               | Buffering high-velocity writes before disk persistence |
+| **Core Framework** | Symfony 7 (PHP 8.4) | Modular Monolith with DDD patterns |
+| **Orchestration** | Docker Compose      | Service isolation (Web, Workers, Ingestors) |
+| **Queue Broker** | RabbitMQ            | Asynchronous job processing & task decoupling |
+| **Storage Strategy**| MySQL 8.0           | **Three-Tier Aggregation** & **Dynamic Partitioning** |
+| **Write Buffer** | Redis               | Multi-staged buffering for ingestion throughput |
 
 ## 🚀 Key Engineering Challenges Solved
 
 ### 1. The "Thundering Herd" Scheduler
-Instead of a naive `foreach` loop that times out, a **Dispatcher** runs every minute to push lightweight Job IDs to RabbitMQ. Distributed **Workers** consume these jobs at their own pace, preventing system overload during peak check times.
+Instead of a naive loop, a **Dispatcher** runs periodically to push lightweight Job IDs to RabbitMQ. Distributed **Workers** consume these batches concurrently using non-blocking I/O (Curl Multi), preventing system overload during peak check times.
 
-### 2. High-Throughput Ingestion
-Writing 10,000 logs/minute kills standard database connections. We implement a **Bulk Ingestion Pipeline** where workers push results to a Redis List, and a dedicated **Ingestor Service** performs single-transaction bulk inserts into MySQL.
+### 2. Multi-Tier Telemetry Pipeline
+We implement a high-efficiency ingestion pipeline:
+- **Tier 1 (Raw)**: Workers buffer results in Redis; a scheduled **Ingestor** performs bulk inserts into partitioned MySQL tables.
+- **Tier 2 (Hourly)**: Scheduled rollups aggregate raw data into hourly performance buckets.
+- **Tier 3 (Daily)**: Long-term summaries for indefinite historical reporting.
 
-### 3. Big Data Analytics
-To query "Average Latency over 30 days" across millions of rows, we utilize **MySQL Range Partitioning** and **Covering Indexes**, turning slow analytical queries into sub-second operations.
+### 3. Automated Data Lifecycle
+To keep the database lean and fast, the system implements **Automatic Partition Management**:
+- **Future Partitioning**: Automatically creates future partitions for the next 7 days.
+- **Data Pruning**: Automatically drops raw data partitions older than 30 days while preserving aggregated stats.
 
 ## 🛠 Installation (Hybrid Mode)
 
