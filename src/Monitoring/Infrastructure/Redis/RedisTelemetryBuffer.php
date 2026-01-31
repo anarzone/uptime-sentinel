@@ -14,18 +14,14 @@ use App\Monitoring\Domain\Service\TelemetryBufferInterface;
  */
 final readonly class RedisTelemetryBuffer implements TelemetryBufferInterface
 {
-    private const string BUFFER_KEY = 'telemetry_buffer';
-
-    /**
-     * @param object $redis Redis client instance (Predis\Client or similar)
-     */
     public function __construct(
         private object $redis,
+        private string $bufferKey,
     ) {
     }
 
     public function push(CheckResultDto $result): void
     {
-        $this->redis->lpush(self::BUFFER_KEY, [json_encode($result->toArray())]);
+        $this->redis->lpush($this->bufferKey, [json_encode($result->toArray())]);
     }
 }
