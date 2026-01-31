@@ -1,3 +1,11 @@
+## [1.4.0](https://github.com/anarzone/uptime-sentinel/compare/v1.3.0...v1.4.0) (2026-01-31)
+
+### Features
+
+* **docker:** integrate telemetry engine with docker compose ([2871139](https://github.com/anarzone/uptime-sentinel/commit/2871139723f295a4cc49666adafba9eb61d59646))
+* **telemetry:** implement core telemetry ingestion engine ([a6db60d](https://github.com/anarzone/uptime-sentinel/commit/a6db60d8c4a687d8f47fb4e7ce62792b6de89e4a))
+* **telemetry:** implement three-tier aggregation and partitioning ([822a2bf](https://github.com/anarzone/uptime-sentinel/commit/822a2bfed026bd451b6df17b4bc025dc84853b32))
+
 ## [1.3.0](https://github.com/anarzone/uptime-sentinel/compare/v1.2.3...v1.3.0) (2026-01-28)
 
 ### Features
