@@ -10,9 +10,6 @@ use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\NotificationTemplateRepositoryInterface;
 
-/**
- * Renders notification messages from templates with variable substitution.
- */
 final readonly class TemplateRenderer
 {
     public function __construct(
@@ -20,16 +17,6 @@ final readonly class TemplateRenderer
     ) {
     }
 
-    /**
-     * Render a notification message for a monitor.
-     *
-     * @param Monitor                 $monitor         The monitor to extract variables from
-     * @param NotificationEventType   $eventType       The type of notification event
-     * @param NotificationChannelType $channel         The notification channel
-     * @param string|null             $fallbackMessage Fallback message if no template is found
-     *
-     * @return NotificationRendered Rendered notification with subject and body
-     */
     public function renderForMonitor(
         Monitor $monitor,
         NotificationEventType $eventType,
@@ -47,11 +34,6 @@ final readonly class TemplateRenderer
         return $template->render($variables);
     }
 
-    /**
-     * Extract variables from a monitor for template substitution.
-     *
-     * @return array<string, string|int>
-     */
     private function extractVariables(Monitor $monitor, NotificationEventType $eventType): array
     {
         return [
@@ -65,13 +47,10 @@ final readonly class TemplateRenderer
             'lastStatusChangeAt' => $monitor->lastStatusChangeAt?->format('Y-m-d H:i:s') ?? 'N/A',
             'expectedStatusCode' => $monitor->expectedStatusCode,
             'eventType' => $eventType->value,
-            'timestamp' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'timestamp' => new \DateTimeImmutable()->format('Y-m-d H:i:s'),
         ];
     }
 
-    /**
-     * Generate a fallback message when no template is found.
-     */
     private function getFallbackMessage(
         Monitor $monitor,
         NotificationEventType $eventType,

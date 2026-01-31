@@ -66,3 +66,8 @@ services:
         arguments:
             $mailer: '@mailer.mailer'
             $mailerFrom: '%env(string:MAILER_FROM)%'
+
+    App\Telemetry\Infrastructure\Console\TelemetryStatusCommand:
+        arguments:
+            $redis: '@redis_client'
+            $bufferKey: '%telemetry_buffer_key%'

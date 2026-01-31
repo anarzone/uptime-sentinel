@@ -9,9 +9,12 @@ use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 
 /**
- * High-performance telemetry ingestor.
+ * High-performance telemetry ingestor with resilient queue pattern.
  *
- * Pops check results from Redis buffer and bulk-inserts into MySQL.
+ * Uses LMOVE (atomic pop-and-push) for crash safety:
+ * 1. Items are moved from `buffer` to `processing` atomically.
+ * 2. After successful SQL insert, the `processing` list is cleared.
+ * 3. On startup, orphaned items in `processing` are recovered.
  */
 final readonly class TelemetryIngestor
 {
@@ -34,13 +37,23 @@ final readonly class TelemetryIngestor
      */
     public function ingest(int $batchSize = self::DEFAULT_BATCH_SIZE): int
     {
-        $batch = $this->popBatch($batchSize);
+        $processingKey = $this->getProcessingKey();
+
+        // Step 1: Recover any orphaned items from a previous crash
+        $this->recoverOrphanedItems($processingKey);
+
+        // Step 2: Move items atomically from buffer to processing list
+        $batch = $this->moveToProcessing($batchSize, $processingKey);
 
         if (empty($batch)) {
             return 0;
         }
 
+        // Step 3: Bulk insert into MySQL
         $this->bulkInsert($batch);
+
+        // Step 4: Clear the processing list (items are now safely in DB)
+        $this->redis->del($processingKey);
 
         $this->logger->info('Telemetry ingested', [
             'rows' => \count($batch),
@@ -51,18 +64,52 @@ final readonly class TelemetryIngestor
     }
 
     /**
-     * Pop items from the Redis buffer.
+     * Get the key for the processing list.
+     */
+    private function getProcessingKey(): string
+    {
+        return $this->bufferKey.':processing';
+    }
+
+    /**
+     * Recover orphaned items from a previous crash.
+     *
+     * If the ingestor crashed after moving items to processing but before
+     * committing the SQL transaction, those items would be "orphaned".
+     * This method re-queues them to the main buffer for reprocessing.
+     */
+    private function recoverOrphanedItems(string $processingKey): void
+    {
+        $orphanCount = (int) $this->redis->llen($processingKey);
+
+        if ($orphanCount === 0) {
+            return;
+        }
+
+        $this->logger->warning('Recovering orphaned telemetry items', [
+            'count' => $orphanCount,
+        ]);
+
+        // Move all orphaned items back to the main buffer (FIFO order, push to right)
+        while ($this->redis->llen($processingKey) > 0) {
+            $this->redis->lmove($processingKey, $this->bufferKey, 'LEFT', 'RIGHT');
+        }
+    }
+
+    /**
+     * Move items from the buffer to the processing list atomically.
      *
      * @return list<PingResultDto>
      */
-    private function popBatch(int $batchSize): array
+    private function moveToProcessing(int $batchSize, string $processingKey): array
     {
         $batch = [];
 
         for ($i = 0; $i < $batchSize; ++$i) {
-            $item = $this->redis->rpop($this->bufferKey);
+            // LMOVE atomically pops from source and pushes to destination
+            $item = $this->redis->lmove($this->bufferKey, $processingKey, 'RIGHT', 'LEFT');
 
-            if ($item === null || !\is_string($item)) {
+            if ($item === null || $item === false || !\is_string($item)) {
                 break;
             }
 
