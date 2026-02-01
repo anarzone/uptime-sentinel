@@ -6,6 +6,9 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -19,23 +22,25 @@ final class Version20260129215151 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE ping_results (
-            id VARCHAR(36) NOT NULL,
-            monitor_id CHAR(36) NOT NULL,
-            status_code SMALLINT NOT NULL,
-            latency_ms INT NOT NULL,
-            is_successful TINYINT(1) NOT NULL,
-            created_at DATETIME NOT NULL,
-            PRIMARY KEY(id, created_at),
-            INDEX idx_monitor_created (monitor_id, created_at)
-        ) DEFAULT CHARACTER SET utf8mb4 ENGINE = InnoDB
-        PARTITION BY RANGE (YEAR(created_at)) (
-            PARTITION p2024 VALUES LESS THAN (2025),
-            PARTITION p2025 VALUES LESS THAN (2026),
-            PARTITION p2026 VALUES LESS THAN (2027),
-            PARTITION p2027 VALUES LESS THAN (2028),
-            PARTITION future VALUES LESS THAN MAXVALUE
-        )');
+        $table = $schema->createTable('ping_results');
+        $table->addColumn('id', Types::STRING, ['length' => 36]);
+        $table->addColumn('monitor_id', Types::STRING, ['length' => 36]);
+        $table->addColumn('status_code', Types::SMALLINT);
+        $table->addColumn('latency_ms', Types::INTEGER);
+        $table->addColumn('is_successful', Types::BOOLEAN);
+        $table->addColumn('created_at', Types::DATETIME_IMMUTABLE);
+
+        $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [UnqualifiedName::unquoted('id')], true));
+        $table->addIndex(['monitor_id', 'created_at'], 'idx_monitor_created');
+
+        // Initialize partitioning programmatically to avoid chicken-and-egg issues in handler
+        // Using RANGE COLUMNS for better pruning and clarity
+        // Wrap in platform check for SQLite compatibility during tests
+        if ($this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MySQLPlatform) {
+            $this->addSql("ALTER TABLE ping_results PARTITION BY RANGE COLUMNS(created_at) (
+                PARTITION p_initial VALUES LESS THAN ('2026-01-01')
+            )");
+        }
     }
 
     public function down(Schema $schema): void

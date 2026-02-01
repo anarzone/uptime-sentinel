@@ -20,7 +20,27 @@ final readonly class PingResultDto
     }
 
     /**
+     * Converts the DTO to a primitive array for storage or transmission.
+     *
+     * @return array{monitor_id: string, status_code: int, latency_ms: int, is_success: bool, checked_at: string}
+     */
+    public function toArray(): array
+    {
+        return [
+            'monitor_id' => $this->monitorId,
+            'status_code' => $this->statusCode,
+            'latency_ms' => $this->latencyMs,
+            'is_success' => $this->isSuccessful,
+            'checked_at' => $this->createdAt->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    /**
+     * Creates a DTO instance from a primitive array.
+     *
      * @param array{monitor_id: string, status_code: int, latency_ms: int, is_success: bool, checked_at: string} $data
+     *
+     * @throws \Exception if the date format is invalid
      */
     public static function fromArray(array $data): self
     {

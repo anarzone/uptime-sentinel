@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/src/Telemetry/Application/Handler/MaintainPartitionsHandler.php" value="0d157b86-e2e2-4c64-bb35-5b353184e232" />
+    <file url="file://$PROJECT_DIR$/src/Telemetry/Infrastructure/Console/TelemetryStatusCommand.php" value="0d157b86-e2e2-4c64-bb35-5b353184e232" />
+  </component>
+</project>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telemetry\Infrastructure\Console;
 
+use App\Telemetry\Application\Service\TelemetryIngestor;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,7 +23,7 @@ final class TelemetryStatusCommand extends Command
 {
     public function __construct(
         private readonly Connection $connection,
-        private readonly object $redis,
+        private readonly \Redis $redis,
         private readonly string $bufferKey,
     ) {
         parent::__construct();
@@ -36,23 +37,24 @@ final class TelemetryStatusCommand extends Command
         $now = new \DateTimeImmutable();
 
         // 1. Redis Buffer Status
+        $processingKey = TelemetryIngestor::getProcessingKey($this->bufferKey);
         $bufferCount = (int) $this->redis->llen($this->bufferKey);
-        $processingCount = (int) $this->redis->llen($this->bufferKey.':processing');
+        $processingCount = (int) $this->redis->llen($processingKey);
 
         $io->section('Redis Buffers');
         $io->table(
             ['Buffer', 'Items'],
             [
                 [$this->bufferKey, $bufferCount],
-                [$this->bufferKey.':processing', $processingCount],
+                [$processingKey, $processingCount],
             ]
         );
 
         // 2. Query last timestamp from each tier
         $tiers = [
             'Tier 1 (Raw)' => 'SELECT MAX(created_at) FROM ping_results',
-            'Tier 2 (Hourly)' => 'SELECT MAX(bucket_start) FROM ping_stats_hourly',
-            'Tier 3 (Daily)' => 'SELECT MAX(bucket_start) FROM ping_stats_daily',
+            'Tier 2 (Hourly)' => 'SELECT MAX(bucket_time) FROM ping_stats_hourly',
+            'Tier 3 (Daily)' => 'SELECT MAX(bucket_time) FROM ping_stats_daily',
         ];
 
         $rows = [];

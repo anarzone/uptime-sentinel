@@ -27,6 +27,20 @@ final readonly class TelemetryRollupService
         $startOfHour = $hour->setTime((int) $hour->format('H'), 0, 0);
         $endOfHour = $startOfHour->modify('+1 hour');
 
+        $isSqlite = $this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\SQLitePlatform;
+
+        $upsertSql = $isSqlite
+            ? 'ON CONFLICT(monitor_id, bucket_time) DO UPDATE SET
+                ping_count = excluded.ping_count,
+                success_count = excluded.success_count,
+                avg_latency_ms = excluded.avg_latency_ms,
+                max_latency_ms = excluded.max_latency_ms'
+            : 'ON DUPLICATE KEY UPDATE
+                ping_count = VALUES(ping_count),
+                success_count = VALUES(success_count),
+                avg_latency_ms = VALUES(avg_latency_ms),
+                max_latency_ms = VALUES(max_latency_ms)';
+
         $sql = <<<SQL
                 INSERT INTO ping_stats_hourly (monitor_id, bucket_time, ping_count, success_count, avg_latency_ms, max_latency_ms)
                 SELECT
@@ -39,11 +53,7 @@ final readonly class TelemetryRollupService
                 FROM ping_results
                 WHERE created_at >= :start_time AND created_at < :end_time
                 GROUP BY monitor_id
-                ON DUPLICATE KEY UPDATE
-                    ping_count = VALUES(ping_count),
-                    success_count = VALUES(success_count),
-                    avg_latency_ms = VALUES(avg_latency_ms),
-                    max_latency_ms = VALUES(max_latency_ms)
+                $upsertSql
             SQL;
 
         $affectedRows = (int) $this->connection->executeStatement($sql, [
@@ -69,6 +79,20 @@ final readonly class TelemetryRollupService
         $startOfDay = $day->setTime(0, 0, 0);
         $endOfDay = $startOfDay->modify('+1 day');
 
+        $isSqlite = $this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\SQLitePlatform;
+
+        $upsertSql = $isSqlite
+            ? 'ON CONFLICT(monitor_id, bucket_time) DO UPDATE SET
+                ping_count = excluded.ping_count,
+                success_count = excluded.success_count,
+                avg_latency_ms = excluded.avg_latency_ms,
+                max_latency_ms = excluded.max_latency_ms'
+            : 'ON DUPLICATE KEY UPDATE
+                ping_count = VALUES(ping_count),
+                success_count = VALUES(success_count),
+                avg_latency_ms = VALUES(avg_latency_ms),
+                max_latency_ms = VALUES(max_latency_ms)';
+
         $sql = <<<SQL
                 INSERT INTO ping_stats_daily (monitor_id, bucket_time, ping_count, success_count, avg_latency_ms, max_latency_ms)
                 SELECT
@@ -81,11 +105,7 @@ final readonly class TelemetryRollupService
                 FROM ping_stats_hourly
                 WHERE bucket_time >= :start_time AND bucket_time < :end_time
                 GROUP BY monitor_id
-                ON DUPLICATE KEY UPDATE
-                    ping_count = VALUES(ping_count),
-                    success_count = VALUES(success_count),
-                    avg_latency_ms = VALUES(avg_latency_ms),
-                    max_latency_ms = VALUES(max_latency_ms)
+                $upsertSql
             SQL;
 
         $affectedRows = (int) $this->connection->executeStatement($sql, [

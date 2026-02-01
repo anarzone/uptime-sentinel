@@ -158,7 +158,7 @@ final class MonitorFixture extends Fixture
         array $values
     ): void {
         $sql = 'INSERT INTO monitors (
-            uuid, name, url_value, method, interval_seconds, timeout_seconds,
+            id, name, url, method, interval_seconds, timeout_seconds,
             status, expected_status_code, health_status, last_status_change_at, 
             headers, body, last_checked_at, next_check_at, created_at, updated_at
         ) VALUES '.implode(', ', $placeholders);

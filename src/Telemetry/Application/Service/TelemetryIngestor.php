@@ -21,7 +21,7 @@ final readonly class TelemetryIngestor
     private const int DEFAULT_BATCH_SIZE = 1000;
 
     public function __construct(
-        private object $redis,
+        private \Redis $redis,
         private Connection $connection,
         private LoggerInterface $logger,
         private string $bufferKey,
@@ -37,38 +37,47 @@ final readonly class TelemetryIngestor
      */
     public function ingest(int $batchSize = self::DEFAULT_BATCH_SIZE): int
     {
-        $processingKey = $this->getProcessingKey();
+        $processingKey = self::getProcessingKey($this->bufferKey);
 
-        // Step 1: Recover any orphaned items from a previous crash
-        $this->recoverOrphanedItems($processingKey);
+        try {
+            // Step 1: Recover any orphaned items from a previous crash
+            $this->recoverOrphanedItems($processingKey);
 
-        // Step 2: Move items atomically from buffer to processing list
-        $batch = $this->moveToProcessing($batchSize, $processingKey);
+            // Step 2: Move items atomically from buffer to processing list
+            $batch = $this->moveToProcessing($batchSize, $processingKey);
 
-        if (empty($batch)) {
+            if (empty($batch)) {
+                return 0;
+            }
+
+            // Step 3: Bulk insert into MySQL
+            $this->bulkInsert($batch);
+
+            // Step 4: Clear the processing list (items are now safely in DB)
+            $this->redis->del($processingKey);
+
+            $this->logger->info('Telemetry ingested', [
+                'rows' => \count($batch),
+                'buffer_remaining' => $this->redis->llen($this->bufferKey),
+            ]);
+
+            return \count($batch);
+        } catch (\Throwable $e) {
+            $this->logger->error('Telemetry ingestion failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return 0;
         }
-
-        // Step 3: Bulk insert into MySQL
-        $this->bulkInsert($batch);
-
-        // Step 4: Clear the processing list (items are now safely in DB)
-        $this->redis->del($processingKey);
-
-        $this->logger->info('Telemetry ingested', [
-            'rows' => \count($batch),
-            'buffer_remaining' => $this->redis->llen($this->bufferKey),
-        ]);
-
-        return \count($batch);
     }
 
     /**
      * Get the key for the processing list.
      */
-    private function getProcessingKey(): string
+    public static function getProcessingKey(string $bufferKey): string
     {
-        return $this->bufferKey.':processing';
+        return $bufferKey.':processing';
     }
 
     /**
@@ -106,19 +115,40 @@ final readonly class TelemetryIngestor
         $batch = [];
 
         for ($i = 0; $i < $batchSize; ++$i) {
-            // LMOVE atomically pops from source and pushes to destination
+            // lmove atomically pops from source and pushes to destination
             $item = $this->redis->lmove($this->bufferKey, $processingKey, 'RIGHT', 'LEFT');
 
-            if ($item === null || $item === false || !\is_string($item)) {
+            if ($item === false || !\is_string($item)) {
                 break;
             }
 
-            /** @var array{monitor_id: string, status_code: int, latency_ms: int, is_success: bool, checked_at: string} $data */
             $data = json_decode($item, true);
+            if (!\is_array($data) || !$this->validateData($data)) {
+                $this->logger->error('Invalid telemetry data format', ['data' => $item]);
+                continue;
+            }
+
             $batch[] = PingResultDto::fromArray($data);
         }
 
         return $batch;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function validateData(array $data): bool
+    {
+        $requiredKeys = ['monitor_id', 'status_code', 'latency_ms', 'is_success', 'checked_at'];
+        if (array_any($requiredKeys, fn ($key) => !\array_key_exists($key, $data))) {
+            return false;
+        }
+
+        return \is_string($data['monitor_id'])
+            && \is_int($data['status_code'])
+            && \is_int($data['latency_ms'])
+            && \is_bool($data['is_success'])
+            && \is_string($data['checked_at']);
     }
 
     /**
@@ -132,23 +162,26 @@ final readonly class TelemetryIngestor
             return;
         }
 
-        $placeholders = [];
-        $params = [];
+        $this->connection->transactional(function (Connection $conn) use ($batch) {
+            $placeholders = [];
+            $params = [];
 
-        foreach ($batch as $result) {
-            $placeholders[] = '(?, ?, ?, ?, ?)';
-            $params[] = $result->monitorId;
-            $params[] = $result->statusCode;
-            $params[] = $result->latencyMs;
-            $params[] = $result->isSuccessful ? 1 : 0;
-            $params[] = $result->createdAt->format('Y-m-d H:i:s');
-        }
+            foreach ($batch as $result) {
+                $placeholders[] = '(?, ?, ?, ?, ?, ?)';
+                $params[] = new \Symfony\Component\Uid\UuidV7()->toRfc4122();
+                $params[] = $result->monitorId;
+                $params[] = $result->statusCode;
+                $params[] = $result->latencyMs;
+                $params[] = $result->isSuccessful ? 1 : 0;
+                $params[] = $result->createdAt->format('Y-m-d H:i:s');
+            }
 
-        $sql = \sprintf(
-            'INSERT INTO ping_results (monitor_id, status_code, latency_ms, is_successful, created_at) VALUES %s',
-            implode(', ', $placeholders)
-        );
+            $sql = \sprintf(
+                'INSERT INTO ping_results (id, monitor_id, status_code, latency_ms, is_successful, created_at) VALUES %s',
+                implode(', ', $placeholders)
+            );
 
-        $this->connection->executeStatement($sql, $params);
+            $conn->executeStatement($sql, $params);
+        });
     }
 }
