@@ -35,7 +35,8 @@ final class Version20260129215151 extends AbstractMigration
         // Add partitioning for MySQL (Skipped for SQLite during tests)
         if ($this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MySQLPlatform) {
             $this->addSql("ALTER TABLE ping_results PARTITION BY RANGE COLUMNS(created_at) (
-                PARTITION p_initial VALUES LESS THAN ('2026-01-01')
+                PARTITION p_initial VALUES LESS THAN ('2026-01-01'),
+                PARTITION p_future VALUES LESS THAN (MAXVALUE)
             )");
         }
     }

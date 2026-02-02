@@ -30,3 +30,4 @@ package-lock.json
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+.idea/

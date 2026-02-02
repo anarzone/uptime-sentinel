@@ -7,8 +7,8 @@ import './stimulus_bootstrap.js';
  * which should already be in your base.html.twig.
  */
 import './styles/app.css';
-import StatusPage from './vue/controllers/StatusPage.js';
+import LandingPage from './vue/controllers/LandingPage.js';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 
-registerVueControllerComponents({ StatusPage });
+registerVueControllerComponents({ LandingPage });

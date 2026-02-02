@@ -54,6 +54,15 @@ jobs:
                     --health-interval=10s
                     --health-timeout=5s
                     --health-retries=3
+            redis:
+                image: redis:7
+                ports:
+                    - 6379:6379
+                options: >-
+                    --health-cmd="redis-cli ping"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=5
 
         steps:
             -   name: Checkout code
@@ -63,20 +72,21 @@ jobs:
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: '8.4'
-                    extensions: pdo, pdo_mysql
+                    extensions: pdo, pdo_mysql, redis
 
             -   name: Install Dependencies
                 run: composer install --no-progress --prefer-dist
 
             -   name: Run Database Migrations
                 env:
-                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel
+                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel_test
                 run: |
                     php bin/console doctrine:migrations:migrate --no-interaction --env=test
 
             -   name: Run Tests
                 env:
-                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel
+                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel_test
+                    REDIS_URL: redis://127.0.0.1:6379
                 run: vendor/bin/phpunit
 
     release:

@@ -8,11 +8,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class StatusPageController extends AbstractController
+final class LandingPageController extends AbstractController
 {
-    #[Route('/status', name: 'app_status_page')]
+    #[Route('/', name: 'app_landing_page')]
     public function index(): Response
     {
-        return $this->render('status_page/index.html.twig');
+        return $this->render('landing/index.html.twig');
     }
 }

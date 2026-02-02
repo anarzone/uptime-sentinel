@@ -38,8 +38,28 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
         $this->entityManager->persist($channel);
         $this->entityManager->flush();
 
-        // 2. Create Specific Policies
+        // 2. Create a Monitor (required for policies)
         $monitorId = MonitorId::generate();
+        $monitor = new \App\Monitoring\Domain\Model\Monitor\Monitor(
+            $monitorId,
+            'Test Monitor',
+            \App\Monitoring\Domain\Model\Monitor\Url::fromString('https://example.com'),
+            \App\Monitoring\Domain\Model\Monitor\HttpMethod::GET,
+            60,
+            10,
+            \App\Monitoring\Domain\Model\Monitor\MonitorStatus::ACTIVE,
+            200,
+            null,
+            null,
+            null,
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable()
+        );
+        $this->entityManager->persist($monitor);
+        $this->entityManager->flush();
+
+        // 3. Create Specific Policies
         $policy1 = EscalationPolicy::create(
             $monitorId,
             1,
@@ -53,8 +73,27 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
             $channel
         );
 
-        // 3. Create another Specific Policy for a different monitor
+        // 4. Create another Monitor and Policy for it
         $otherMonitorId = MonitorId::generate();
+        $otherMonitor = new \App\Monitoring\Domain\Model\Monitor\Monitor(
+            $otherMonitorId,
+            'Other Monitor',
+            \App\Monitoring\Domain\Model\Monitor\Url::fromString('https://other.com'),
+            \App\Monitoring\Domain\Model\Monitor\HttpMethod::GET,
+            60,
+            10,
+            \App\Monitoring\Domain\Model\Monitor\MonitorStatus::ACTIVE,
+            200,
+            null,
+            null,
+            null,
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable()
+        );
+        $this->entityManager->persist($otherMonitor);
+        $this->entityManager->flush();
+
         $otherPolicy = EscalationPolicy::create(
             $otherMonitorId,
             1,
@@ -66,7 +105,7 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
         $this->repository->save($policy2);
         $this->repository->save($otherPolicy);
 
-        // 4. Query for first monitor
+        // 5. Query for first monitor
         $policies = $this->repository->findApplicableForMonitor($monitorId);
 
         $this->assertCount(2, $policies);
@@ -92,6 +131,24 @@ final class EscalationPolicyRepositoryTest extends KernelTestCase
         $this->entityManager->flush();
 
         $monitorId = MonitorId::generate();
+        $monitor = new \App\Monitoring\Domain\Model\Monitor\Monitor(
+            $monitorId,
+            'Test Monitor',
+            \App\Monitoring\Domain\Model\Monitor\Url::fromString('https://example.com'),
+            \App\Monitoring\Domain\Model\Monitor\HttpMethod::GET,
+            60,
+            10,
+            \App\Monitoring\Domain\Model\Monitor\MonitorStatus::ACTIVE,
+            200,
+            null,
+            null,
+            null,
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable(),
+            new \DateTimeImmutable()
+        );
+        $this->entityManager->persist($monitor);
+        $this->entityManager->flush();
 
         $enabledPolicy = EscalationPolicy::create($monitorId, 1, 3, $channel);
         $disabledPolicy = EscalationPolicy::create($monitorId, 2, 10, $channel);
