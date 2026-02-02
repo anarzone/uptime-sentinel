@@ -17,6 +17,23 @@ class MonitorRepository extends ServiceEntityRepository implements MonitorReposi
     {
         parent::__construct($registry, Monitor::class);
     }
+    public function findPaginated(int $page, int $limit): array
+    {
+        return $this->createQueryBuilder('m')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->orderBy('m.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countTotal(): int
+    {
+        return (int) $this->createQueryBuilder('m')
+            ->select('COUNT(m.id.value)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
     public function findDueForChecking(): array
     {

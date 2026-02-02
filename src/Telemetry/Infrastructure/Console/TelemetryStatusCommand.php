@@ -6,6 +6,7 @@ namespace App\Telemetry\Infrastructure\Console;
 
 use App\Telemetry\Application\Service\TelemetryIngestor;
 use Doctrine\DBAL\Connection;
+use Redis;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

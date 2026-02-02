@@ -7,6 +7,7 @@ namespace App\Telemetry\Application\Service;
 use App\Telemetry\Model\PingResultDto;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
+use Redis;
 
 /**
  * High-performance telemetry ingestor with resilient queue pattern.

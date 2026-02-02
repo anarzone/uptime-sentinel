@@ -1,0 +1,92 @@
+<div {{ attributes }} class="glass-card" style="margin-top: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3>Service Inventory</h3>
+        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">+ Add Monitor</button>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.875rem;">
+                    <th style="padding: 1rem 0.5rem;">MONITOR</th>
+                    <th style="padding: 1rem 0.5rem;">URL</th>
+                    <th style="padding: 1rem 0.5rem;">STATUS</th>
+                    <th style="padding: 1rem 0.5rem;">LATENCY (1H)</th>
+                    <th style="padding: 1rem 0.5rem;">LAST CHECK</th>
+                    <th style="padding: 1rem 0.5rem; text-align: right;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for monitor in this.monitors %}
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: var(--transition);" class="monitor-row">
+                        <td style="padding: 1rem 0.5rem;">
+                            <div style="font-weight: 600;">{{ monitor.name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ monitor.intervalSeconds }}s interval</div>
+                        </td>
+                        <td style="padding: 1rem 0.5rem;">
+                            <code style="font-size: 0.875rem; color: var(--text-secondary);">{{ monitor.url.value }}</code>
+                        </td>
+                        <td style="padding: 1rem 0.5rem;">
+                            {% if monitor.healthStatus.value == 'up' %}
+                                <span class="badge badge-success">Online</span>
+                            {% elseif monitor.healthStatus.value == 'down' %}
+                                <span class="badge badge-danger">Offline</span>
+                            {% else %}
+                                <span class="badge" style="background: var(--surface-accent); color: var(--text-muted);">Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 0.5rem; width: 120px;">
+                            {{ component('LatencySparkline', { monitorId: monitor.id.value }) }}
+                        </td>
+                        <td style="padding: 1rem 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">
+                            {{ monitor.lastCheckedAt ? monitor.lastCheckedAt|date('H:i:s') : 'Never' }}
+                        </td>
+                        <td style="padding: 1rem 0.5rem; text-align: right;">
+                            <button style="background: none; border: none; color: var(--text-muted); cursor: pointer;">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                            No monitors active. High time to add your first one.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div style="font-size: 0.875rem; color: var(--text-muted);">
+            Showing {{ (this.page - 1) * this.limit + 1 }} to {{ min(this.page * this.limit, this.totalCount) }} of {{ this.totalCount }} monitors
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button 
+                class="btn-secondary" 
+                style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                {% if this.page <= 1 %}disabled{% endif %}
+                data-action="live#action"
+                data-live-action-param="setPage"
+                data-live-page-param="{{ this.page - 1 }}"
+            >
+                Previous
+            </button>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-weight: 600;">
+                {{ this.page }} / {{ this.totalPages }}
+            </span>
+            <button 
+                class="btn-secondary" 
+                style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                {% if this.page >= this.totalPages %}disabled{% endif %}
+                data-action="live#action"
+                data-live-action-param="setPage"
+                data-live-page-param="{{ this.page + 1 }}"
+            >
+                Next
+            </button>
+        </div>
+    </div>
+</div>

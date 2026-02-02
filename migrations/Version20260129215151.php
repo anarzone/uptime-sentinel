@@ -28,9 +28,9 @@ final class Version20260129215151 extends AbstractMigration
             latency_ms INT NOT NULL,
             is_successful TINYINT(1) NOT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY (id),
-            INDEX idx_monitor_created (monitor_id, created_at)
+            PRIMARY KEY (id)
         )');
+        $this->addSql('CREATE INDEX idx_monitor_created ON ping_results (monitor_id, created_at)');
 
         // Add partitioning for MySQL (Skipped for SQLite during tests)
         if ($this->connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MySQLPlatform) {

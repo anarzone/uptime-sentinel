@@ -280,7 +280,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     },
  *     asset_mapper?: bool|array{ // Asset Mapper configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         paths?: array<string, scalar|null|Param>,
  *         excluded_patterns?: list<scalar|null|Param>,
  *         exclude_dotfiles?: bool|Param, // If true, any files starting with "." will be excluded from the asset mapper. // Default: true
@@ -362,7 +362,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         }>,
  *     },
  *     property_access?: bool|array{ // Property access configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         magic_call?: bool|Param, // Default: false
  *         magic_get?: bool|Param, // Default: true
  *         magic_set?: bool|Param, // Default: true
@@ -370,11 +370,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         throw_exception_on_invalid_property_path?: bool|Param, // Default: true
  *     },
  *     type_info?: bool|array{ // Type info configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         aliases?: array<string, scalar|null|Param>,
  *     },
  *     property_info?: bool|array{ // Property info configuration
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *         with_constructor_extractor?: bool|Param, // Registers the constructor extractor. // Default: true
  *     },
  *     cache?: array{ // Cache configuration
@@ -939,6 +939,61 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         default_namespace?: scalar|null|Param, // Default namespace where stories will be created by maker. // Default: "Story"
  *     },
  * }
+ * @psalm-type TwigConfig = array{
+ *     form_themes?: list<scalar|null|Param>,
+ *     globals?: array<string, array{ // Default: []
+ *         id?: scalar|null|Param,
+ *         type?: scalar|null|Param,
+ *         value?: mixed,
+ *     }>,
+ *     autoescape_service?: scalar|null|Param, // Default: null
+ *     autoescape_service_method?: scalar|null|Param, // Default: null
+ *     cache?: scalar|null|Param, // Default: true
+ *     charset?: scalar|null|Param, // Default: "%kernel.charset%"
+ *     debug?: bool|Param, // Default: "%kernel.debug%"
+ *     strict_variables?: bool|Param, // Default: "%kernel.debug%"
+ *     auto_reload?: scalar|null|Param,
+ *     optimizations?: int|Param,
+ *     default_path?: scalar|null|Param, // The default path used to load templates. // Default: "%kernel.project_dir%/templates"
+ *     file_name_pattern?: list<scalar|null|Param>,
+ *     paths?: array<string, mixed>,
+ *     date?: array{ // The default format options used by the date filter.
+ *         format?: scalar|null|Param, // Default: "F j, Y H:i"
+ *         interval_format?: scalar|null|Param, // Default: "%d days"
+ *         timezone?: scalar|null|Param, // The timezone used when formatting dates, when set to null, the timezone returned by date_default_timezone_get() is used. // Default: null
+ *     },
+ *     number_format?: array{ // The default format options for the number_format filter.
+ *         decimals?: int|Param, // Default: 0
+ *         decimal_point?: scalar|null|Param, // Default: "."
+ *         thousands_separator?: scalar|null|Param, // Default: ","
+ *     },
+ *     mailer?: array{
+ *         html_to_text_converter?: scalar|null|Param, // A service implementing the "Symfony\Component\Mime\HtmlToTextConverter\HtmlToTextConverterInterface". // Default: null
+ *     },
+ * }
+ * @psalm-type StimulusConfig = array{
+ *     controller_paths?: list<scalar|null|Param>,
+ *     controllers_json?: scalar|null|Param, // Default: "%kernel.project_dir%/assets/controllers.json"
+ * }
+ * @psalm-type TwigComponentConfig = array{
+ *     defaults?: array<string, string|array{ // Default: ["__deprecated__use_old_naming_behavior"]
+ *         template_directory?: scalar|null|Param, // Default: "components"
+ *         name_prefix?: scalar|null|Param, // Default: ""
+ *     }>,
+ *     anonymous_template_directory?: scalar|null|Param, // Defaults to `components`
+ *     profiler?: bool|array{ // Enables the profiler for Twig Component
+ *         enabled?: bool|Param, // Default: "%kernel.debug%"
+ *         collect_components?: bool|Param, // Collect components instances // Default: true
+ *     },
+ *     controllers_json?: scalar|null|Param, // Deprecated: The "twig_component.controllers_json" config option is deprecated, and will be removed in 3.0. // Default: null
+ * }
+ * @psalm-type LiveComponentConfig = array{
+ *     secret?: scalar|null|Param, // The secret used to compute fingerprints and checksums // Default: "%kernel.secret%"
+ * }
+ * @psalm-type VueConfig = array{
+ *     controllers_path?: scalar|null|Param, // The path to the directory where Vue controller components are stored - relevant only when using symfony/asset-mapper. // Default: "%kernel.project_dir%/assets/vue/controllers"
+ *     name_glob?: list<scalar|null|Param>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -946,6 +1001,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     framework?: FrameworkConfig,
  *     doctrine?: DoctrineConfig,
  *     doctrine_migrations?: DoctrineMigrationsConfig,
+ *     twig?: TwigConfig,
+ *     stimulus?: StimulusConfig,
+ *     twig_component?: TwigComponentConfig,
+ *     live_component?: LiveComponentConfig,
+ *     vue?: VueConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -955,6 +1015,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         maker?: MakerConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         vue?: VueConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -963,6 +1028,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         framework?: FrameworkConfig,
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         vue?: VueConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -972,6 +1042,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
  *         zenstruck_foundry?: ZenstruckFoundryConfig,
+ *         twig?: TwigConfig,
+ *         stimulus?: StimulusConfig,
+ *         twig_component?: TwigComponentConfig,
+ *         live_component?: LiveComponentConfig,
+ *         vue?: VueConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

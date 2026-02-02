@@ -13,6 +13,11 @@ use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
  */
 interface MonitorRepositoryInterface
 {
+    /** @return Monitor[] */
+    public function findPaginated(int $page, int $limit): array;
+
+    public function countTotal(): int;
+
     public function findAll(): array;
 
     public function findDueForChecking(): array;

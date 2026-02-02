@@ -128,6 +128,14 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/notifier" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/rate-limiter" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/slack-notifier" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/asset-mapper" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/stimulus-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/twig-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/twig-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/ux-chartjs" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/ux-live-component" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/ux-twig-component" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/twig/twig" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
