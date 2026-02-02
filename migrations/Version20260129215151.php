@@ -28,7 +28,7 @@ final class Version20260129215151 extends AbstractMigration
             latency_ms INT NOT NULL,
             is_successful TINYINT(1) NOT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id, created_at)
         )');
         $this->addSql('CREATE INDEX idx_monitor_created ON ping_results (monitor_id, created_at)');
 
