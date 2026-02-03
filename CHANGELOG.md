@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/anarzone/uptime-sentinel/compare/v1.6.0...v1.6.1) (2026-02-03)
+
+### Bug Fixes
+
+* production nginx configuration and port mapping ([344c23a](https://github.com/anarzone/uptime-sentinel/commit/344c23aadcd1f2f7b0b3091aa864d41e120b298f))
+
 ## [1.6.0](https://github.com/anarzone/uptime-sentinel/compare/v1.5.0...v1.6.0) (2026-02-03)
 
 ### Features
