@@ -13,7 +13,14 @@ log_error() { echo "${RED}✗ $1${NC}"; }
 
 echo "🚀 Starting UptimeSentinel container..."
 
-# Wait for database to be ready
+# Fail fast if required environment variables are missing
+check_env() {
+    if [ -z "$DATABASE_URL" ]; then log_error "DATABASE_URL is not set"; exit 1; fi
+    if [ -z "$REDIS_URL" ]; then log_error "REDIS_URL is not set"; exit 1; fi
+    log_success "Environment variables verified"
+}
+check_env
+
 wait_for_database() {
     log_info "⏳ Waiting for database to be ready..."
     
