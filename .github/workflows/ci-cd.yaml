@@ -123,5 +123,5 @@ jobs:
         steps:
             - name: Trigger Coolify Webhook
               run: |
-                 curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}'
+                 curl --request GET --retry 3 --retry-delay 5 --verbose '${{ secrets.COOLIFY_WEBHOOK }}'
 
