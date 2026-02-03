@@ -1,3 +1,9 @@
+## [1.6.4](https://github.com/anarzone/uptime-sentinel/compare/v1.6.3...v1.6.4) (2026-02-03)
+
+### Bug Fixes
+
+* bake nginx config into Docker image for Coolify compatibility ([a9b6264](https://github.com/anarzone/uptime-sentinel/commit/a9b626400d1e9e7ead75843d689f744b6666d01b))
+
 ## [1.6.3](https://github.com/anarzone/uptime-sentinel/compare/v1.6.2...v1.6.3) (2026-02-03)
 
 ### Bug Fixes
