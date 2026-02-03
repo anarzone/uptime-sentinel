@@ -1,3 +1,19 @@
+## [1.6.0](https://github.com/anarzone/uptime-sentinel/compare/v1.5.0...v1.6.0) (2026-02-03)
+
+### Features
+
+* premium dashboard and status page with scale fixes ([9e06ee3](https://github.com/anarzone/uptime-sentinel/commit/9e06ee3fea48e247acebc3c7c0e57a656546b3dc))
+* **telemetry:** add integration tests and fix ingestion with UUID generation ([6e38cbc](https://github.com/anarzone/uptime-sentinel/commit/6e38cbcfbbcfd4a19ef854f9282e700ee7d3fce8))
+
+### Bug Fixes
+
+* **ci:** correct database name and use migrations in workflow ([d3416b4](https://github.com/anarzone/uptime-sentinel/commit/d3416b48f9781a08ffd69ce7a7a2cdf63ecbc210))
+* **ci:** resolve test failures and add landing page redesign ([1ca1701](https://github.com/anarzone/uptime-sentinel/commit/1ca1701bac4ac1cac9f450e904862c909a5afcfc))
+* **migrations:** convert ping_results creation to raw SQL ([3cc0bc9](https://github.com/anarzone/uptime-sentinel/commit/3cc0bc9a2daf4c75273c9f180e7841495226895b))
+* **migrations:** include created_at in ping_results primary key for MySQL partitioning ([086c9e3](https://github.com/anarzone/uptime-sentinel/commit/086c9e3526ceefc4b552c77b2a28342d69ed961b))
+* resolve double database suffix in CI ([c1530be](https://github.com/anarzone/uptime-sentinel/commit/c1530be25094aa0023df5902d7815c96c159076a))
+* restore telemetry tables and update deployment config ([11e3c59](https://github.com/anarzone/uptime-sentinel/commit/11e3c59374bc50a1cb04a2c10eec754a65935c49))
+
 ## [1.5.0](https://github.com/anarzone/uptime-sentinel/compare/v1.4.0...v1.5.0) (2026-01-31)
 
 ### Features
