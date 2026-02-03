@@ -28,7 +28,6 @@ services:
       dockerfile: docker/nginx/Dockerfile
     restart: always
     ports:
-      - "80:80"
       - "8000:80"
     volumes:
       - ./public:/var/www/public
