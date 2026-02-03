@@ -12,6 +12,7 @@ services:
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
       MAILER_DSN: ${MAILER_DSN}
+    command: php-fpm
     depends_on:
       database:
         condition: service_healthy
