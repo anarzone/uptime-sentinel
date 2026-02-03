@@ -64,12 +64,7 @@ final readonly class TelemetryIngestor
 
             return \count($batch);
         } catch (\Throwable $e) {
-            $this->logger->error('Telemetry ingestion failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return 0;
+            throw $e;
         }
     }
 

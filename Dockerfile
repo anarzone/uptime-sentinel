@@ -22,7 +22,8 @@ RUN install-php-extensions \
     pcntl \
     intl \
     zip \
-    opcache
+    opcache \
+    xsl
 
 # Set working directory
 WORKDIR /var/www
