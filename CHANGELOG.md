@@ -1,3 +1,13 @@
+## [1.6.2](https://github.com/anarzone/uptime-sentinel/compare/v1.6.1...v1.6.2) (2026-02-03)
+
+### Bug Fixes
+
+* exhaustive production networking and fail-fast startup ([30768b7](https://github.com/anarzone/uptime-sentinel/commit/30768b732ab43147e227342cd007b155eba2ca7f))
+* explicit php-fpm command for app service ([cbc32ea](https://github.com/anarzone/uptime-sentinel/commit/cbc32ea358888f40087d72821a6b9953719ca091))
+* production database healthcheck and port 8000 ([1c3ca76](https://github.com/anarzone/uptime-sentinel/commit/1c3ca760a3ef135a28689101eb24c296aa9804bc))
+* production networking and startup sequence ([6845371](https://github.com/anarzone/uptime-sentinel/commit/6845371609ff1aa755ad4e25986c8e79eb5a0228))
+* production optimization and port 80 standardization ([7771fbc](https://github.com/anarzone/uptime-sentinel/commit/7771fbc575c4edc99e014620b1f28de285ff7edd))
+
 ## [1.6.1](https://github.com/anarzone/uptime-sentinel/compare/v1.6.0...v1.6.1) (2026-02-03)
 
 ### Bug Fixes
