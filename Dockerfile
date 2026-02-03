@@ -1,4 +1,4 @@
-FROM php:8.4-cli-alpine
+FROM php:8.4-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -46,6 +46,8 @@ RUN chmod +x /entrypoint.sh
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www
+
+EXPOSE 9000
 
 ENTRYPOINT ["/entrypoint.sh"]
 

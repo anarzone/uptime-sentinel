@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register | Sentinel{% endblock %}
+
+{% block body %}
+<div class="auth-page container">
+    <div class="auth-card glass-card">
+        <h1 class="text-gradient">Final Step</h1>
+        <p class="text-secondary">Welcome to Sentinel! Just one click to activate your account and start monitoring.</p>
+        
+        <form method="post" class="auth-form">
+            <div class="info-box glass">
+                <p>Registering as: <strong>{{ app.user.userIdentifier }}</strong></p>
+            </div>
+            
+            <button type="submit" class="btn-primary w-full">Start Fastest Monitoring</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-card {
+    max-width: 450px;
+    width: 100%;
+    padding: 3rem;
+    text-align: center;
+}
+
+.info-box {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+}
+</style>
+{% endblock %}

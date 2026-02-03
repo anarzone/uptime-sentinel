@@ -1,30 +1,30 @@
 import { ref, onMounted, defineComponent } from 'vue';
 
 export default defineComponent({
-    setup() {
-        const stats = ref({
-            total_monitors: 0,
-            total_integrations: 0,
-            avg_latency_ms: 0,
-            uptime_percentage: 100,
-            loading: true
-        });
+  setup() {
+    const stats = ref({
+      total_monitors: 0,
+      total_integrations: 0,
+      avg_latency_ms: 0,
+      uptime_percentage: 100,
+      loading: true
+    });
 
-        const fetchStats = async () => {
-            try {
-                const response = await fetch('/api/landing-stats');
-                const data = await response.json();
-                stats.value = { ...data, loading: false };
-            } catch (error) {
-                console.error('Failed to fetch landing stats:', error);
-            }
-        };
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/landing-stats');
+        const data = await response.json();
+        stats.value = { ...data, loading: false };
+      } catch (error) {
+        console.error('Failed to fetch landing stats:', error);
+      }
+    };
 
-        onMounted(fetchStats);
+    onMounted(fetchStats);
 
-        return { stats };
-    },
-    template: `
+    return { stats };
+  },
+  template: `
     <div class="landing-page">
       <!-- Hero Section -->
       <section class="hero glass">
@@ -33,8 +33,7 @@ export default defineComponent({
             <h1 class="text-gradient animate-float">Global Vigilance, <br>Instant Awareness.</h1>
             <p class="hero-subtitle">Sentinels are watching your infrastructure 24/7/365. Experience the next generation of uptime monitoring.</p>
             <div class="hero-actions">
-              <a href="/admin" class="btn-primary">Go to Dashboard</a>
-              <a href="#performance" class="btn-secondary">View Performance</a>
+              <a href="/login" class="btn-primary">Start Fastest Monitoring</a>
             </div>
           </div>
           <div class="hero-visual">

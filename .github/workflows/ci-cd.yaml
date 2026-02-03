@@ -114,3 +114,14 @@ jobs:
                         @semantic-release/changelog
                         @semantic-release/git
                         conventional-changelog-conventionalcommits
+
+    deploy:
+        name: Deploy to Production (Coolify)
+        needs: [quality, tests]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Trigger Coolify Webhook
+              run: |
+                 curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}'
+
