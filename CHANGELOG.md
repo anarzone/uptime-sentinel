@@ -1,3 +1,9 @@
+## [1.6.5](https://github.com/anarzone/uptime-sentinel/compare/v1.6.4...v1.6.5) (2026-02-03)
+
+### Bug Fixes
+
+* remove port 80 conflict, use only 8000 ([851211d](https://github.com/anarzone/uptime-sentinel/commit/851211d34aa3b5812497daa07c399bf2b55f959f))
+
 ## [1.6.4](https://github.com/anarzone/uptime-sentinel/compare/v1.6.3...v1.6.4) (2026-02-03)
 
 ### Bug Fixes
