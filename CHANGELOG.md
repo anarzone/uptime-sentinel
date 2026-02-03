@@ -1,3 +1,9 @@
+## [1.6.3](https://github.com/anarzone/uptime-sentinel/compare/v1.6.2...v1.6.3) (2026-02-03)
+
+### Bug Fixes
+
+* **ci:** add retries and verbose logging to deployment webhook ([b26a711](https://github.com/anarzone/uptime-sentinel/commit/b26a71126c61ebb51de1f2a775365a962a6e9530))
+
 ## [1.6.2](https://github.com/anarzone/uptime-sentinel/compare/v1.6.1...v1.6.2) (2026-02-03)
 
 ### Bug Fixes
