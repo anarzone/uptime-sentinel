@@ -34,12 +34,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy application files
 COPY . .
 
-# Install dependencies (no-dev for production, but here we might need them for tests)
-RUN composer install --no-scripts --no-interaction
+# Install dependencies
+RUN composer install --no-scripts --no-interaction --no-dev --optimize-autoloader
 
 # Optimizations
-ENV SYMFONY_ENV=dev
-ENV APP_ENV=dev
+ENV SYMFONY_ENV=prod
+ENV APP_ENV=prod
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
