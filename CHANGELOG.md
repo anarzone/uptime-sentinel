@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/anarzone/uptime-sentinel/compare/v1.6.7...v1.7.0) (2026-02-04)
+
+### Features
+
+* build and push pre-built images to GHCR for more reliable deployment ([69b11fe](https://github.com/anarzone/uptime-sentinel/commit/69b11fe1e47df54aca18dfc2e424523534808509))
+
 ## [1.6.7](https://github.com/anarzone/uptime-sentinel/compare/v1.6.6...v1.6.7) (2026-02-04)
 
 ### Bug Fixes
