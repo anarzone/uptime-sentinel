@@ -62,7 +62,7 @@ services:
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
       REDIS_DSN: ${REDIS_DSN}
-    command: php bin/console messenger:consume scheduler_monitoring scheduler_telemetry -vv
+    command: php bin/console messenger:consume scheduler_monitoring -vv
     depends_on:
       database:
         condition: service_healthy
@@ -82,7 +82,7 @@ services:
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
       REDIS_DSN: ${REDIS_DSN}
-    command: php bin/console messenger:consume telemetry -vv
+    command: php bin/console messenger:consume scheduler_telemetry -vv
     depends_on:
       database:
         condition: service_healthy

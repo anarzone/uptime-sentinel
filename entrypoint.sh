@@ -102,12 +102,28 @@ prepare_cache() {
     log_success "Cache ready"
 }
 
+# Install assets (required for correct Nginx serving when using volumes)
+install_assets() {
+    log_info "🎨 Installing assets..."
+    php bin/console assets:install public --no-interaction > /dev/null 2>&1 || true
+    log_success "Assets ready"
+}
+
+# Setup messenger transports (ensure exchanges/queues exist in RabbitMQ)
+setup_transports() {
+    log_info "📬 Setting up messenger transports..."
+    php bin/console messenger:setup-transports --no-interaction > /dev/null 2>&1 || true
+    log_success "Transports ready"
+}
+
 # Main execution flow
 main() {
     wait_for_database
     create_database_if_needed
     run_migrations
     prepare_cache
+    install_assets
+    setup_transports
 
     log_success "Initialization complete! Starting application..."
 
