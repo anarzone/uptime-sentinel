@@ -1,3 +1,9 @@
+## [1.7.11](https://github.com/anarzone/uptime-sentinel/compare/v1.7.10...v1.7.11) (2026-02-04)
+
+### Performance Improvements
+
+* finalize build optimizations and robust production entrypoint ([b0c7d9b](https://github.com/anarzone/uptime-sentinel/commit/b0c7d9b50a4890e4067730dfc176a8f24f4863d3))
+
 ## [1.7.10](https://github.com/anarzone/uptime-sentinel/compare/v1.7.9...v1.7.10) (2026-02-04)
 
 ### Bug Fixes
