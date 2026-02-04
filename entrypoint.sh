@@ -87,6 +87,7 @@ prepare_cache() {
             trap "rmdir $LOCK_FILE 2>/dev/null" EXIT
             php bin/console cache:clear --no-warmup 2>/dev/null || true
             php bin/console cache:warmup 2>/dev/null || true
+            chown -R www-data:www-data var/
             rmdir "$LOCK_FILE" 2>/dev/null || true
             trap - EXIT
             log_success "Cache ready"
