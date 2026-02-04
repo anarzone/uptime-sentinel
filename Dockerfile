@@ -9,11 +9,13 @@ RUN apk add --no-cache \
     unzip \
     icu-dev \
     zlib-dev \
-    linux-headers
+    linux-headers \
+    rabbitmq-c-dev \
+    libxslt-dev
 
 # Install PHP extensions required for Symfony boot/composer
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions intl zip
+RUN install-php-extensions intl zip amqp xsl
 
 # Copy Composer from official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
