@@ -1,3 +1,9 @@
+## [1.6.6](https://github.com/anarzone/uptime-sentinel/compare/v1.6.5...v1.6.6) (2026-02-04)
+
+### Bug Fixes
+
+* use port 8080 to avoid conflicts with Coolify (8000) and system nginx (80) ([b4911d6](https://github.com/anarzone/uptime-sentinel/commit/b4911d6558a2a6d7019d5864da83d4dedc162143))
+
 ## [1.6.5](https://github.com/anarzone/uptime-sentinel/compare/v1.6.4...v1.6.5) (2026-02-03)
 
 ### Bug Fixes
