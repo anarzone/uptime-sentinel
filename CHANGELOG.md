@@ -1,3 +1,10 @@
+## [1.7.7](https://github.com/anarzone/uptime-sentinel/compare/v1.7.6...v1.7.7) (2026-02-04)
+
+### Bug Fixes
+
+* ensure cache and logs have correct permissions in production ([17a66bc](https://github.com/anarzone/uptime-sentinel/commit/17a66bcdd2152dbaa3ab6c5f232c4ad84dfc2887))
+* run importmap:install in Dockerfile ([03da859](https://github.com/anarzone/uptime-sentinel/commit/03da859abdd7b1c7654d39f48d7b38cd7e0c80ae))
+
 ## [1.7.6](https://github.com/anarzone/uptime-sentinel/compare/v1.7.5...v1.7.6) (2026-02-04)
 
 ### Bug Fixes
