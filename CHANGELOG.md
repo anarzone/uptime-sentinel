@@ -1,3 +1,9 @@
+## [1.7.2](https://github.com/anarzone/uptime-sentinel/compare/v1.7.1...v1.7.2) (2026-02-04)
+
+### Bug Fixes
+
+* handle REDIS_DSN in entrypoint and compose ([fe6216a](https://github.com/anarzone/uptime-sentinel/commit/fe6216aac5195927e1d65ca5da0fdcb8c175d01b))
+
 ## [1.7.1](https://github.com/anarzone/uptime-sentinel/compare/v1.7.0...v1.7.1) (2026-02-04)
 
 ### Bug Fixes
