@@ -3,6 +3,9 @@ FROM --platform=$BUILDPLATFORM php:8.4-cli-alpine AS builder
 
 WORKDIR /var/www
 
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
 # Install system dependencies for Composer
 RUN apk add --no-cache \
     git \
