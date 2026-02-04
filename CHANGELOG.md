@@ -1,3 +1,9 @@
+## [1.7.10](https://github.com/anarzone/uptime-sentinel/compare/v1.7.9...v1.7.10) (2026-02-04)
+
+### Bug Fixes
+
+* set APP_ENV=prod in Docker builder stage to prevent dev bundle loading ([7932d42](https://github.com/anarzone/uptime-sentinel/commit/7932d42ad22e738c288dcc6c0d6114a49d6bd9a4))
+
 ## [1.7.9](https://github.com/anarzone/uptime-sentinel/compare/v1.7.8...v1.7.9) (2026-02-04)
 
 ### Bug Fixes
