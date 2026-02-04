@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/anarzone/uptime-sentinel/compare/v1.7.0...v1.7.1) (2026-02-04)
+
+### Bug Fixes
+
+* build images for ARM64 architecture ([4b851cd](https://github.com/anarzone/uptime-sentinel/commit/4b851cd7a0de8f0f25e2ba263fa061e784142ff2))
+
 ## [1.7.0](https://github.com/anarzone/uptime-sentinel/compare/v1.6.7...v1.7.0) (2026-02-04)
 
 ### Features
