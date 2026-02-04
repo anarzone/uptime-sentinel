@@ -1,3 +1,9 @@
+## [1.6.7](https://github.com/anarzone/uptime-sentinel/compare/v1.6.6...v1.6.7) (2026-02-04)
+
+### Bug Fixes
+
+* use Bearer token auth for Coolify API deployment ([ee2e222](https://github.com/anarzone/uptime-sentinel/commit/ee2e222b1ed688ccdb6876a96f339a82b7d6a24b))
+
 ## [1.6.6](https://github.com/anarzone/uptime-sentinel/compare/v1.6.5...v1.6.6) (2026-02-04)
 
 ### Bug Fixes
