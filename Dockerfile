@@ -36,6 +36,7 @@ COPY . .
 
 # Install dependencies
 RUN composer install --no-scripts --no-interaction --no-dev --optimize-autoloader
+RUN php bin/console importmap:install
 
 # Optimizations
 ENV SYMFONY_ENV=prod
