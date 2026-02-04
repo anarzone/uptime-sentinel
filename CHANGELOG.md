@@ -1,3 +1,9 @@
+## [1.7.4](https://github.com/anarzone/uptime-sentinel/compare/v1.7.3...v1.7.4) (2026-02-04)
+
+### Performance Improvements
+
+* add Docker build cache for GHA ([4a454fa](https://github.com/anarzone/uptime-sentinel/commit/4a454fa75c58a59b66cf03ae5dff05e2e100ba8c))
+
 ## [1.7.3](https://github.com/anarzone/uptime-sentinel/compare/v1.7.2...v1.7.3) (2026-02-04)
 
 ### Bug Fixes
