@@ -115,9 +115,46 @@ jobs:
                         @semantic-release/git
                         conventional-changelog-conventionalcommits
 
+    build-and-push:
+        name: Build and Push Images to GHCR
+        needs: [quality, tests]
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            - name: Log in to GitHub Container Registry
+              uses: docker/login-action@v2
+              with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build and push App image
+              uses: docker/build-push-action@v4
+              with:
+                context: .
+                file: Dockerfile
+                platforms: linux/amd64
+                push: true
+                tags: ghcr.io/${{ github.repository }}/app:latest
+
+            - name: Build and push Nginx image
+              uses: docker/build-push-action@v4
+              with:
+                context: .
+                file: docker/nginx/Dockerfile
+                platforms: linux/amd64
+                push: true
+                tags: ghcr.io/${{ github.repository }}/nginx:latest
+
     deploy:
         name: Deploy to Production (Coolify)
-        needs: [quality, tests]
+        needs: [build-and-push]
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:

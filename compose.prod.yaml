@@ -1,9 +1,7 @@
 services:
   # 1. Main Application (PHP-FPM)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/anarzone/uptime-sentinel/app:latest
     restart: always
     environment:
       APP_ENV: prod
@@ -23,9 +21,7 @@ services:
 
   # 2. Web Server (Nginx)
   nginx:
-    build:
-      context: .
-      dockerfile: docker/nginx/Dockerfile
+    image: ghcr.io/anarzone/uptime-sentinel/nginx:latest
     restart: always
     ports:
       - "8080:80"
@@ -36,9 +32,7 @@ services:
 
   # 3. Worker (Async Job Consumer)
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/anarzone/uptime-sentinel/app:latest
     restart: always
     environment:
       APP_ENV: prod
@@ -57,9 +51,7 @@ services:
 
   # 4. Scheduler (Cron Replacement)
   scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/anarzone/uptime-sentinel/app:latest
     restart: always
     environment:
       APP_ENV: prod
@@ -78,9 +70,7 @@ services:
 
   # 5. Telemetry Ingestor (High Volume Consumer)
   telemetry-ingestor:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/anarzone/uptime-sentinel/app:latest
     restart: always
     environment:
       APP_ENV: prod
