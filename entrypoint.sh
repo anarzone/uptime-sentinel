@@ -21,7 +21,11 @@ fi
 # Fail fast if required environment variables are missing
 check_env() {
     if [ -z "$DATABASE_URL" ]; then log_error "DATABASE_URL is not set"; exit 1; fi
-    if [ -z "$REDIS_URL" ]; then log_error "REDIS_URL is not set (and REDIS_DSN is also empty)"; exit 1; fi
+    if [ -z "$REDIS_URL" ]; then log_error "REDIS_URL is not set"; exit 1; fi
+    if [ -z "$APP_SECRET" ] || [ "$APP_SECRET" = "changeme" ]; then
+        log_error "APP_SECRET is not set or insecure. Please set a random string in Coolify."
+        exit 1
+    fi
     log_success "Environment variables verified"
 }
 check_env
@@ -80,14 +84,13 @@ prepare_cache() {
 
     # Try to acquire lock (with timeout)
     tries=0
-    max_tries=30
+    max_tries=60
     while [ $tries -lt $max_tries ]; do
         if mkdir "$LOCK_FILE" 2>/dev/null; then
             # We got the lock, clear cache
             trap "rmdir $LOCK_FILE 2>/dev/null" EXIT
             php bin/console cache:clear --no-warmup 2>/dev/null || true
             php bin/console cache:warmup 2>/dev/null || true
-            chown -R www-data:www-data var/
             rmdir "$LOCK_FILE" 2>/dev/null || true
             trap - EXIT
             log_success "Cache ready"
@@ -95,12 +98,20 @@ prepare_cache() {
         fi
         # Another process has the lock, wait
         tries=$((tries+1))
+        [ $((tries % 10)) -eq 0 ] && echo "  Still waiting for cache lock (${tries}/${max_tries})..."
         sleep 1
     done
     
     # Lock timed out, try anyway (cache might already be ready)
     log_info "Cache lock timeout, proceeding anyway..."
-    log_success "Cache ready"
+}
+
+# Ensure correct permissions
+fix_permissions() {
+    log_info "🔑 Ensuring directory permissions..."
+    # Always ensure www-data owns the writable directories
+    chown -R www-data:www-data var/
+    log_success "Permissions verified"
 }
 
 # Install assets (required for correct Nginx serving when using volumes)
@@ -120,13 +131,23 @@ setup_transports() {
 # Main execution flow
 main() {
     wait_for_database
-    create_database_if_needed
-    run_migrations
-    prepare_cache
-    install_assets
-    setup_transports
+    
+    # Only the "Primary" container (php-fpm) handles the heavy DB/Asset setup
+    if [ "$1" = "php-fpm" ]; then
+        log_info "🚀 Primary container detected. Running initialization..."
+        create_database_if_needed
+        run_migrations
+        prepare_cache
+        install_assets
+        setup_transports
+    else
+        log_info "⚙️ Service container detected. Waiting for system readiness..."
+        prepare_cache # This will just wait for the lock or skip if already done
+    fi
 
-    log_success "Initialization complete! Starting application..."
+    fix_permissions # ALWAYS run this at the end
+
+    log_success "Initialization complete! Starting: $@"
 
     # exec replaces shell process with PHP - ensures signals (SIGTERM/SIGINT) reach application
     exec "$@"

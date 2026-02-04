@@ -27,6 +27,8 @@ jobs:
                     php-version: '8.4'
                     tools: composer:v2
                     coverage: none
+                env:
+                    update: true
 
             -   name: Install Dependencies
                 run: composer install --no-progress --prefer-dist
@@ -73,6 +75,8 @@ jobs:
                 with:
                     php-version: '8.4'
                     extensions: pdo, pdo_mysql, redis
+                env:
+                    update: true
 
             -   name: Install Dependencies
                 run: composer install --no-progress --prefer-dist
@@ -163,9 +167,6 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v4
 
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v2
-
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v2
 
@@ -181,7 +182,8 @@ jobs:
               with:
                 context: .
                 file: docker/nginx/Dockerfile
-                platforms: linux/arm64
+                # Nginx is just a config file, native build is enough for the generic image
+                platforms: linux/amd64,linux/arm64
                 push: true
                 tags: ghcr.io/${{ github.repository }}/nginx:latest
                 cache-from: type=gha
