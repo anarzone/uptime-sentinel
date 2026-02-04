@@ -9,6 +9,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
+      REDIS_DSN: ${REDIS_DSN}
       MAILER_DSN: ${MAILER_DSN}
     command: php-fpm
     depends_on:
@@ -40,6 +41,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
+      REDIS_DSN: ${REDIS_DSN}
     command: php bin/console messenger:consume async -vv
     depends_on:
       database:
@@ -59,6 +61,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
+      REDIS_DSN: ${REDIS_DSN}
     command: php bin/console messenger:consume scheduler_monitoring scheduler_telemetry -vv
     depends_on:
       database:
@@ -78,6 +81,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       MESSENGER_TRANSPORT_DSN: ${MESSENGER_TRANSPORT_DSN}
       REDIS_URL: ${REDIS_URL}
+      REDIS_DSN: ${REDIS_DSN}
     command: php bin/console messenger:consume telemetry -vv
     depends_on:
       database:

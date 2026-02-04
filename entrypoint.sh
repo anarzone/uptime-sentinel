@@ -13,10 +13,15 @@ log_error() { echo "${RED}✗ $1${NC}"; }
 
 echo "🚀 Starting UptimeSentinel container..."
 
+# Fallback: support both REDIS_URL and REDIS_DSN
+if [ -z "$REDIS_URL" ] && [ -n "$REDIS_DSN" ]; then
+    export REDIS_URL="$REDIS_DSN"
+fi
+
 # Fail fast if required environment variables are missing
 check_env() {
     if [ -z "$DATABASE_URL" ]; then log_error "DATABASE_URL is not set"; exit 1; fi
-    if [ -z "$REDIS_URL" ]; then log_error "REDIS_URL is not set"; exit 1; fi
+    if [ -z "$REDIS_URL" ]; then log_error "REDIS_URL is not set (and REDIS_DSN is also empty)"; exit 1; fi
     log_success "Environment variables verified"
 }
 check_env
