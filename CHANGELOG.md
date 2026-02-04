@@ -1,3 +1,9 @@
+## [1.7.12](https://github.com/anarzone/uptime-sentinel/compare/v1.7.11...v1.7.12) (2026-02-04)
+
+### Bug Fixes
+
+* use shared named volume for public assets to resolve Nginx 404s ([9e51720](https://github.com/anarzone/uptime-sentinel/commit/9e517201839996d82ef6f6893ff8f7bf5b226ee0))
+
 ## [1.7.11](https://github.com/anarzone/uptime-sentinel/compare/v1.7.10...v1.7.11) (2026-02-04)
 
 ### Performance Improvements
