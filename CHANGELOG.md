@@ -1,3 +1,9 @@
+## [1.7.3](https://github.com/anarzone/uptime-sentinel/compare/v1.7.2...v1.7.3) (2026-02-04)
+
+### Bug Fixes
+
+* move serializer and property-access to production dependencies ([8f82ae6](https://github.com/anarzone/uptime-sentinel/commit/8f82ae649fa1e477cb418b1ba4f876248377ab09))
+
 ## [1.7.2](https://github.com/anarzone/uptime-sentinel/compare/v1.7.1...v1.7.2) (2026-02-04)
 
 ### Bug Fixes
