@@ -148,6 +148,8 @@ jobs:
                 platforms: linux/arm64
                 push: true
                 tags: ghcr.io/${{ github.repository }}/app:latest
+                cache-from: type=gha
+                cache-to: type=gha,mode=max
 
             - name: Build and push Nginx image
               uses: docker/build-push-action@v4
@@ -157,6 +159,8 @@ jobs:
                 platforms: linux/arm64
                 push: true
                 tags: ghcr.io/${{ github.repository }}/nginx:latest
+                cache-from: type=gha
+                cache-to: type=gha,mode=max
 
     deploy:
         name: Deploy to Production (Coolify)
