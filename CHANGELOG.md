@@ -1,3 +1,9 @@
+## [1.7.9](https://github.com/anarzone/uptime-sentinel/compare/v1.7.8...v1.7.9) (2026-02-04)
+
+### Bug Fixes
+
+* add missing PHP extensions to Docker builder stage for platform check ([4108734](https://github.com/anarzone/uptime-sentinel/commit/41087341ee2b3dee068a26b84a7ffe39545fd128))
+
 ## [1.7.8](https://github.com/anarzone/uptime-sentinel/compare/v1.7.7...v1.7.8) (2026-02-04)
 
 ### Performance Improvements
