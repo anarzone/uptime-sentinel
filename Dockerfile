@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/.composer/cache \
 # Install AssetMapper dependencies and compile assets
 COPY . .
 RUN php bin/console importmap:install
-RUN php bin/console asset-mapper:compile
+RUN php bin/console asset-map:compile
 
 
 # Stage 2: Final ARM64 runtime image
