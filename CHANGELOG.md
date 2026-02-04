@@ -1,3 +1,10 @@
+## [1.7.14](https://github.com/anarzone/uptime-sentinel/compare/v1.7.13...v1.7.14) (2026-02-04)
+
+### Bug Fixes
+
+* correct AssetMapper compile command typo ([7b33762](https://github.com/anarzone/uptime-sentinel/commit/7b33762e3f75f37da4214207233a991359ae26ea))
+* ensure assets are force-copied to shared volume on startup ([eb8b5bc](https://github.com/anarzone/uptime-sentinel/commit/eb8b5bcaaa50408b75161574888a9ce6cbb1b9c2))
+
 ## [1.7.13](https://github.com/anarzone/uptime-sentinel/compare/v1.7.12...v1.7.13) (2026-02-04)
 
 ### Bug Fixes
