@@ -1,3 +1,9 @@
+## [1.7.5](https://github.com/anarzone/uptime-sentinel/compare/v1.7.4...v1.7.5) (2026-02-04)
+
+### Bug Fixes
+
+* correct telemetry receiver and improve production entrypoint ([1c00977](https://github.com/anarzone/uptime-sentinel/commit/1c00977be3f92844a9558319e3dce3635f6265cf))
+
 ## [1.7.4](https://github.com/anarzone/uptime-sentinel/compare/v1.7.3...v1.7.4) (2026-02-04)
 
 ### Performance Improvements
