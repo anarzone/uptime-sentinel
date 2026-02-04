@@ -28,9 +28,10 @@ COPY composer.json composer.lock ./
 RUN --mount=type=cache,target=/root/.composer/cache \
     composer install --no-scripts --no-interaction --no-dev --optimize-autoloader
 
-# Install AssetMapper dependencies
+# Install AssetMapper dependencies and compile assets
 COPY . .
 RUN php bin/console importmap:install
+RUN php bin/console asset-mapper:compile
 
 
 # Stage 2: Final ARM64 runtime image
@@ -65,9 +66,10 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
-# Copy pre-built dependencies from builder
+# Copy pre-built dependencies and assets from builder
 COPY --from=builder /var/www/vendor ./vendor
 COPY --from=builder /var/www/assets/vendor ./assets/vendor
+COPY --from=builder /var/www/public ./public
 
 # Optimizations
 ENV SYMFONY_ENV=prod
