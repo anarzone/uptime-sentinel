@@ -70,6 +70,7 @@ COPY . .
 COPY --from=builder /var/www/vendor ./vendor
 COPY --from=builder /var/www/assets/vendor ./assets/vendor
 COPY --from=builder /var/www/public ./public
+COPY --from=builder /var/www/public ./public_source
 
 # Optimizations
 ENV SYMFONY_ENV=prod

@@ -116,8 +116,17 @@ fix_permissions() {
 
 # Install assets (required for correct Nginx serving when using volumes)
 install_assets() {
-    log_info "🎨 Installing assets..."
+    log_info "🎨 Ensuring assets are available..."
+    
+    # Force copy pre-compiled assets from image to the shared volume
+    if [ -d "/var/www/public_source" ]; then
+        log_info "✨ Copying assets from image to volume..."
+        cp -r /var/www/public_source/. /var/www/public/ 2>/dev/null || true
+    fi
+
+    # Run standard Symfony asset installation for bundles
     php bin/console assets:install public --no-interaction > /dev/null 2>&1 || true
+    
     log_success "Assets ready"
 }
 
