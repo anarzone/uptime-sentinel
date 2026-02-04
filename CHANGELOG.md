@@ -1,3 +1,9 @@
+## [1.7.13](https://github.com/anarzone/uptime-sentinel/compare/v1.7.12...v1.7.13) (2026-02-04)
+
+### Bug Fixes
+
+* compile and copy assets in Dockerfile to satisfy AssetMapper ([fd79a98](https://github.com/anarzone/uptime-sentinel/commit/fd79a98d0175234ef32bcb96f9b157cd7a2c10ba))
+
 ## [1.7.12](https://github.com/anarzone/uptime-sentinel/compare/v1.7.11...v1.7.12) (2026-02-04)
 
 ### Bug Fixes
