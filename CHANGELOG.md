@@ -1,3 +1,9 @@
+## [1.7.8](https://github.com/anarzone/uptime-sentinel/compare/v1.7.7...v1.7.8) (2026-02-04)
+
+### Performance Improvements
+
+* optimize CI/CD build speed with multi-stage ARM64 builds and parallelism ([8865397](https://github.com/anarzone/uptime-sentinel/commit/886539767bc8d150062018858628d2068f39a7e3))
+
 ## [1.7.7](https://github.com/anarzone/uptime-sentinel/compare/v1.7.6...v1.7.7) (2026-02-04)
 
 ### Bug Fixes
