@@ -1,3 +1,9 @@
+## [1.7.6](https://github.com/anarzone/uptime-sentinel/compare/v1.7.5...v1.7.6) (2026-02-04)
+
+### Bug Fixes
+
+* pass APP_SECRET to PHP services ([7aeba9b](https://github.com/anarzone/uptime-sentinel/commit/7aeba9b7c8788d1127afaf2d9c9ac6b559a7537c))
+
 ## [1.7.5](https://github.com/anarzone/uptime-sentinel/compare/v1.7.4...v1.7.5) (2026-02-04)
 
 ### Bug Fixes
