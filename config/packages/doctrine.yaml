@@ -28,6 +28,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Monitoring/Domain/Model'
                 prefix: 'App\Monitoring\Domain\Model'
                 alias: Monitoring
+            Telemetry:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Telemetry/Domain/Entity'
+                prefix: 'App\Telemetry\Domain\Entity'
+                alias: Telemetry
         controller_resolver:
             auto_mapping: false
 

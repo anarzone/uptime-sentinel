@@ -17,7 +17,7 @@ when@test:
     zenstruck_foundry:
         orm:
             reset:
-                mode: migrate
+                mode: schema
         persistence:
             flush_once: true
 
