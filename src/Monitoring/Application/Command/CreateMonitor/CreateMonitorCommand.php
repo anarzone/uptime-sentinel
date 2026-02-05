@@ -15,7 +15,9 @@ final readonly class CreateMonitorCommand
         public int $timeoutSeconds,
         public int $expectedStatusCode,
         public ?array $headers,
-        public ?string $body
+        public ?string $body,
+        public ?string $ownerId = null,
+        public ?string $requesterId = null
     ) {
     }
 }

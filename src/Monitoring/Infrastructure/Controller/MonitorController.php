@@ -6,6 +6,7 @@ namespace App\Monitoring\Infrastructure\Controller;
 
 use App\Monitoring\Application\Command\CheckMonitor\CheckMonitorCommand;
 use App\Monitoring\Application\Command\CreateMonitor\CreateMonitorCommand;
+use App\Monitoring\Application\Command\DeleteMonitor\DeleteMonitorCommand;
 use App\Monitoring\Application\Command\UpdateMonitor\UpdateMonitorCommand;
 use App\Monitoring\Application\Dto\CreateMonitorRequestDto;
 use App\Monitoring\Application\Dto\UpdateMonitorRequestDto;
@@ -48,6 +49,11 @@ class MonitorController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
+        // Ownership check
+        if (!$this->isGranted('ROLE_ADMIN') && $monitor->ownerId !== $this->getUser()?->getUserIdentifier()) {
+            throw $this->createAccessDeniedException('You do not have access to this monitor.');
+        }
+
         return new JsonResponse([
             'data' => \App\Monitoring\Application\Dto\MonitorResponseDto::fromEntity($monitor),
         ]);
@@ -57,6 +63,7 @@ class MonitorController extends AbstractController
     public function create(#[MapRequestPayload] CreateMonitorRequestDto $dto): JsonResponse
     {
         $uuid = new UuidV7();
+        $user = $this->getUser();
 
         $command = new CreateMonitorCommand(
             uuid: $uuid->toRfc4122(),
@@ -67,7 +74,9 @@ class MonitorController extends AbstractController
             timeoutSeconds: $dto->timeoutSeconds,
             expectedStatusCode: $dto->expectedStatusCode,
             headers: $dto->headers,
-            body: $dto->body
+            body: $dto->body,
+            ownerId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier(),
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
         );
 
         $this->bus->dispatch($command);
@@ -83,6 +92,7 @@ class MonitorController extends AbstractController
     #[Route('/{uuid}', methods: ['PUT'])]
     public function update(string $uuid, #[MapRequestPayload] UpdateMonitorRequestDto $dto): JsonResponse
     {
+        $user = $this->getUser();
         $command = new UpdateMonitorCommand(
             uuid: $uuid,
             name: $dto->name,
@@ -92,7 +102,8 @@ class MonitorController extends AbstractController
             timeoutSeconds: $dto->timeoutSeconds,
             expectedStatusCode: $dto->expectedStatusCode,
             headers: $dto->headers,
-            body: $dto->body
+            body: $dto->body,
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
         );
 
         $this->bus->dispatch($command);
@@ -108,7 +119,9 @@ class MonitorController extends AbstractController
     #[Route('/{uuid}/check', methods: ['POST'])]
     public function check(string $uuid): JsonResponse
     {
-        $command = new CheckMonitorCommand($uuid);
+        $user = $this->getUser();
+        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
+        $command = new CheckMonitorCommand($uuid, requesterId: $requesterId);
         $this->bus->dispatch($command);
 
         return new JsonResponse([
@@ -117,5 +130,15 @@ class MonitorController extends AbstractController
                 'monitorId' => $uuid,
             ],
         ], Response::HTTP_ACCEPTED);
+    }
+
+    #[Route('/{uuid}', methods: ['DELETE'])]
+    public function delete(string $uuid): JsonResponse
+    {
+        $user = $this->getUser();
+        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
+        $this->bus->dispatch(new DeleteMonitorCommand($uuid, $requesterId));
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

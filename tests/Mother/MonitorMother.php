@@ -11,6 +11,8 @@ use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 use App\Monitoring\Domain\Model\Monitor\Url;
 use Symfony\Component\Uid\UuidV7;
 
+use App\Monitoring\Domain\ValueObject\OwnerId;
+
 /**
  * Test factory for creating Monitor entities and value objects.
  *
@@ -36,6 +38,7 @@ final class MonitorMother
         ?array $headers = null,
         ?string $body = null,
         ?MonitorId $id = null,
+        ?OwnerId $ownerId = null,
     ): Monitor {
         $now = new \DateTimeImmutable();
         $interval = $intervalSeconds ?? self::DEFAULT_INTERVAL_SECONDS;
@@ -55,6 +58,7 @@ final class MonitorMother
             nextCheckAt: $now->modify("+{$interval} seconds"),
             createdAt: $now,
             updatedAt: $now,
+            ownerId: $ownerId
         );
     }
 

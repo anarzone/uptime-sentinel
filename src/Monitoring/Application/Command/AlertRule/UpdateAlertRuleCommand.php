@@ -12,6 +12,7 @@ final readonly class UpdateAlertRuleCommand
         public ?int $failureThreshold,
         public ?string $type,
         public ?string $cooldownInterval,
+        public ?string $requesterId = null,
     ) {
     }
 }

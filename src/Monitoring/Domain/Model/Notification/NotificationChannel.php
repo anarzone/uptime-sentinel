@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Domain\Model\Notification;
 
+use App\Monitoring\Domain\ValueObject\OwnerId;
 use App\Monitoring\Infrastructure\Persistence\NotificationChannelRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,6 +28,9 @@ final class NotificationChannel
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     public private(set) bool $isEnabled = true;
 
+    #[ORM\Column(type: Types::STRING, length: 36, nullable: true)]
+    public private(set) ?string $ownerId;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     public readonly \DateTimeImmutable $createdAt;
 
@@ -35,11 +39,13 @@ final class NotificationChannel
         string $name,
         NotificationChannelType $type,
         string $dsn,
+        ?OwnerId $ownerId = null,
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->type = $type;
         $this->dsn = $dsn;
+        $this->ownerId = $ownerId?->value;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -47,12 +53,14 @@ final class NotificationChannel
         string $name,
         NotificationChannelType $type,
         string $dsn,
+        ?OwnerId $ownerId = null,
     ): self {
         return new self(
             id: NotificationChannelId::generate(),
             name: $name,
             type: $type,
             dsn: $dsn,
+            ownerId: $ownerId,
         );
     }
 

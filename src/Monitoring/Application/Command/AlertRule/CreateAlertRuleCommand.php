@@ -16,6 +16,8 @@ final readonly class CreateAlertRuleCommand
         public int $failureThreshold,
         public string $type,
         public ?string $cooldownInterval,
+        public ?string $ownerId = null,
+        public ?string $requesterId = null,
     ) {
     }
 
@@ -26,6 +28,8 @@ final readonly class CreateAlertRuleCommand
         int $failureThreshold,
         string $type,
         ?string $cooldownInterval,
+        ?string $ownerId = null,
+        ?string $requesterId = null,
     ): self {
         return new self(
             id: (new UuidV7())->toRfc4122(),
@@ -35,6 +39,8 @@ final readonly class CreateAlertRuleCommand
             failureThreshold: $failureThreshold,
             type: $type,
             cooldownInterval: $cooldownInterval,
+            ownerId: $ownerId,
+            requesterId: $requesterId,
         );
     }
 }

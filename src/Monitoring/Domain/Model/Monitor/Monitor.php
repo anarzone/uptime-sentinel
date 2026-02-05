@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Domain\Model\Monitor;
 
+use App\Monitoring\Domain\ValueObject\OwnerId;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -62,6 +63,9 @@ final class Monitor
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     public private(set) int $consecutiveFailures = 0;
 
+    #[ORM\Column(type: Types::STRING, length: 36, nullable: true)]
+    public private(set) ?string $ownerId;
+
     public function __construct(
         MonitorId $id,
         string $name,
@@ -77,6 +81,7 @@ final class Monitor
         \DateTimeImmutable $nextCheckAt,
         \DateTimeImmutable $createdAt,
         \DateTimeImmutable $updatedAt,
+        ?OwnerId $ownerId = null,
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -92,6 +97,7 @@ final class Monitor
         $this->nextCheckAt = $nextCheckAt;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+        $this->ownerId = $ownerId?->value;
     }
 
     public function updateConfiguration(

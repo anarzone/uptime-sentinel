@@ -8,6 +8,7 @@ final readonly class DeleteEscalationPolicyCommand
 {
     public function __construct(
         public string $id,
+        public ?string $requesterId = null,
     ) {
     }
 }

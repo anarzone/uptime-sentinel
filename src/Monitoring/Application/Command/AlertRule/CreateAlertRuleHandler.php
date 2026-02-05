@@ -20,11 +20,17 @@ final readonly class CreateAlertRuleHandler
         private AlertRuleRepositoryInterface $alertRuleRepository,
         private MonitorRepositoryInterface $monitorRepository,
         private NotificationChannelRepositoryInterface $channelRepository,
+        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
+        private \Symfony\Bundle\SecurityBundle\Security $security,
     ) {
     }
 
     public function __invoke(CreateAlertRuleCommand $command): string
     {
+        if ($command->requesterId === null) {
+            throw new \InvalidArgumentException('requesterId is required');
+        }
+
         $monitorId = MonitorId::fromString($command->monitorId);
 
         // Verify monitor exists
@@ -33,15 +39,24 @@ final readonly class CreateAlertRuleHandler
             throw new \InvalidArgumentException(\sprintf('Monitor with ID "%s" does not exist', $command->monitorId));
         }
 
+        // Authorization check
+        $this->authorizationService->requireOwnership(
+            $monitor,
+            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            $this->security->isGranted('ROLE_ADMIN')
+        );
+
         // Find or create notification channel
         $channelType = NotificationChannelType::from($command->channel);
-        $notificationChannel = $this->channelRepository->findByTypeAndTarget($channelType, $command->target);
+        $ownerIdObj = $command->ownerId !== null ? \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->ownerId) : null;
+        $notificationChannel = $this->channelRepository->findByTypeAndTarget($channelType, $command->target, $ownerIdObj);
 
         if ($notificationChannel === null) {
             $notificationChannel = \App\Monitoring\Domain\Model\Notification\NotificationChannel::create(
                 'Auto-created channel for '.$command->target,
                 $channelType,
-                $command->target
+                $command->target,
+                $ownerIdObj
             );
             $this->channelRepository->save($notificationChannel);
         }

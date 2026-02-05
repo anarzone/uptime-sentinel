@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Monitoring\Domain\Model\Monitor;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Embeddable]
@@ -16,8 +17,8 @@ final readonly class MonitorId
 
     public function __construct(string $value)
     {
-        if (!UuidV7::isValid($value)) {
-            throw new \InvalidArgumentException('Invalid UuidV7 format');
+        if (!Uuid::isValid($value)) {
+            throw new \InvalidArgumentException('Invalid UUID format');
         }
 
         $this->value = $value;

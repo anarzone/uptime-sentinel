@@ -30,19 +30,17 @@ final class MonitorIdTest extends TestCase
     public function test_throws_exception_for_invalid_uuid_format(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid UuidV7 format');
+        $this->expectExceptionMessage('Invalid UUID format');
 
         MonitorId::fromString('not-a-valid-uuid');
     }
 
-    public function test_throws_exception_for_uuid_v4(): void
+    public function test_can_be_created_from_valid_uuid_v4(): void
     {
         $uuidV4 = '550e8400-e29b-41d4-a716-446655440000';
+        $monitorId = MonitorId::fromString($uuidV4);
 
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid UuidV7 format');
-
-        MonitorId::fromString($uuidV4);
+        $this->assertSame($uuidV4, $monitorId->value);
     }
 
     public function test_two_generated_ids_are_different(): void

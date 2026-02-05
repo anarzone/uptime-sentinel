@@ -12,16 +12,35 @@ final readonly class DeleteEscalationPolicyHandler
 {
     public function __construct(
         private EscalationPolicyRepositoryInterface $escalationPolicyRepository,
+        private \App\Monitoring\Domain\Repository\MonitorRepositoryInterface $monitorRepository,
+        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
+        private \Symfony\Bundle\SecurityBundle\Security $security,
     ) {
     }
 
     public function __invoke(DeleteEscalationPolicyCommand $command): void
     {
+        if ($command->requesterId === null) {
+            throw new \InvalidArgumentException('requesterId is required');
+        }
+
         $policy = $this->escalationPolicyRepository->find($command->id);
 
         if ($policy === null) {
             throw new \InvalidArgumentException(\sprintf('Escalation policy with ID "%s" does not exist', $command->id));
         }
+
+        $monitor = $this->monitorRepository->find($policy->monitorId);
+        if ($monitor === null) {
+            throw new \InvalidArgumentException('Associated monitor not found');
+        }
+
+        // Authorization check
+        $this->authorizationService->requireOwnership(
+            $monitor,
+            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            $this->security->isGranted('ROLE_ADMIN')
+        );
 
         $this->escalationPolicyRepository->remove($policy);
     }

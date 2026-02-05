@@ -29,6 +29,8 @@ final readonly class CheckMonitorHandler
         private MonitorRepositoryInterface $monitorRepository,
         private UrlCheckerInterface $urlChecker,
         private TelemetryBufferInterface $telemetryBuffer,
+        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
+        private \Symfony\Bundle\SecurityBundle\Security $security,
     ) {
     }
 
@@ -41,6 +43,17 @@ final readonly class CheckMonitorHandler
         if ($monitor === null) {
             return; // Monitor was deleted while in queue
         }
+
+        // Authorization check (Fix TOCTOU)
+        if ($command->requesterId === null) {
+            throw new \InvalidArgumentException('requesterId is required');
+        }
+
+        $this->authorizationService->requireOwnership(
+            $monitor,
+            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            $this->security->isGranted('ROLE_ADMIN')
+        );
 
         if ($monitor->status !== MonitorStatus::ACTIVE) {
             return; // Monitor was paused while in queue

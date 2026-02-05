@@ -7,6 +7,7 @@ namespace App\Monitoring\Domain\Repository;
 use App\Monitoring\Domain\Model\Monitor\Monitor;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
+use App\Monitoring\Domain\ValueObject\OwnerId;
 
 /**
  * @method Monitor|null find(MonitorId $monitorId)
@@ -14,11 +15,14 @@ use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 interface MonitorRepositoryInterface
 {
     /** @return Monitor[] */
-    public function findPaginated(int $page, int $limit): array;
+    public function findPaginated(int $page, int $limit, ?OwnerId $ownerId = null): array;
 
-    public function countTotal(): int;
+    public function countTotal(?OwnerId $ownerId = null): int;
 
     public function findAll(): array;
+
+    /** @return Monitor[] */
+    public function findAllByOwner(?OwnerId $ownerId): array;
 
     public function findDueForChecking(): array;
 

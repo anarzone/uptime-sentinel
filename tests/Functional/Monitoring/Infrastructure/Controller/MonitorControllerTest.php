@@ -14,10 +14,19 @@ final class MonitorControllerTest extends WebTestCase
     use ResetDatabase;
 
     private $client;
+    private $user;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
+
+        $container = static::getContainer();
+        $userRepository = $container->get(\App\Security\Infrastructure\Repository\UserRepository::class);
+
+        $this->user = new \App\Security\Domain\Entity\User('test@example.com');
+        $userRepository->save($this->user);
+
+        $this->client->loginUser($this->user);
     }
 
     public function testCreateMonitorReturnsAcceptedResponse(): void
@@ -172,7 +181,8 @@ final class MonitorControllerTest extends WebTestCase
             lastCheckedAt: null,
             nextCheckAt: new \DateTimeImmutable('+60 seconds'),
             createdAt: new \DateTimeImmutable(),
-            updatedAt: new \DateTimeImmutable()
+            updatedAt: new \DateTimeImmutable(),
+            ownerId: \App\Monitoring\Domain\ValueObject\OwnerId::fromString($this->user->getId()->toRfc4122())
         );
 
         $repository->save($monitor);
@@ -181,7 +191,7 @@ final class MonitorControllerTest extends WebTestCase
             'name' => 'Updated Name',
         ];
 
-        $this->client->request('PUT', '/api/monitors/'.$monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
+        $this->client->request('PUT', '/api/monitors/' . $monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
 
         $this->assertResponseStatusCodeSame(202);
 
@@ -214,7 +224,8 @@ final class MonitorControllerTest extends WebTestCase
             lastCheckedAt: null,
             nextCheckAt: new \DateTimeImmutable('+60 seconds'),
             createdAt: new \DateTimeImmutable(),
-            updatedAt: new \DateTimeImmutable()
+            updatedAt: new \DateTimeImmutable(),
+            ownerId: \App\Monitoring\Domain\ValueObject\OwnerId::fromString($this->user->getId()->toRfc4122())
         );
 
         $repository->save($monitor);
@@ -230,7 +241,7 @@ final class MonitorControllerTest extends WebTestCase
             'body' => '{"updated": true}',
         ];
 
-        $this->client->request('PUT', '/api/monitors/'.$monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
+        $this->client->request('PUT', '/api/monitors/' . $monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
 
         $this->assertResponseStatusCodeSame(202);
     }
@@ -256,7 +267,8 @@ final class MonitorControllerTest extends WebTestCase
             lastCheckedAt: null,
             nextCheckAt: new \DateTimeImmutable('+60 seconds'),
             createdAt: new \DateTimeImmutable(),
-            updatedAt: new \DateTimeImmutable()
+            updatedAt: new \DateTimeImmutable(),
+            ownerId: \App\Monitoring\Domain\ValueObject\OwnerId::fromString($this->user->getId()->toRfc4122())
         );
 
         $repository->save($monitor);
@@ -265,7 +277,7 @@ final class MonitorControllerTest extends WebTestCase
             'url' => 'not-a-valid-url',
         ];
 
-        $this->client->request('PUT', '/api/monitors/'.$monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
+        $this->client->request('PUT', '/api/monitors/' . $monitorId->toString(), [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($payload));
 
         $this->assertResponseStatusCodeSame(422);
     }

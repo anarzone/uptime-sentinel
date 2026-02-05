@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`users`')]
@@ -20,7 +21,7 @@ class User implements UserInterface
     private Uuid $id;
 
     #[ORM\Column(length: 180)]
-    private ?string $email = null;
+    private string $email;
 
     /**
      * @var list<string> The user roles
@@ -36,7 +37,7 @@ class User implements UserInterface
 
     public function __construct(string $email)
     {
-        $this->id = Uuid::v4();
+        $this->id = new UuidV7();
         $this->email = $email;
         $this->createdAt = new \DateTimeImmutable();
     }

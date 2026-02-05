@@ -20,6 +20,7 @@ final class CreateMonitorHandlerTest extends KernelTestCase
 
     private CreateMonitorHandler $handler;
     private MonitorRepositoryInterface $repository;
+    private string $testRequesterId = '01923b48-7807-72d2-8705-836e0b7c1e7a';
 
     protected function setUp(): void
     {
@@ -42,7 +43,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 10,
             expectedStatusCode: 200,
             headers: ['Authorization' => 'Bearer token'],
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command);
@@ -59,12 +62,12 @@ final class CreateMonitorHandlerTest extends KernelTestCase
         $this->assertSame(200, $monitor->expectedStatusCode);
         $this->assertSame(['Authorization' => 'Bearer token'], $monitor->headers);
         $this->assertNull($monitor->body);
+        $this->assertSame($this->testRequesterId, $monitor->ownerId);
     }
 
     public function test_creates_monitor_with_all_fields(): void
     {
         $uuid = '01923b48-7807-72d2-8705-836e0b7c1e7e';
-        $now = new \DateTimeImmutable();
 
         $command = new CreateMonitorCommand(
             uuid: $uuid,
@@ -75,7 +78,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 30,
             expectedStatusCode: 201,
             headers: ['Content-Type' => 'application/json'],
-            body: '{"test": "data"}'
+            body: '{"test": "data"}',
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command);
@@ -108,7 +113,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 10,
             expectedStatusCode: 200,
             headers: null,
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command);
@@ -133,7 +140,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 10,
             expectedStatusCode: 200,
             headers: null,
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command);
@@ -157,7 +166,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 10,
             expectedStatusCode: 200,
             headers: null,
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command);
@@ -182,7 +193,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 10,
             expectedStatusCode: 200,
             headers: null,
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         $command2 = new CreateMonitorCommand(
@@ -194,7 +207,9 @@ final class CreateMonitorHandlerTest extends KernelTestCase
             timeoutSeconds: 20,
             expectedStatusCode: 200,
             headers: null,
-            body: null
+            body: null,
+            requesterId: $this->testRequesterId,
+            ownerId: $this->testRequesterId
         );
 
         ($this->handler)($command1);

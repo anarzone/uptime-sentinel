@@ -14,6 +14,7 @@ final readonly class CheckMonitorCommand
 {
     public function __construct(
         public string $monitorId,
+        public ?string $requesterId = null,
     ) {
     }
 }

@@ -14,8 +14,9 @@ final readonly class UpdateMonitorCommand
         public ?int $intervalSeconds,
         public ?int $timeoutSeconds,
         public ?int $expectedStatusCode,
-        public ?array $headers,
-        public ?string $body
+        public ?array $headers = null,
+        public ?string $body = null,
+        public ?string $requesterId = null
     ) {
     }
 }

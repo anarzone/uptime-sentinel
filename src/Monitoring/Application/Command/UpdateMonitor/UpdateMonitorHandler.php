@@ -14,7 +14,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 readonly class UpdateMonitorHandler
 {
     public function __construct(
-        private MonitorRepositoryInterface $monitorRepository
+        private MonitorRepositoryInterface $monitorRepository,
+        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
+        private \Symfony\Bundle\SecurityBundle\Security $security,
     ) {
     }
 
@@ -26,6 +28,17 @@ readonly class UpdateMonitorHandler
         if (!$monitor) {
             throw new \InvalidArgumentException('Monitor not found');
         }
+
+        // Authorization check (Fix TOCTOU)
+        if ($command->requesterId === null) {
+            throw new \InvalidArgumentException('requesterId is required');
+        }
+
+        $this->authorizationService->requireOwnership(
+            $monitor,
+            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            $this->security->isGranted('ROLE_ADMIN')
+        );
 
         $name = $command->name ?? $monitor->name;
         $url = $command->url !== null

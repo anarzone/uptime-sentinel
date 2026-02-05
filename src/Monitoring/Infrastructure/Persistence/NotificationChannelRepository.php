@@ -8,6 +8,7 @@ use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelId;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
+use App\Monitoring\Domain\ValueObject\OwnerId;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -26,14 +27,24 @@ final class NotificationChannelRepository extends ServiceEntityRepository implem
         return $this->find($id->toString());
     }
 
-    public function findByTarget(string $target): ?NotificationChannel
+    public function findByTarget(string $target, ?OwnerId $ownerId = null): ?NotificationChannel
     {
-        return $this->findOneBy(['dsn' => $target]);
+        $criteria = ['dsn' => $target];
+        if ($ownerId !== null) {
+            $criteria['ownerId'] = $ownerId->value;
+        }
+
+        return $this->findOneBy($criteria);
     }
 
-    public function findByTypeAndTarget(NotificationChannelType $type, string $target): ?NotificationChannel
+    public function findByTypeAndTarget(NotificationChannelType $type, string $target, ?OwnerId $ownerId = null): ?NotificationChannel
     {
-        return $this->findOneBy(['type' => $type, 'dsn' => $target]);
+        $criteria = ['type' => $type, 'dsn' => $target];
+        if ($ownerId !== null) {
+            $criteria['ownerId'] = $ownerId->value;
+        }
+
+        return $this->findOneBy($criteria);
     }
 
     public function save(NotificationChannel $channel): void

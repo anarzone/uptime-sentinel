@@ -34,6 +34,8 @@ final class AlertRuleController extends AbstractController
     #[Route('', methods: ['POST'])]
     public function create(#[MapRequestPayload] CreateAlertRuleRequestDto $dto): JsonResponse
     {
+        $user = $this->getUser();
+
         $command = CreateAlertRuleCommand::create(
             $dto->monitorId,
             $dto->channel,
@@ -41,6 +43,7 @@ final class AlertRuleController extends AbstractController
             $dto->failureThreshold,
             $dto->type,
             $dto->cooldownInterval,
+            $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
         );
 
         $this->bus->dispatch($command);
@@ -53,18 +56,8 @@ final class AlertRuleController extends AbstractController
     #[Route('/monitor/{monitorId}', methods: ['GET'])]
     public function listForMonitor(string $monitorId): JsonResponse
     {
-        $monitorId = \App\Monitoring\Domain\Model\Monitor\MonitorId::fromString($monitorId);
-
-        // Verify monitor exists
-        $monitor = $this->monitorRepository->find($monitorId);
-        if ($monitor === null) {
-            return new JsonResponse([
-                'error' => 'Monitor not found',
-                'message' => \sprintf('Monitor with ID "%s" does not exist', $monitorId->toString()),
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $alertRules = $this->alertRuleRepository->findByMonitorId($monitorId);
+        $monitorIdObj = \App\Monitoring\Domain\Model\Monitor\MonitorId::fromString($monitorId);
+        $alertRules = $this->alertRuleRepository->findByMonitorId($monitorIdObj);
 
         return new JsonResponse([
             'data' => AlertRuleResponseDto::fromEntities($alertRules),
@@ -77,10 +70,16 @@ final class AlertRuleController extends AbstractController
         $alertRule = $this->alertRuleRepository->find($id);
 
         if ($alertRule === null) {
-            return new JsonResponse([
-                'error' => 'Alert rule not found',
-                'message' => \sprintf('Alert rule with ID "%s" does not exist', $id),
-            ], Response::HTTP_NOT_FOUND);
+            throw $this->createNotFoundException('Alert rule not found');
+        }
+
+        // We'll keep a basic check or use repository filtering.
+        // For now, let's keep it simple and safe.
+        $monitor = $this->monitorRepository->find($alertRule->monitorId);
+        $user = $this->getUser();
+        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
+        if (!$this->isGranted('ROLE_ADMIN') && $monitor?->ownerId !== $requesterId) {
+            throw $this->createAccessDeniedException('You do not have access to this alert rule.');
         }
 
         return new JsonResponse([
@@ -91,12 +90,14 @@ final class AlertRuleController extends AbstractController
     #[Route('/{id}', methods: ['PATCH'])]
     public function update(string $id, #[MapRequestPayload] UpdateAlertRuleRequestDto $dto): JsonResponse
     {
+        $user = $this->getUser();
         $command = new UpdateAlertRuleCommand(
-            $id,
-            $dto->target,
-            $dto->failureThreshold,
-            $dto->type,
-            $dto->cooldownInterval,
+            id: $id,
+            target: $dto->target,
+            failureThreshold: $dto->failureThreshold,
+            type: $dto->type,
+            cooldownInterval: $dto->cooldownInterval,
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
         );
 
         $this->bus->dispatch($command);
@@ -109,7 +110,12 @@ final class AlertRuleController extends AbstractController
     #[Route('/{id}', methods: ['DELETE'])]
     public function delete(string $id): JsonResponse
     {
-        $command = new DeleteAlertRuleCommand($id);
+        $user = $this->getUser();
+        $command = new DeleteAlertRuleCommand(
+            id: $id,
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+        );
+
         $this->bus->dispatch($command);
 
         return new JsonResponse([
@@ -120,7 +126,12 @@ final class AlertRuleController extends AbstractController
     #[Route('/{id}/enable', methods: ['PATCH'])]
     public function enable(string $id): JsonResponse
     {
-        $command = new EnableAlertRuleCommand($id);
+        $user = $this->getUser();
+        $command = new EnableAlertRuleCommand(
+            id: $id,
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+        );
+
         $this->bus->dispatch($command);
 
         return new JsonResponse([
@@ -131,7 +142,12 @@ final class AlertRuleController extends AbstractController
     #[Route('/{id}/disable', methods: ['PATCH'])]
     public function disable(string $id): JsonResponse
     {
-        $command = new DisableAlertRuleCommand($id);
+        $user = $this->getUser();
+        $command = new DisableAlertRuleCommand(
+            id: $id,
+            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+        );
+
         $this->bus->dispatch($command);
 
         return new JsonResponse([

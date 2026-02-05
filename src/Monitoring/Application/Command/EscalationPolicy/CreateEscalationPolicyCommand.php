@@ -13,6 +13,7 @@ final readonly class CreateEscalationPolicyCommand
         public int $consecutiveFailures,
         public string $channel,
         public string $target,
+        public ?string $requesterId = null,
     ) {
     }
 }

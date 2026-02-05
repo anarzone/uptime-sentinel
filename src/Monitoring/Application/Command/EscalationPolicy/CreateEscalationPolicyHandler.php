@@ -19,11 +19,17 @@ final readonly class CreateEscalationPolicyHandler
         private MonitorRepositoryInterface $monitorRepository,
         private NotificationChannelRepositoryInterface $notificationChannelRepository,
         private EscalationPolicyRepositoryInterface $escalationPolicyRepository,
+        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
+        private \Symfony\Bundle\SecurityBundle\Security $security,
     ) {
     }
 
     public function __invoke(CreateEscalationPolicyCommand $command): void
     {
+        if ($command->requesterId === null) {
+            throw new \InvalidArgumentException('requesterId is required');
+        }
+
         // Validate monitor exists
         $monitorId = MonitorId::fromString($command->monitorId);
         $monitor = $this->monitorRepository->find($monitorId);
@@ -34,6 +40,13 @@ final readonly class CreateEscalationPolicyHandler
                 $command->monitorId
             ));
         }
+
+        // Authorization check
+        $this->authorizationService->requireOwnership(
+            $monitor,
+            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            $this->security->isGranted('ROLE_ADMIN')
+        );
 
         // Find notification channel by type and target
         $channelType = NotificationChannelType::from($command->channel);

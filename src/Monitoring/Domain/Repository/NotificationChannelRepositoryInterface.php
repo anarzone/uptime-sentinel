@@ -7,14 +7,15 @@ namespace App\Monitoring\Domain\Repository;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelId;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
+use App\Monitoring\Domain\ValueObject\OwnerId;
 
 interface NotificationChannelRepositoryInterface
 {
     public function findNotificationChannel(NotificationChannelId $id): ?NotificationChannel;
 
-    public function findByTarget(string $target): ?NotificationChannel;
+    public function findByTarget(string $target, ?OwnerId $ownerId = null): ?NotificationChannel;
 
-    public function findByTypeAndTarget(NotificationChannelType $type, string $target): ?NotificationChannel;
+    public function findByTypeAndTarget(NotificationChannelType $type, string $target, ?OwnerId $ownerId = null): ?NotificationChannel;
 
     public function save(NotificationChannel $channel): void;
 

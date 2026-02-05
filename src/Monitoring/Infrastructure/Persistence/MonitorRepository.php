@@ -17,22 +17,32 @@ class MonitorRepository extends ServiceEntityRepository implements MonitorReposi
     {
         parent::__construct($registry, Monitor::class);
     }
-    public function findPaginated(int $page, int $limit): array
+    public function findPaginated(int $page, int $limit, ?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): array
     {
-        return $this->createQueryBuilder('m')
+        $qb = $this->createQueryBuilder('m')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
-            ->orderBy('m.name', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('m.name', 'ASC');
+
+        if ($ownerId !== null) {
+            $qb->andWhere('m.ownerId = :ownerId')
+                ->setParameter('ownerId', $ownerId->value);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
-    public function countTotal(): int
+    public function countTotal(?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): int
     {
-        return (int) $this->createQueryBuilder('m')
-            ->select('COUNT(m.id.value)')
-            ->getQuery()
-            ->getSingleScalarResult();
+        $qb = $this->createQueryBuilder('m')
+            ->select('COUNT(m.id.value)');
+
+        if ($ownerId !== null) {
+            $qb->andWhere('m.ownerId = :ownerId')
+                ->setParameter('ownerId', $ownerId->value);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     public function findDueForChecking(): array
@@ -62,6 +72,19 @@ class MonitorRepository extends ServiceEntityRepository implements MonitorReposi
             ->setParameter('status', $status)
             ->getQuery()
             ->execute();
+    }
+
+    public function findAllByOwner(?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId): array
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->orderBy('m.name', 'ASC');
+
+        if ($ownerId !== null) {
+            $qb->andWhere('m.ownerId = :ownerId')
+                ->setParameter('ownerId', $ownerId->value);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     /**
