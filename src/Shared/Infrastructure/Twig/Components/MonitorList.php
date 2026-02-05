@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Twig\Components;
+namespace App\Shared\Infrastructure\Twig\Components;
 
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;

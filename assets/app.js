@@ -8,7 +8,8 @@ import './stimulus_bootstrap.js';
  */
 import './styles/app.css';
 import LandingPage from './vue/controllers/LandingPage.js';
+import MonitorManager from './vue/controllers/MonitorManager.js';
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
 
-registerVueControllerComponents({ LandingPage });
+registerVueControllerComponents({ LandingPage, MonitorManager });

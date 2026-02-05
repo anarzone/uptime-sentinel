@@ -22,6 +22,6 @@ final readonly class RedisTelemetryBuffer implements TelemetryBufferInterface
 
     public function push(CheckResultDto $result): void
     {
-        $this->redis->lpush($this->bufferKey, [json_encode($result->toArray())]);
+        $this->redis->lpush($this->bufferKey, json_encode($result->toArray()));
     }
 }

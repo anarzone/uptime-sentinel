@@ -53,7 +53,7 @@ final readonly class CheckMonitorHandler
         $this->telemetryBuffer->push($result);
 
         // Update monitor's state
-        $isSuccess = $result->statusCode >= 200 && $result->statusCode < 300;
+        $isSuccess = $result->statusCode === $monitor->expectedStatusCode;
         $monitor->markChecked($result->checkedAt, $isSuccess);
         $this->alertNotificationService->checkAndNotify($monitor);
 

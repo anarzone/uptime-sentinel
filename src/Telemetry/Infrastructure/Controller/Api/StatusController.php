@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Telemetry\Infrastructure\Controller\Api;
 
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use App\Telemetry\Infrastructure\Repository\TelemetryReadRepository;

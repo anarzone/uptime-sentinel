@@ -47,20 +47,20 @@ final readonly class TelemetryIngestor
             // Step 2: Move items atomically from buffer to processing list
             $batch = $this->moveToProcessing($batchSize, $processingKey);
 
-            if (empty($batch)) {
-                return 0;
+            // Step 3: Bulk insert into MySQL if we have valid items
+            if (!empty($batch)) {
+                $this->bulkInsert($batch);
             }
 
-            // Step 3: Bulk insert into MySQL
-            $this->bulkInsert($batch);
-
-            // Step 4: Clear the processing list (items are now safely in DB)
+            // Step 4: Clear the processing list (items are now safely in DB or were invalid/discarded)
             $this->redis->del($processingKey);
 
-            $this->logger->info('Telemetry ingested', [
-                'rows' => \count($batch),
-                'buffer_remaining' => $this->redis->llen($this->bufferKey),
-            ]);
+            if (!empty($batch)) {
+                $this->logger->info('Telemetry ingested', [
+                    'rows' => \count($batch),
+                    'buffer_remaining' => $this->redis->llen($this->bufferKey),
+                ]);
+            }
 
             return \count($batch);
         } catch (\Throwable $e) {

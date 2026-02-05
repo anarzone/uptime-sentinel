@@ -1,7 +1,7 @@
 <div {{ attributes }} class="glass-card" style="margin-top: 1.5rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h3>Service Inventory</h3>
-        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">+ Add Monitor</button>
+        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="window.MonitorManager.openCreateModal()">+ Add Monitor</button>
     </div>
 
     <div style="overflow-x: auto;">
@@ -42,8 +42,11 @@
                             {{ monitor.lastCheckedAt ? monitor.lastCheckedAt|date('H:i:s') : 'Never' }}
                         </td>
                         <td style="padding: 1rem 0.5rem; text-align: right;">
-                            <button style="background: none; border: none; color: var(--text-muted); cursor: pointer;">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                            <button 
+                                style="background: var(--surface-accent); border: 1px solid var(--border-color); color: var(--text-secondary); cursor: pointer; padding: 0.4rem 0.8rem; border-radius: var(--radius-md); font-size: 0.75rem; font-weight: 600;"
+                                onclick='window.MonitorManager.openAlertModal({ id: "{{ monitor.id.value }}", name: "{{ monitor.name }}" })'
+                            >
+                                Configure Alerts
                             </button>
                         </td>
                     </tr>
@@ -90,3 +93,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.addEventListener('monitor-created', () => {
+        // Refresh the LiveComponent
+        const componentId = document.querySelector('[data-live-name-value="MonitorList"]').id;
+        if (componentId) {
+            Symfony.getComponent(componentId).then((component) => {
+                component.render();
+            });
+        }
+    });
+</script>

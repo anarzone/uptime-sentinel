@@ -33,7 +33,7 @@ export default defineComponent({
             <h1 class="text-gradient animate-float">Global Vigilance, <br>Instant Awareness.</h1>
             <p class="hero-subtitle">Sentinels are watching your infrastructure 24/7/365. Experience the next generation of uptime monitoring.</p>
             <div class="hero-actions">
-              <a href="/login" class="btn-primary">Start Fastest Monitoring</a>
+              <a href="/login" class="btn btn-primary">Start Fastest Monitoring</a>
             </div>
           </div>
           <div class="hero-visual">

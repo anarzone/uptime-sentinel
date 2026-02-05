@@ -57,7 +57,9 @@ final readonly class TelemetryReadRepository
                 (SELECT COUNT(*) FROM monitors) as total_monitors,
                 (SELECT COUNT(*) FROM monitors WHERE health_status = 'up') as up_count,
                 (SELECT COUNT(*) FROM monitors WHERE health_status = 'down') as down_count,
-                COALESCE((SELECT AVG(latency_ms) FROM ping_results WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)), 0) as avg_latency_24h"
+                COALESCE((SELECT AVG(latency_ms) FROM ping_results WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)), 0) as avg_latency_24h,
+                (SELECT COUNT(*) FROM ping_results WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)) as total_pings_24h,
+                (SELECT COUNT(*) FROM ping_results WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_successful = 1) as success_pings_24h"
         ) ?: [];
     }
 

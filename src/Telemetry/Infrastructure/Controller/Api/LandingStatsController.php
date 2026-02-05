@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Telemetry\Infrastructure\Controller\Api;
 
 use App\Telemetry\Infrastructure\Repository\TelemetryReadRepository;
 use Doctrine\DBAL\Connection;
@@ -31,7 +31,7 @@ final class LandingStatsController extends AbstractController
             'total_monitors' => $globalStats['total_monitors'] ?? 0,
             'total_integrations' => $channelsCount,
             'avg_latency_ms' => round((float) ($globalStats['avg_latency_24h'] ?? 0), 2),
-            'uptime_percentage' => round(100 * (($globalStats['up_count'] ?? 0) / max(1, $globalStats['total_monitors'] ?? 1)), 2),
+            'uptime_percentage' => round(100 * (($globalStats['success_pings_24h'] ?? 0) / max(1, $globalStats['total_pings_24h'] ?? 1)), 2),
         ]);
     }
 }

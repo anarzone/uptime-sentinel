@@ -20,8 +20,37 @@ use Symfony\Component\Uid\UuidV7;
 #[Route('/api/monitors')]
 class MonitorController extends AbstractController
 {
-    public function __construct(private MessageBusInterface $bus)
+    public function __construct(
+        private MessageBusInterface $bus,
+        private \App\Monitoring\Domain\Repository\MonitorRepositoryInterface $monitorRepository
+    ) {
+    }
+
+    #[Route('', methods: ['GET'])]
+    public function list(): JsonResponse
     {
+        $monitors = $this->monitorRepository->findAll();
+
+        return new JsonResponse([
+            'data' => \App\Monitoring\Application\Dto\MonitorResponseDto::fromEntities($monitors),
+        ]);
+    }
+
+    #[Route('/{uuid}', methods: ['GET'])]
+    public function get(string $uuid): JsonResponse
+    {
+        $monitor = $this->monitorRepository->find(\App\Monitoring\Domain\Model\Monitor\MonitorId::fromString($uuid));
+
+        if ($monitor === null) {
+            return new JsonResponse([
+                'error' => 'Monitor not found',
+                'message' => \sprintf('Monitor with ID "%s" does not exist', $uuid),
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse([
+            'data' => \App\Monitoring\Application\Dto\MonitorResponseDto::fromEntity($monitor),
+        ]);
     }
 
     #[Route('', methods: ['POST'])]

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Admin;
+namespace App\Telemetry\Infrastructure\Controller\Admin;
 
 use App\Telemetry\Infrastructure\Repository\TelemetryReadRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
