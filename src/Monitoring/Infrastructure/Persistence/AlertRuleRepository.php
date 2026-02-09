@@ -19,6 +19,48 @@ class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRe
         parent::__construct($registry, AlertRule::class);
     }
 
+    public function findPaginated(int $page, int $limit, ?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): array
+    {
+        $qb = $this->createQueryBuilder('ar')
+            ->join('ar.notificationChannel', 'nc')
+            ->addSelect('nc')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            // Join monitor to potentially order by monitor name in future, but for now createdAt is fine
+            ->orderBy('ar.createdAt', 'DESC');
+
+        if ($ownerId !== null) {
+            // Assuming AlertRule has an ownerId field?
+            // Checking CreateAlertRuleHandler, it sets ownerId.
+            // Let's check AlertRule entity to be sure about the field name.
+            // Wait, CreateAlertRuleHandler uses 'requesterId' for ownership check but does it persist it?
+            // AlertRule::create arguments: monitorId, notificationChannel, threshold, type.
+            // Does it have ownerId? monitor has ownerId. AlertRule belongs to Monitor.
+            // Policies don't have ownerId.
+            // So filtering by ownerId means filtering by ar.monitor.ownerId.
+
+            $qb->join(\App\Monitoring\Domain\Model\Monitor\Monitor::class, 'm', \Doctrine\ORM\Query\Expr\Join::WITH, 'ar.monitorId.value = m.id.value')
+                ->andWhere('m.ownerId = :ownerId')
+                ->setParameter('ownerId', $ownerId->value);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function countTotal(?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): int
+    {
+        $qb = $this->createQueryBuilder('ar')
+            ->select('COUNT(ar)');
+
+        if ($ownerId !== null) {
+            $qb->join(\App\Monitoring\Domain\Model\Monitor\Monitor::class, 'm', \Doctrine\ORM\Query\Expr\Join::WITH, 'ar.monitorId.value = m.id.value')
+                ->andWhere('m.ownerId = :ownerId')
+                ->setParameter('ownerId', $ownerId->value);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function findByMonitorId(MonitorId $monitorId): array
     {
         return $this->createQueryBuilder('ar')
@@ -55,5 +97,10 @@ class AlertRuleRepository extends ServiceEntityRepository implements AlertRuleRe
     {
         $this->getEntityManager()->remove($alertRule);
         $this->getEntityManager()->flush();
+    }
+
+    public function findById(string $id): ?AlertRule
+    {
+        return $this->findOneBy(['id.value' => $id]);
     }
 }

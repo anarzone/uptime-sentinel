@@ -16,7 +16,8 @@ final class LatencySparkline
 
     public function __construct(
         private readonly TelemetryReadRepository $telemetryRepository,
-        private readonly ChartBuilderInterface $chartBuilder
+        private readonly ChartBuilderInterface $chartBuilder,
+        private readonly \Symfony\Bundle\SecurityBundle\Security $security
     ) {
     }
 
@@ -25,7 +26,13 @@ final class LatencySparkline
         $start = new \DateTimeImmutable('-1 hour');
         $end = new \DateTimeImmutable();
 
-        $history = $this->telemetryRepository->getLatencyHistory($this->monitorId, $start, $end);
+        $user = $this->security->getUser();
+        $ownerId = null;
+        if (!$this->security->isGranted('ROLE_ADMIN') && $user instanceof \App\Security\Domain\Entity\User) {
+            $ownerId = $user->getId()->toRfc4122();
+        }
+
+        $history = $this->telemetryRepository->getLatencyHistory($this->monitorId, $start, $end, $ownerId);
 
         $chart = $this->chartBuilder->createChart(Chart::TYPE_LINE);
 

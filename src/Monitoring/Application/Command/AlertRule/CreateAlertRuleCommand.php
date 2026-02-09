@@ -32,7 +32,7 @@ final readonly class CreateAlertRuleCommand
         ?string $requesterId = null,
     ): self {
         return new self(
-            id: (new UuidV7())->toRfc4122(),
+            id: new UuidV7()->toRfc4122(),
             monitorId: $monitorId,
             channel: $channel,
             target: $target,

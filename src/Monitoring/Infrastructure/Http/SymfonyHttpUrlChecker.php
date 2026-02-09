@@ -51,9 +51,9 @@ final readonly class SymfonyHttpUrlChecker implements UrlCheckerInterface
 
     public function checkBatch(array $monitors): iterable
     {
-        // 💡 Refactored to a simpler loop to avoid internal HttpClient 'stream'
-        // destructor issues in CLI/Docker environments.
-        // Todo: Try stream again
+        // Sequential processing due to Symfony HttpClient stream() destructor bug
+        // in CLI/Docker environments (causes CurlResponse->__destruct() exceptions).
+        // The queue backlog was the real cause of the unknown monitor status.
         foreach ($monitors as $monitor) {
             yield $this->check($monitor);
         }

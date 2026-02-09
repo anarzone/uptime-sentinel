@@ -26,6 +26,10 @@ final class SecurityController extends AbstractController
         NotifierInterface $notifier,
         EntityManagerInterface $entityManager
     ): Response {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('admin_dashboard');
+        }
+
         if ($request->isMethod('POST')) {
             $email = $request->getPayload()->get('email');
             $user = $userRepository->findOneBy(['email' => $email]);

@@ -32,7 +32,7 @@ final readonly class CreateEscalationPolicyHandler
 
         // Validate monitor exists
         $monitorId = MonitorId::fromString($command->monitorId);
-        $monitor = $this->monitorRepository->find($monitorId);
+        $monitor = $this->monitorRepository->findById($monitorId);
 
         if ($monitor === null) {
             throw new \InvalidArgumentException(\sprintf(
@@ -56,11 +56,14 @@ final readonly class CreateEscalationPolicyHandler
         );
 
         if ($notificationChannel === null) {
-            throw new \InvalidArgumentException(\sprintf(
-                'Notification channel not found for type "%s" and target "%s"',
-                $command->channel,
-                $command->target
-            ));
+            $ownerId = \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId);
+            $notificationChannel = \App\Monitoring\Domain\Model\Notification\NotificationChannel::create(
+                name: $command->channel.' - '.$command->target,
+                type: $channelType,
+                dsn: $command->target,
+                ownerId: $ownerId
+            );
+            $this->notificationChannelRepository->save($notificationChannel);
         }
 
         // Create escalation policy

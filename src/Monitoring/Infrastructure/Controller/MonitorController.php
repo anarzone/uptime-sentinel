@@ -10,6 +10,7 @@ use App\Monitoring\Application\Command\DeleteMonitor\DeleteMonitorCommand;
 use App\Monitoring\Application\Command\UpdateMonitor\UpdateMonitorCommand;
 use App\Monitoring\Application\Dto\CreateMonitorRequestDto;
 use App\Monitoring\Application\Dto\UpdateMonitorRequestDto;
+use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,15 +23,24 @@ use Symfony\Component\Uid\UuidV7;
 class MonitorController extends AbstractController
 {
     public function __construct(
+        private MonitorRepositoryInterface $monitorRepository,
         private MessageBusInterface $bus,
-        private \App\Monitoring\Domain\Repository\MonitorRepositoryInterface $monitorRepository
     ) {
     }
 
     #[Route('', methods: ['GET'])]
     public function list(): JsonResponse
     {
-        $monitors = $this->monitorRepository->findAll();
+        $user = $this->getUser();
+        $ownerIdStr = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
+
+        $ownerId = $ownerIdStr ? \App\Monitoring\Domain\ValueObject\OwnerId::fromString($ownerIdStr) : null;
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $monitors = $this->monitorRepository->findAll();
+        } else {
+            $monitors = $this->monitorRepository->findAllByOwner($ownerId);
+        }
 
         return new JsonResponse([
             'data' => \App\Monitoring\Application\Dto\MonitorResponseDto::fromEntities($monitors),

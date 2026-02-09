@@ -28,7 +28,7 @@ final readonly class DeleteAlertRuleHandler
             throw new \InvalidArgumentException('requesterId is required');
         }
 
-        $alertRule = $this->alertRuleRepository->find($command->id);
+        $alertRule = $this->alertRuleRepository->findById($command->id);
 
         if ($alertRule === null) {
             throw new \InvalidArgumentException(\sprintf('Alert rule with ID "%s" does not exist', $command->id));

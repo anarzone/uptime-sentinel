@@ -1,7 +1,7 @@
-<div {{ attributes }} class="glass-card" style="margin-top: 1.5rem;">
+<div {{ attributes.defaults({ 'data-action': 'monitor-created@window->live#$render' }) }} class="glass-card" style="margin-top: 1.5rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <h3>Service Inventory</h3>
-        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="window.MonitorManager.openCreateModal()">+ Add Monitor</button>
+        <button class="btn btn-primary" onclick="window.MonitorManager.openCreateModal()">+ Add Monitor</button>
     </div>
 
     <div style="overflow-x: auto;">
@@ -93,15 +93,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    window.addEventListener('monitor-created', () => {
-        // Refresh the LiveComponent
-        const componentId = document.querySelector('[data-live-name-value="MonitorList"]').id;
-        if (componentId) {
-            Symfony.getComponent(componentId).then((component) => {
-                component.render();
-            });
-        }
-    });
-</script>

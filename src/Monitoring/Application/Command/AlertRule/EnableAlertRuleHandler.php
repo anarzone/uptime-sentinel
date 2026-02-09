@@ -20,7 +20,7 @@ final readonly class EnableAlertRuleHandler
 
     public function __invoke(EnableAlertRuleCommand $command): void
     {
-        $alertRule = $this->alertRuleRepository->find($command->id);
+        $alertRule = $this->alertRuleRepository->findById($command->id);
 
         if ($alertRule === null) {
             throw new \InvalidArgumentException(\sprintf('Alert rule with ID "%s" does not exist', $command->id));

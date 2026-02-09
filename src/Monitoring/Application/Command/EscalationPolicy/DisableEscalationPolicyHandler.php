@@ -24,7 +24,7 @@ final readonly class DisableEscalationPolicyHandler
             throw new \InvalidArgumentException('requesterId is required');
         }
 
-        $policy = $this->escalationPolicyRepository->find($command->id);
+        $policy = $this->escalationPolicyRepository->findById($command->id);
 
         if ($policy === null) {
             throw new \InvalidArgumentException(\sprintf('Escalation policy with ID "%s" does not exist', $command->id));

@@ -13,14 +13,22 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DashboardController extends AbstractController
 {
     public function __construct(
-        private readonly TelemetryReadRepository $telemetryRepository
+        private readonly TelemetryReadRepository $telemetryRepository,
+        private readonly \Symfony\Bundle\SecurityBundle\Security $security
     ) {
     }
 
     #[Route('', name: 'dashboard')]
     public function index(): Response
     {
-        $stats = $this->telemetryRepository->getGlobalStats();
+        $user = $this->security->getUser();
+        $ownerId = null;
+
+        if (!$this->security->isGranted('ROLE_ADMIN') && $user instanceof \App\Security\Domain\Entity\User) {
+            $ownerId = $user->getId()->toRfc4122();
+        }
+
+        $stats = $this->telemetryRepository->getGlobalStats($ownerId);
 
         return $this->render('admin/dashboard/index.html.twig', [
             'stats' => [

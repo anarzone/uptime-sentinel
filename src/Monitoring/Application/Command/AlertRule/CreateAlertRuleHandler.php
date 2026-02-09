@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Monitoring\Application\Command\AlertRule;
 
+use App\Monitoring\Application\Service\MonitorAuthorizationService;
 use App\Monitoring\Domain\Model\Alert\AlertRule;
 use App\Monitoring\Domain\Model\Alert\NotificationType;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
+use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Model\Notification\NotificationChannelType;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use App\Monitoring\Domain\Repository\NotificationChannelRepositoryInterface;
+use App\Monitoring\Domain\ValueObject\OwnerId;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -20,8 +24,8 @@ final readonly class CreateAlertRuleHandler
         private AlertRuleRepositoryInterface $alertRuleRepository,
         private MonitorRepositoryInterface $monitorRepository,
         private NotificationChannelRepositoryInterface $channelRepository,
-        private \App\Monitoring\Application\Service\MonitorAuthorizationService $authorizationService,
-        private \Symfony\Bundle\SecurityBundle\Security $security,
+        private MonitorAuthorizationService $authorizationService,
+        private Security $security,
     ) {
     }
 
@@ -42,17 +46,17 @@ final readonly class CreateAlertRuleHandler
         // Authorization check
         $this->authorizationService->requireOwnership(
             $monitor,
-            \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->requesterId),
+            OwnerId::fromString($command->requesterId),
             $this->security->isGranted('ROLE_ADMIN')
         );
 
         // Find or create notification channel
         $channelType = NotificationChannelType::from($command->channel);
-        $ownerIdObj = $command->ownerId !== null ? \App\Monitoring\Domain\ValueObject\OwnerId::fromString($command->ownerId) : null;
+        $ownerIdObj = $command->ownerId !== null ? OwnerId::fromString($command->ownerId) : null;
         $notificationChannel = $this->channelRepository->findByTypeAndTarget($channelType, $command->target, $ownerIdObj);
 
         if ($notificationChannel === null) {
-            $notificationChannel = \App\Monitoring\Domain\Model\Notification\NotificationChannel::create(
+            $notificationChannel = NotificationChannel::create(
                 'Auto-created channel for '.$command->target,
                 $channelType,
                 $command->target,

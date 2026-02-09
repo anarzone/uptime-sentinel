@@ -23,10 +23,10 @@ final class EscalationPolicy
     public readonly MonitorId $monitorId;
 
     #[ORM\Column(type: Types::INTEGER)]
-    public readonly int $level; // 1 = first escalation, 2 = second, etc.
+    public int $level; // 1 = first escalation, 2 = second, etc.
 
     #[ORM\Column(type: Types::INTEGER)]
-    public readonly int $consecutiveFailures;
+    public int $consecutiveFailures;
 
     #[ORM\ManyToOne(targetEntity: NotificationChannel::class)]
     #[ORM\JoinColumn(
@@ -108,5 +108,15 @@ final class EscalationPolicy
     {
         return $this->matches($monitor)
             && $monitor->consecutiveFailures === $this->consecutiveFailures;
+    }
+
+    public function update(
+        int $level,
+        int $consecutiveFailures,
+        NotificationChannel $notificationChannel
+    ): void {
+        $this->level = $level;
+        $this->consecutiveFailures = $consecutiveFailures;
+        $this->notificationChannel = $notificationChannel;
     }
 }

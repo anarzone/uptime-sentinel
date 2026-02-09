@@ -12,6 +12,11 @@ use App\Monitoring\Domain\Model\Monitor\MonitorId;
  */
 interface AlertRuleRepositoryInterface
 {
+    /** @return AlertRule[] */
+    public function findPaginated(int $page, int $limit, ?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): array;
+
+    public function countTotal(?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): int;
+
     public function findAll(): array;
 
     public function findByMonitorId(MonitorId $monitorId): array;
@@ -23,4 +28,6 @@ interface AlertRuleRepositoryInterface
     public function remove(AlertRule $alertRule): void;
 
     public function exists(string $id): bool;
+
+    public function findById(string $id): ?AlertRule;
 }

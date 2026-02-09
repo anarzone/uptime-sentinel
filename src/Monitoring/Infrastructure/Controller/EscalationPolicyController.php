@@ -8,22 +8,25 @@ use App\Monitoring\Application\Command\EscalationPolicy\CreateEscalationPolicyCo
 use App\Monitoring\Application\Command\EscalationPolicy\DeleteEscalationPolicyCommand;
 use App\Monitoring\Application\Command\EscalationPolicy\DisableEscalationPolicyCommand;
 use App\Monitoring\Application\Command\EscalationPolicy\EnableEscalationPolicyCommand;
+use App\Monitoring\Application\Dto\BatchCreateEscalationPolicyRequestDto;
 use App\Monitoring\Application\Dto\CreateEscalationPolicyRequestDto;
 use App\Monitoring\Application\Dto\EscalationPolicyResponseDto;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
+use App\Shared\Infrastructure\Controller\ControllerUserIdTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\UuidV7;
 
 #[Route('/api/escalation-policies')]
 final class EscalationPolicyController extends AbstractController
 {
+    use ControllerUserIdTrait;
+
     public function __construct(
         private EscalationPolicyRepositoryInterface $escalationPolicyRepository,
         private MonitorRepositoryInterface $monitorRepository,
@@ -34,21 +37,43 @@ final class EscalationPolicyController extends AbstractController
     #[Route('', methods: ['POST'])]
     public function create(#[MapRequestPayload] CreateEscalationPolicyRequestDto $dto): JsonResponse
     {
-        $user = $this->getUser();
-        $command = new CreateEscalationPolicyCommand(
-            new UuidV7()->toRfc4122(),
+        $command = CreateEscalationPolicyCommand::create(
             $dto->monitorId,
             $dto->level,
             $dto->consecutiveFailures,
             $dto->channel,
             $dto->target,
-            $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            $this->getRequesterId()
         );
 
         $this->bus->dispatch($command);
 
         return new JsonResponse([
-            'message' => 'Escalation policy creation request accepted',
+            'message' => 'Created escalation policy',
+        ], Response::HTTP_ACCEPTED);
+    }
+
+    #[Route('/batch', methods: ['POST'])]
+    public function batchCreate(#[MapRequestPayload] BatchCreateEscalationPolicyRequestDto $dto): JsonResponse
+    {
+        $requesterId = $this->getRequesterId();
+
+        foreach ($dto->monitorIds as $monitorId) {
+            $command = CreateEscalationPolicyCommand::create(
+                $monitorId,
+                $dto->level,
+                $dto->consecutiveFailures,
+                $dto->channel,
+                $dto->target,
+                $requesterId
+            );
+
+            $this->bus->dispatch($command);
+        }
+
+        return new JsonResponse([
+            'message' => \sprintf('Created %d escalation policies', \count($dto->monitorIds)),
+            'count' => \count($dto->monitorIds),
         ], Response::HTTP_ACCEPTED);
     }
 
@@ -104,9 +129,7 @@ final class EscalationPolicyController extends AbstractController
     #[Route('/{id}', methods: ['DELETE'])]
     public function delete(string $id): JsonResponse
     {
-        $user = $this->getUser();
-        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
-        $command = new DeleteEscalationPolicyCommand($id, $requesterId);
+        $command = new DeleteEscalationPolicyCommand($id, $this->getRequesterId());
         $this->bus->dispatch($command);
 
         return new JsonResponse([
@@ -117,9 +140,7 @@ final class EscalationPolicyController extends AbstractController
     #[Route('/{id}/enable', methods: ['PATCH'])]
     public function enable(string $id): JsonResponse
     {
-        $user = $this->getUser();
-        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
-        $command = new EnableEscalationPolicyCommand($id, $requesterId);
+        $command = new EnableEscalationPolicyCommand($id, $this->getRequesterId());
         $this->bus->dispatch($command);
 
         return new JsonResponse([
@@ -130,9 +151,7 @@ final class EscalationPolicyController extends AbstractController
     #[Route('/{id}/disable', methods: ['PATCH'])]
     public function disable(string $id): JsonResponse
     {
-        $user = $this->getUser();
-        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
-        $command = new DisableEscalationPolicyCommand($id, $requesterId);
+        $command = new DisableEscalationPolicyCommand($id, $this->getRequesterId());
         $this->bus->dispatch($command);
 
         return new JsonResponse([

@@ -10,10 +10,12 @@ use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 use App\Monitoring\Domain\ValueObject\OwnerId;
 
 /**
- * @method Monitor|null find(MonitorId $monitorId)
+ * @method Monitor|null find(MonitorId|string $id)
  */
 interface MonitorRepositoryInterface
 {
+    public function findById(MonitorId|string $id): ?Monitor;
+
     /** @return Monitor[] */
     public function findPaginated(int $page, int $limit, ?OwnerId $ownerId = null): array;
 
@@ -36,5 +38,5 @@ interface MonitorRepositoryInterface
 
     public function remove(Monitor $monitor): void;
 
-    public function exists(MonitorId $id): bool;
+    public function exists(MonitorId|string $id): bool;
 }

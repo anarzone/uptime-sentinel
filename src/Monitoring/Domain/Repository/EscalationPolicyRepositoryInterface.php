@@ -44,4 +44,11 @@ interface EscalationPolicyRepositoryInterface
      * Check if a policy exists.
      */
     public function exists(string $id): bool;
+
+    public function findById(string $id): ?EscalationPolicy;
+
+    /** @return EscalationPolicy[] */
+    public function findPaginated(int $page, int $limit, ?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): array;
+
+    public function countTotal(?\App\Monitoring\Domain\ValueObject\OwnerId $ownerId = null): int;
 }

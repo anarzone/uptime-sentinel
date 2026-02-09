@@ -18,7 +18,8 @@ final class LatencyChart
 
     public function __construct(
         private readonly TelemetryReadRepository $telemetryRepository,
-        private readonly ChartBuilderInterface $chartBuilder
+        private readonly ChartBuilderInterface $chartBuilder,
+        private readonly \Symfony\Bundle\SecurityBundle\Security $security
     ) {
     }
 
@@ -27,12 +28,18 @@ final class LatencyChart
         $start = new \DateTimeImmutable('-24 hours');
         $end = new \DateTimeImmutable();
 
+        $user = $this->security->getUser();
+        $ownerId = null;
+        if (!$this->security->isGranted('ROLE_ADMIN') && $user instanceof \App\Security\Domain\Entity\User) {
+            $ownerId = $user->getId()->toRfc4122();
+        }
+
         // In a real app, we would parse $this->range and $this->monitorId
         // For the global dashboard, we can average across all monitors or show a specific one
-        $data = $this->telemetryRepository->getGlobalStats(); // Simplified for now
+        $data = $this->telemetryRepository->getGlobalStats($ownerId); // Updated for owner filtering
 
         // Since we are in 'global' mode, we pass null to get aggregated stats across all monitors
-        $history = $this->telemetryRepository->getLatencyHistory(null, $start, $end);
+        $history = $this->telemetryRepository->getLatencyHistory(null, $start, $end, $ownerId);
 
         $chart = $this->chartBuilder->createChart(Chart::TYPE_LINE);
 

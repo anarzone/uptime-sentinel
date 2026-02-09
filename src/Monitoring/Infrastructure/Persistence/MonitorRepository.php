@@ -117,8 +117,15 @@ class MonitorRepository extends ServiceEntityRepository implements MonitorReposi
         $this->getEntityManager()->flush();
     }
 
-    public function exists(MonitorId $id): bool
+    public function findById(MonitorId|string $id): ?Monitor
     {
-        return $this->find($id->toString()) !== null;
+        return $this->find($id);
+    }
+
+    public function exists(MonitorId|string $id): bool
+    {
+        $idStr = $id instanceof MonitorId ? $id->toString() : $id;
+
+        return $this->find($idStr) !== null;
     }
 }

@@ -14,6 +14,7 @@ use App\Monitoring\Application\Dto\CreateAlertRuleRequestDto;
 use App\Monitoring\Application\Dto\UpdateAlertRuleRequestDto;
 use App\Monitoring\Domain\Repository\AlertRuleRepositoryInterface;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
+use App\Shared\Infrastructure\Controller\ControllerUserIdTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/alert-rules')]
 final class AlertRuleController extends AbstractController
 {
+    use ControllerUserIdTrait;
+
     public function __construct(
         private AlertRuleRepositoryInterface $alertRuleRepository,
         private MonitorRepositoryInterface $monitorRepository,
@@ -34,22 +37,49 @@ final class AlertRuleController extends AbstractController
     #[Route('', methods: ['POST'])]
     public function create(#[MapRequestPayload] CreateAlertRuleRequestDto $dto): JsonResponse
     {
-        $user = $this->getUser();
+        $requesterId = $this->getRequesterId();
 
         $command = CreateAlertRuleCommand::create(
-            $dto->monitorId,
-            $dto->channel,
-            $dto->target,
-            $dto->failureThreshold,
-            $dto->type,
-            $dto->cooldownInterval,
-            $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            monitorId: $dto->monitorId,
+            channel: $dto->channel,
+            target: $dto->target,
+            failureThreshold: $dto->failureThreshold,
+            type: $dto->type,
+            cooldownInterval: $dto->cooldownInterval,
+            ownerId: $requesterId,
+            requesterId: $requesterId
         );
 
         $this->bus->dispatch($command);
 
         return new JsonResponse([
-            'message' => 'Alert rule creation request accepted',
+            'message' => 'Created alert rule',
+        ], Response::HTTP_ACCEPTED);
+    }
+
+    #[Route('/batch', methods: ['POST'])]
+    public function batchCreate(#[MapRequestPayload] \App\Monitoring\Application\Dto\BatchCreateAlertRuleRequestDto $dto): JsonResponse
+    {
+        $requesterId = $this->getRequesterId();
+
+        foreach ($dto->monitorIds as $monitorId) {
+            $command = CreateAlertRuleCommand::create(
+                monitorId: $monitorId,
+                channel: $dto->channel,
+                target: $dto->target,
+                failureThreshold: $dto->failureThreshold,
+                type: $dto->type,
+                cooldownInterval: $dto->cooldownInterval,
+                ownerId: $requesterId,
+                requesterId: $requesterId
+            );
+
+            $this->bus->dispatch($command);
+        }
+
+        return new JsonResponse([
+            'message' => \sprintf('Created %d alert rules', \count($dto->monitorIds)),
+            'count' => \count($dto->monitorIds),
         ], Response::HTTP_ACCEPTED);
     }
 
@@ -76,9 +106,7 @@ final class AlertRuleController extends AbstractController
         // We'll keep a basic check or use repository filtering.
         // For now, let's keep it simple and safe.
         $monitor = $this->monitorRepository->find($alertRule->monitorId);
-        $user = $this->getUser();
-        $requesterId = $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier();
-        if (!$this->isGranted('ROLE_ADMIN') && $monitor?->ownerId !== $requesterId) {
+        if (!$this->isGranted('ROLE_ADMIN') && $monitor?->ownerId !== $this->getRequesterId()) {
             throw $this->createAccessDeniedException('You do not have access to this alert rule.');
         }
 
@@ -97,7 +125,7 @@ final class AlertRuleController extends AbstractController
             failureThreshold: $dto->failureThreshold,
             type: $dto->type,
             cooldownInterval: $dto->cooldownInterval,
-            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            requesterId: $this->getRequesterId()
         );
 
         $this->bus->dispatch($command);
@@ -113,7 +141,7 @@ final class AlertRuleController extends AbstractController
         $user = $this->getUser();
         $command = new DeleteAlertRuleCommand(
             id: $id,
-            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            requesterId: $this->getRequesterId()
         );
 
         $this->bus->dispatch($command);
@@ -129,7 +157,7 @@ final class AlertRuleController extends AbstractController
         $user = $this->getUser();
         $command = new EnableAlertRuleCommand(
             id: $id,
-            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            requesterId: $this->getRequesterId()
         );
 
         $this->bus->dispatch($command);
@@ -145,7 +173,7 @@ final class AlertRuleController extends AbstractController
         $user = $this->getUser();
         $command = new DisableAlertRuleCommand(
             id: $id,
-            requesterId: $user instanceof \App\Security\Domain\Entity\User ? $user->getId()->toRfc4122() : $user?->getUserIdentifier()
+            requesterId: $this->getRequesterId()
         );
 
         $this->bus->dispatch($command);

@@ -103,13 +103,17 @@ export default {
         const addAlertRule = async () => {
             clearErrors('alert');
             try {
-                const res = await fetch('/api/alert-rules', {
+                const isBatch = selectedMonitorIds.value.length > 1;
+                const endpoint = isBatch ? '/api/alert-rules/batch' : '/api/alert-rules';
+                const payload = {
+                    ...alertForm,
+                    [isBatch ? 'monitorIds' : 'monitorId']: isBatch ? selectedMonitorIds.value : selectedMonitorIds.value[0]
+                };
+
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...alertForm,
-                        monitorId: selectedMonitorIds.value
-                    })
+                    body: JSON.stringify(payload)
                 });
                 if (res.ok) {
                     // If in focused mode, just close correctly
@@ -138,13 +142,17 @@ export default {
         const addPolicy = async () => {
             clearErrors('policy');
             try {
-                const res = await fetch('/api/escalation-policies', {
+                const isBatch = selectedMonitorIds.value.length > 1;
+                const endpoint = isBatch ? '/api/escalation-policies/batch' : '/api/escalation-policies';
+                const payload = {
+                    ...policyForm,
+                    [isBatch ? 'monitorIds' : 'monitorId']: isBatch ? selectedMonitorIds.value : (selectedMonitorIds.value[0] || null)
+                };
+
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...policyForm,
-                        monitorId: selectedMonitorIds.value
-                    })
+                    body: JSON.stringify(payload)
                 });
                 if (res.ok) {
                     // If in focused mode, just close correctly
