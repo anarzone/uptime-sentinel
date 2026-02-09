@@ -1,3 +1,13 @@
+## [1.8.0](https://github.com/anarzone/uptime-sentinel/compare/v1.7.14...v1.8.0) (2026-02-09)
+
+### Features
+
+* implement Monitor and Alert Management UI with Vue.js (fixed styling) ([e39f534](https://github.com/anarzone/uptime-sentinel/commit/e39f534358099bdafde082bb387a3937bd7a9b87))
+* **monitoring:** implement batch creation API and DDD refactoring ([bb69113](https://github.com/anarzone/uptime-sentinel/commit/bb69113c430ca2958fd927aa66fd5d0df6bdef89))
+* optimize test suite by squashing migrations ([cf4ec8a](https://github.com/anarzone/uptime-sentinel/commit/cf4ec8a35887e97c621010ae2d9c1937bc0a2577))
+* standardize ownership on user UUIDs and harden security ([14ccb61](https://github.com/anarzone/uptime-sentinel/commit/14ccb61fc4536e3f7000bb47228301fe7eebcaa5))
+* **ui:** enhance monitor batch selection with custom dropdown ([8280cc9](https://github.com/anarzone/uptime-sentinel/commit/8280cc991dac42484f7d7184380ff04e16712897))
+
 ## [1.7.14](https://github.com/anarzone/uptime-sentinel/compare/v1.7.13...v1.7.14) (2026-02-04)
 
 ### Bug Fixes
