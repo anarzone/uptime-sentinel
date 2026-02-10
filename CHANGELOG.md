@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/anarzone/uptime-sentinel/compare/v1.8.0...v1.9.0) (2026-02-10)
+
+### Features
+
+* integrate Resend mailer and secure configuration ([98b31bf](https://github.com/anarzone/uptime-sentinel/commit/98b31bf5f4124f3edea6d41afc0d38ae46c636ee))
+
 ## [1.8.0](https://github.com/anarzone/uptime-sentinel/compare/v1.7.14...v1.8.0) (2026-02-09)
 
 ### Features
