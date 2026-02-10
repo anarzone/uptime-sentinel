@@ -197,12 +197,15 @@ jobs:
         steps:
             - name: Trigger Coolify Deployment
               env:
-                COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+                COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
                 COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+                COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
               run: |
-                 curl --request GET \
+                 curl --request POST \
                    --header "Authorization: Bearer $COOLIFY_TOKEN" \
+                   --header "Content-Type: application/json" \
+                   --data '{"uuid": "$COOLIFY_APP_UUID", "force": true}' \
                    --retry 3 \
                    --retry-delay 5 \
-                   --fail \
-                   "$COOLIFY_WEBHOOK"
+                   --silent --show-error \
+                   "$COOLIFY_URL/api/v1/deploy"
