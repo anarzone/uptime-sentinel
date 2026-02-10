@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/anarzone/uptime-sentinel/compare/v1.9.0...v1.9.1) (2026-02-10)
+
+### Bug Fixes
+
+* **ci:** correct Coolify webhook deployment integration ([123823b](https://github.com/anarzone/uptime-sentinel/commit/123823be3abdd7915b6ae0373da0e06300f63ea4))
+
 ## [1.9.0](https://github.com/anarzone/uptime-sentinel/compare/v1.8.0...v1.9.0) (2026-02-10)
 
 ### Features
