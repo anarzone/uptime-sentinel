@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% set show_sidebar = true %}
+
+{% block title %}Edit Alert Rule | Sentinel{% endblock %}
+
+{% block body %}
+    {{ component('EditAlertRule', { id: id }) }}
+{% endblock %}

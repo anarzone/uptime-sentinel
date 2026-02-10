@@ -1,0 +1,43 @@
+<div {{ attributes }} class="glass-card" style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h3>Edit Escalation Policy</h3>
+        <a href="{{ path('admin_escalation_policies_index') }}" class="btn-secondary">Cancel</a>
+    </div>
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger" style="margin-bottom: 1rem;">{{ message }}</div>
+    {% endfor %}
+
+    <form data-action="live#action:prevent" data-live-action-param="save">
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Escalation Level</label>
+            <input type="number" data-model="level" min="1" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-md);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Level 1 happens first, then Level 2, etc.</div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Consecutive Failures</label>
+            <input type="number" data-model="consecutiveFailures" min="1" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-md);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Trigger after this many failures.</div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Channel Type</label>
+            <select data-model="channelType" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-md);">
+                <option value="email">Email</option>
+                <option value="slack">Slack</option>
+                <option value="webhook">Webhook</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Target / Recipient</label>
+            <input type="text" data-model="target" class="form-control" style="width: 100%; padding: 0.75rem; background: var(--surface-hover); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-md);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Email address or Webhook URL.</div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+             <button type="submit" class="btn-primary" style="padding: 0.75rem 2rem;">Save Changes</button>
+        </div>
+    </form>
+</div>

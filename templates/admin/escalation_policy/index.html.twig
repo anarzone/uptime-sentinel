@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% set show_sidebar = true %}
+
+{% block title %}Escalation Policies | Sentinel{% endblock %}
+
+{% block body %}
+<div class="header" style="margin-bottom: 2rem;">
+    <h1 class="text-gradient">Escalation Policies</h1>
+    <p style="color: var(--text-secondary);">Manage your alert escalation steps.</p>
+</div>
+
+{{ component('GlobalEscalationPolicyList') }}
+
+<div {{ vue_component('MonitorManager') }}></div>
+{% endblock %}

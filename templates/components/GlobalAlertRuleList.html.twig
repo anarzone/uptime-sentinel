@@ -1,0 +1,122 @@
+<div {{ attributes }} class="glass-card" data-poll>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3>Alert Rules</h3>
+        {% if not this.monitorId %}
+            <button class="btn btn-primary" onclick="window.MonitorManager.openAddRuleModal()">+ Add Rule</button>
+        {% endif %}
+    </div>
+
+    {% set rules = this.alertRules %}
+    {% set monitors = this.monitorsForRules(rules) %}
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.875rem;">
+                    {% if not this.monitorId %}
+                        <th style="padding: 1rem 0.5rem;">MONITOR</th>
+                    {% endif %}
+                    <th style="padding: 1rem 0.5rem;">CHANNEL</th>
+                    <th style="padding: 1rem 0.5rem;">TARGET</th>
+                    <th style="padding: 1rem 0.5rem;">THRESHOLD</th>
+                    <th style="padding: 1rem 0.5rem;">STATUS</th>
+                    <th style="padding: 1rem 0.5rem; text-align: right;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rule in rules %}
+                    {% set monitor = monitors[rule.monitorId.value] ?? null %}
+                    <tr style="border-bottom: 1px solid var(--border-color); transition: var(--transition);" class="monitor-row">
+                        {% if not this.monitorId %}
+                            <td style="padding: 1rem 0.5rem;">
+                                {% if monitor %}
+                                    <div style="font-weight: 600;">{{ monitor.name }}</div>
+                                    <code style="font-size: 0.75rem; color: var(--text-secondary);">{{ monitor.url.value }}</code>
+                                {% else %}
+                                    <span style="color: var(--text-muted);">Unknown Monitor</span>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                        <td style="padding: 1rem 0.5rem;">
+                            <span class="badge" style="background: var(--surface-accent); color: var(--text-secondary);">
+                                {{ rule.type.name }}
+                            </span>
+                        </td>
+                         <td style="padding: 1rem 0.5rem;">
+                            <span style="color: var(--text-secondary);">
+                                {{ rule.notificationChannel.type.value|capitalize }}
+                            </span>
+                             <div style="font-size: 0.75rem; color: var(--text-muted);">{{ rule.notificationChannel.dsn }}</div>
+                        </td>
+                        <td style="padding: 1rem 0.5rem;">
+                            After {{ rule.failureThreshold }} failures
+                        </td>
+                         <td style="padding: 1rem 0.5rem;">
+                            {% if rule.isEnabled %}
+                                <span class="badge badge-success">Enabled</span>
+                            {% else %}
+                                <span class="badge" style="background: var(--surface-accent); color: var(--text-muted);">Disabled</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem 0.5rem; text-align: right;">
+                             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                                <a href="{{ path('admin_alert_rules_edit', {id: rule.id.value}) }}" class="btn-icon" style="color: var(--text-secondary); padding: 0.4rem;" title="Edit">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.8;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </a>
+                                <button
+                                    class="btn-icon" 
+                                    style="color: var(--danger-color); padding: 0.4rem; cursor: pointer;" 
+                                    title="Delete"
+                                    data-action="live#action"
+                                    data-live-action-param="delete"
+                                    data-live-id-param="{{ rule.id.value }}"
+                                    onclick="if (!confirm('Are you sure you want to delete this alert rule?')) { event.preventDefault(); event.stopImmediatePropagation(); }"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="{{ this.monitorId ? 5 : 6 }}" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                            No alert rules found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div style="font-size: 0.875rem; color: var(--text-muted);">
+            Showing {{ (this.page - 1) * this.limit + 1 }} to {{ min(this.page * this.limit, this.totalCount) }} of {{ this.totalCount }} rules
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+             <button 
+                class="btn-secondary" 
+                style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                {% if this.page <= 1 %}disabled{% endif %}
+                data-action="live#action"
+                data-live-action-param="setPage"
+                data-live-page-param="{{ this.page - 1 }}"
+            >
+                Previous
+            </button>
+            <span style="display: flex; align-items: center; padding: 0 1rem; font-weight: 600;">
+                {{ this.page }} / {{ this.totalPages }}
+            </span>
+            <button 
+                class="btn-secondary" 
+                style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                {% if this.page >= this.totalPages %}disabled{% endif %}
+                data-action="live#action"
+                data-live-action-param="setPage"
+                data-live-page-param="{{ this.page + 1 }}"
+            >
+                Next
+            </button>
+        </div>
+    </div>
+</div>

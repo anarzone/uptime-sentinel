@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% set show_sidebar = true %}
+
+{% block title %}Edit Monitor | Sentinel{% endblock %}
+
+{% block body %}
+    {{ component('EditMonitor', { id: id }) }}
+    <div {{ vue_component('MonitorManager') }}></div>
+{% endblock %}

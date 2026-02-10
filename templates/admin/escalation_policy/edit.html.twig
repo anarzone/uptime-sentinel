@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% set show_sidebar = true %}
+
+{% block title %}Edit Escalation Policy | Sentinel{% endblock %}
+
+{% block body %}
+    {{ component('EditEscalationPolicy', { id: id }) }}
+{% endblock %}

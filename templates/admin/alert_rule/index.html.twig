@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% set show_sidebar = true %}
+
+{% block title %}Alert Rules | Sentinel{% endblock %}
+
+{% block body %}
+<div class="header" style="margin-bottom: 2rem;">
+    <h1 class="text-gradient">Alert Rules</h1>
+    <p style="color: var(--text-secondary);">Configure notification rules for your monitors.</p>
+</div>
+
+{{ component('GlobalAlertRuleList') }}
+
+<div {{ vue_component('MonitorManager') }}></div>
+{% endblock %}
