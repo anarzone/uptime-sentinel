@@ -7,11 +7,11 @@ namespace App\Tests\Functional\Monitoring\Infrastructure\Controller;
 use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
+// use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class MonitorControllerTest extends WebTestCase
 {
-    use ResetDatabase;
+    // use ResetDatabase;
 
     private $client;
     private $user;
