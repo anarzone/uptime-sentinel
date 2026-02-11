@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/anarzone/uptime-sentinel/compare/v1.9.1...v1.10.0) (2026-02-11)
+
+### Features
+
+* **docker:** add health checks to app, nginx, and redis services ([3ddfc8d](https://github.com/anarzone/uptime-sentinel/commit/3ddfc8dc480cfde873005e05a4b69a32cab29052))
+
 ## [1.9.1](https://github.com/anarzone/uptime-sentinel/compare/v1.9.0...v1.9.1) (2026-02-10)
 
 ### Bug Fixes
