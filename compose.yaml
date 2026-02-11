@@ -49,7 +49,7 @@ services:
     env_file:
       - .env.docker
     environment:
-      APP_ENV: dev
+      APP_ENV: prod
     command: php bin/console messenger:consume scheduler_monitoring -vv
     depends_on:
       rabbitmq:
@@ -69,7 +69,7 @@ services:
     env_file:
       - .env.docker
     environment:
-      APP_ENV: dev
+      APP_ENV: prod
     command: php bin/console messenger:consume scheduler_telemetry -vv
     depends_on:
       rabbitmq:
@@ -89,7 +89,7 @@ services:
     env_file:
       - .env.docker
     environment:
-      APP_ENV: dev
+      APP_ENV: prod
     depends_on:
       rabbitmq:
         condition: service_healthy
