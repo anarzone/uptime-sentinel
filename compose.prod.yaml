@@ -15,6 +15,12 @@ services:
     command: php-fpm
     volumes:
       - app_public:/var/www/public
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     depends_on:
       database:
         condition: service_healthy
@@ -31,8 +37,15 @@ services:
       - "8080:80"
     volumes:
       - app_public:/var/www/public
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
-      - app
+      app:
+        condition: service_healthy
 
   # 3. Worker (Async Job Consumer)
   worker:
@@ -123,6 +136,11 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: always
 
   rabbitmq:
