@@ -6,7 +6,6 @@ namespace App\Security\Domain\Entity;
 
 use App\Security\Infrastructure\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV7;
@@ -17,8 +16,8 @@ use Symfony\Component\Uid\UuidV7;
 class User implements UserInterface
 {
     #[ORM\Id]
-    #[ORM\Column(type: UuidType::NAME, unique: true)]
-    private Uuid $id;
+    #[ORM\Column(type: 'guid', unique: true)]
+    private string $id;
 
     #[ORM\Column(length: 180)]
     private string $email;
@@ -37,14 +36,14 @@ class User implements UserInterface
 
     public function __construct(string $email)
     {
-        $this->id = new UuidV7();
+        $this->id = (string) new UuidV7();
         $this->email = $email;
         $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): Uuid
     {
-        return $this->id;
+        return Uuid::fromString($this->id);
     }
 
     public function getEmail(): ?string

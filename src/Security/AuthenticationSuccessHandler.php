@@ -20,12 +20,21 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): RedirectResponse
     {
-        $user = $token->getUser();
+        try {
+            $user = $token->getUser();
 
-        if ($user instanceof User && !$user->isRegistered()) {
-            return new RedirectResponse($this->urlGenerator->generate('app_register'));
+            if ($user instanceof User && !$user->isRegistered()) {
+                return new RedirectResponse($this->urlGenerator->generate('app_register'));
+            }
+
+            return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        } catch (\Throwable $e) {
+            file_put_contents(
+                \dirname(__DIR__, 2).'/var/log/auth_success_error.log',
+                date('[Y-m-d H:i:s] ').$e->getMessage()."\n".$e->getTraceAsString()."\n",
+                \FILE_APPEND
+            );
+            throw $e;
         }
-
-        return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
     }
 }

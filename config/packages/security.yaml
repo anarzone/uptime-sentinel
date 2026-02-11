@@ -22,9 +22,10 @@ security:
 
             login_link:
                 check_route: login_check
-                signature_properties: ['id', 'email']
+                signature_properties: ['email']
                 success_handler: App\Security\AuthenticationSuccessHandler
-                lifetime: 600 # 10 minutes
+                failure_handler: App\Security\AuthenticationFailureHandler
+                lifetime: 600
 
             logout:
                 path: app_logout

@@ -1,0 +1,107 @@
+Secret: cc58e50f340801cc10f854b423377708
+Env Secret: NOT SET
+PHP Time: 2026-02-11 19:01:11
+PHP Timestamp: 1770836471
+Is Secure: YES
+Host: uptime-sentinel.test
+Scheme: https
+Logged User: ANONYMOUS
+Logged Roles: N/A
+DB User ID: 019c4ced-8ed8-7e5b-81fe-b3c301eb227b
+DB User Email: hi@anar.to
+Headers: {
+    "accept": "*\/*",
+    "user-agent": "curl\/8.7.1",
+    "host": "uptime-sentinel.test",
+    "x-php-ob-level": "1"
+}
+ENV: {
+    "USER": "anar",
+    "HOME": "\/Users\/anar",
+    "HTTP_ACCEPT": "*\/*",
+    "HTTP_USER_AGENT": "curl\/8.7.1",
+    "HTTP_HOST": "uptime-sentinel.test",
+    "PATH_INFO": "",
+    "HERD_HOME": "\/Users\/anar\/Library\/Application Support\/Herd",
+    "REDIRECT_STATUS": "200",
+    "HTTPS": "on",
+    "SERVER_NAME": "uptime-sentinel.test",
+    "SERVER_PORT": "443",
+    "SERVER_ADDR": "127.0.0.1",
+    "REMOTE_PORT": "60742",
+    "REMOTE_ADDR": "127.0.0.1",
+    "SERVER_SOFTWARE": "nginx\/1.25.4",
+    "GATEWAY_INTERFACE": "CGI\/1.1",
+    "SERVER_PROTOCOL": "HTTP\/2.0",
+    "DOCUMENT_ROOT": "",
+    "DOCUMENT_URI": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "REQUEST_URI": "\/debug_secret",
+    "SCRIPT_NAME": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "SCRIPT_FILENAME": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "CONTENT_LENGTH": "",
+    "CONTENT_TYPE": "",
+    "REQUEST_METHOD": "GET",
+    "QUERY_STRING": "",
+    "FCGI_ROLE": "RESPONDER",
+    "APP_PROJECT_DIR": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel",
+    "SYMFONY_DOTENV_PATH": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel\/.env",
+    "APP_ENV": "dev",
+    "APP_SHARE_DIR": "var\/share",
+    "TRUSTED_PROXIES": "127.0.0.1,::1,10.0.0.0\/8,172.16.0.0\/12,192.168.0.0\/16",
+    "DEFAULT_URI": "https:\/\/uptime-sentinel.test",
+    "MAILER_FROM": "alerts@uptime-sentinel.local",
+    "SYMFONY_DOTENV_VARS": "APP_ENV,APP_SHARE_DIR,TRUSTED_PROXIES,DEFAULT_URI,MAILER_FROM",
+    "APP_DEBUG": "1",
+    "SHELL_VERBOSITY": 3,
+    "DOCTRINE_DEPRECATIONS": "trigger"
+}
+SERVER: {
+    "USER": "anar",
+    "HOME": "\/Users\/anar",
+    "HTTP_ACCEPT": "*\/*",
+    "HTTP_USER_AGENT": "curl\/8.7.1",
+    "HTTP_HOST": "uptime-sentinel.test",
+    "PATH_INFO": "",
+    "HERD_HOME": "\/Users\/anar\/Library\/Application Support\/Herd",
+    "REDIRECT_STATUS": "200",
+    "HTTPS": "on",
+    "SERVER_NAME": "uptime-sentinel.test",
+    "SERVER_PORT": "443",
+    "SERVER_ADDR": "127.0.0.1",
+    "REMOTE_PORT": "60742",
+    "REMOTE_ADDR": "127.0.0.1",
+    "SERVER_SOFTWARE": "nginx\/1.25.4",
+    "GATEWAY_INTERFACE": "CGI\/1.1",
+    "SERVER_PROTOCOL": "HTTP\/2.0",
+    "DOCUMENT_ROOT": "",
+    "DOCUMENT_URI": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "REQUEST_URI": "\/debug_secret",
+    "SCRIPT_NAME": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "SCRIPT_FILENAME": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel\/public\/index.php",
+    "CONTENT_LENGTH": "",
+    "CONTENT_TYPE": "",
+    "REQUEST_METHOD": "GET",
+    "QUERY_STRING": "",
+    "FCGI_ROLE": "RESPONDER",
+    "PHP_SELF": "\/Applications\/Herd.app\/Contents\/Resources\/valet\/server.php",
+    "REQUEST_TIME_FLOAT": 1770836471.124827,
+    "REQUEST_TIME": 1770836471,
+    "argv": [],
+    "argc": 0,
+    "HERD_SITE_PATH": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel",
+    "APP_RUNTIME_OPTIONS": {
+        "project_dir": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel"
+    },
+    "APP_RUNTIME": "Symfony\\Component\\Runtime\\SymfonyRuntime",
+    "APP_PROJECT_DIR": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel",
+    "SYMFONY_DOTENV_PATH": "\/Users\/anar\/Projects\/Own\/Interviews\/uptime-sentinel\/.env",
+    "APP_ENV": "dev",
+    "APP_SHARE_DIR": "var\/share",
+    "TRUSTED_PROXIES": "127.0.0.1,::1,10.0.0.0\/8,172.16.0.0\/12,192.168.0.0\/16",
+    "DEFAULT_URI": "https:\/\/uptime-sentinel.test",
+    "MAILER_FROM": "alerts@uptime-sentinel.local",
+    "SYMFONY_DOTENV_VARS": "APP_ENV,APP_SHARE_DIR,TRUSTED_PROXIES,DEFAULT_URI,MAILER_FROM",
+    "APP_DEBUG": "1",
+    "SHELL_VERBOSITY": 3,
+    "DOCTRINE_DEPRECATIONS": "trigger"
+}
