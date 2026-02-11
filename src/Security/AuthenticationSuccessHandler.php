@@ -21,6 +21,7 @@ final class AuthenticationSuccessHandler implements AuthenticationSuccessHandler
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): RedirectResponse
     {
         try {
+            $session = $request->getSession();
             $user = $token->getUser();
 
             if ($user instanceof User && !$user->isRegistered()) {
