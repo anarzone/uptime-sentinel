@@ -32,7 +32,6 @@ final class Version20260211210233 extends AbstractMigration
 
         $this->addSql('ALTER TABLE alert_rules ADD CONSTRAINT `FK_63C06ED789870488` FOREIGN KEY (notification_channel_id) REFERENCES notification_channels (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE escalation_policies DROP FOREIGN KEY `FK_escalation_policies_monitor`');
-        $this->addSql('DROP INDEX IDX_E659FDB14CE1C902 ON escalation_policies');
         $this->addSql('ALTER TABLE escalation_policies RENAME INDEX idx_escalation_policies_channel TO IDX_E659FDB189870488');
         $this->addSql('DROP INDEX idx_monitor_owner ON monitors');
         $this->addSql('ALTER TABLE monitors CHANGE headers headers JSON DEFAULT NULL, CHANGE last_checked_at last_checked_at DATETIME DEFAULT NULL, CHANGE next_check_at next_check_at DATETIME NOT NULL, CHANGE created_at created_at DATETIME NOT NULL, CHANGE updated_at updated_at DATETIME NOT NULL, CHANGE last_status_change_at last_status_change_at DATETIME DEFAULT NULL');
