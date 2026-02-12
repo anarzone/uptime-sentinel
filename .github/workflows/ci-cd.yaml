@@ -147,6 +147,8 @@ jobs:
                 with:
                     context: .
                     file: Dockerfile
+                    build-args: |
+                      CACHE_BUST=${{ github.sha }}
                     platforms: linux/arm64
                     push: true
                     tags: ghcr.io/${{ github.repository }}/app:latest
