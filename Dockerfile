@@ -77,6 +77,9 @@ COPY --from=builder /var/www/public ./public_source
 ENV SYMFONY_ENV=prod
 ENV APP_ENV=prod
 
+# Cache bust to force fresh build - 2026-02-12
+RUN echo "Build timestamp: $(date +%s-%N)" > /tmp/.build_info
+
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
