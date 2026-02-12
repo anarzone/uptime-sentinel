@@ -10,11 +10,9 @@ use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Notification\NotificationChannel;
 use App\Monitoring\Domain\Repository\EscalationPolicyRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class EscalationPolicyRepositoryTest extends KernelTestCase
 {
-    use ResetDatabase;
 
     private EscalationPolicyRepositoryInterface $repository;
     private $entityManager;

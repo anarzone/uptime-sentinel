@@ -12,11 +12,17 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20260211210233 extends AbstractMigration
 {
+    /**
+     * @return string
+     */
     public function getDescription(): string
     {
-        return '';
+        return 'Fix schema drift and normalize index names';
     }
 
+    /**
+     * @param Schema $schema
+     */
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
@@ -33,9 +39,9 @@ final class Version20260211210233 extends AbstractMigration
         $this->addSql('ALTER TABLE alert_rules ADD CONSTRAINT `FK_63C06ED789870488` FOREIGN KEY (notification_channel_id) REFERENCES notification_channels (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE escalation_policies DROP FOREIGN KEY `FK_escalation_policies_monitor`');
         $this->addSql('ALTER TABLE escalation_policies RENAME INDEX idx_escalation_policies_channel TO IDX_E659FDB189870488');
-        $this->addSql('DROP INDEX idx_monitor_owner ON monitors');
+        $this->addSql('DROP INDEX IF EXISTS idx_monitor_owner ON monitors');
         $this->addSql('ALTER TABLE monitors CHANGE headers headers JSON DEFAULT NULL, CHANGE last_checked_at last_checked_at DATETIME DEFAULT NULL, CHANGE next_check_at next_check_at DATETIME NOT NULL, CHANGE created_at created_at DATETIME NOT NULL, CHANGE updated_at updated_at DATETIME NOT NULL, CHANGE last_status_change_at last_status_change_at DATETIME DEFAULT NULL');
-        $this->addSql('DROP INDEX idx_notification_channel_owner ON notification_channels');
+        $this->addSql('DROP INDEX IF EXISTS idx_notification_channel_owner ON notification_channels');
         $this->addSql('ALTER TABLE notification_templates CHANGE created_at created_at DATETIME NOT NULL, CHANGE updated_at updated_at DATETIME NOT NULL');
         $this->addSql('ALTER TABLE notification_templates RENAME INDEX unique_template_name TO unique_name');
         $this->addSql('ALTER TABLE notification_templates RENAME INDEX unique_template_channel_event TO unique_channel_event');
@@ -45,6 +51,9 @@ final class Version20260211210233 extends AbstractMigration
         $this->addSql('ALTER TABLE users CHANGE id id CHAR(36) NOT NULL, CHANGE roles roles JSON NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
     }
 
+    /**
+     * @param Schema $schema
+     */
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs

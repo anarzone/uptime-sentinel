@@ -9,11 +9,9 @@ use App\Telemetry\Application\Service\TelemetryIngestor;
 use App\Telemetry\Model\PingResultDto;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class TelemetryIngestorTest extends KernelTestCase
 {
-    use ResetDatabase;
 
     private TelemetryIngestor $ingestor;
     private Connection $connection;

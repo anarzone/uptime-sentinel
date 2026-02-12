@@ -12,11 +12,9 @@ use App\Monitoring\Domain\Model\Monitor\Url;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use App\Tests\Mother\MonitorMother;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class MonitorRepositoryTest extends KernelTestCase
 {
-    use ResetDatabase;
 
     private MonitorRepositoryInterface $repository;
 
@@ -158,7 +156,7 @@ final class MonitorRepositoryTest extends KernelTestCase
 
         $this->assertCount(2, $dueMonitors);
 
-        $dueMonitorIds = array_map(fn ($m) => $m->id->toString(), $dueMonitors);
+        $dueMonitorIds = array_map(fn($m) => $m->id->toString(), $dueMonitors);
         $this->assertContains($pastMonitor->id->toString(), $dueMonitorIds);
         $this->assertContains($dueMonitor->id->toString(), $dueMonitorIds);
         $this->assertNotContains($futureMonitor->id->toString(), $dueMonitorIds);

@@ -8,11 +8,9 @@ use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Telemetry\Application\Service\TelemetryRollupService;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class TelemetryRollupServiceTest extends KernelTestCase
 {
-    use ResetDatabase;
 
     private TelemetryRollupService $service;
     private Connection $connection;
@@ -48,10 +46,10 @@ final class TelemetryRollupServiceTest extends KernelTestCase
         );
 
         $this->assertNotFalse($stats);
-        $this->assertEquals(3, $stats['ping_count']);
-        $this->assertEquals(2, $stats['success_count']);
-        $this->assertEquals(200, $stats['avg_latency_ms']); // (100 + 200 + 300) / 3 = 200
-        $this->assertEquals(300, $stats['max_latency_ms']);
+        $this->assertSame(3, $stats['ping_count']);
+        $this->assertSame(2, $stats['success_count']);
+        $this->assertSame(200, $stats['avg_latency_ms']); // (100 + 200 + 300) / 3 = 200
+        $this->assertSame(300, $stats['max_latency_ms']);
     }
 
     public function testAggregateDailyGroupsHourlyStatsCorrectly(): void
@@ -76,10 +74,10 @@ final class TelemetryRollupServiceTest extends KernelTestCase
         );
 
         $this->assertNotFalse($stats);
-        $this->assertEquals(30, $stats['ping_count']); // 10 + 20
-        $this->assertEquals(27, $stats['success_count']); // 9 + 18
-        $this->assertEquals(150, $stats['avg_latency_ms']); // (100 + 200) / 2 = 150
-        $this->assertEquals(250, $stats['max_latency_ms']);
+        $this->assertSame(30, $stats['ping_count']); // 10 + 20
+        $this->assertSame(27, $stats['success_count']); // 9 + 18
+        $this->assertSame(150, $stats['avg_latency_ms']); // (100 + 200) / 2 = 150
+        $this->assertSame(250, $stats['max_latency_ms']);
     }
 
     private function insertRawResult(string $monitorId, int $statusCode, int $latencyMs, bool $isSuccessful, string $createdAt): void

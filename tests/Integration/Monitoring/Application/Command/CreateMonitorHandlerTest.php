@@ -12,11 +12,9 @@ use App\Monitoring\Domain\Model\Monitor\MonitorId;
 use App\Monitoring\Domain\Model\Monitor\MonitorStatus;
 use App\Monitoring\Domain\Repository\MonitorRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 final class CreateMonitorHandlerTest extends KernelTestCase
 {
-    use ResetDatabase;
 
     private CreateMonitorHandler $handler;
     private MonitorRepositoryInterface $repository;
