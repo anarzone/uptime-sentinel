@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/anarzone/uptime-sentinel/compare/v1.11.4...v1.11.5) (2026-02-12)
+
+### Bug Fixes
+
+* **ci:** invalidate docker build cache with github sha ([7e16f84](https://github.com/anarzone/uptime-sentinel/commit/7e16f84a1dbcd9bc74ba283670885f26fe0df827))
+* **docker:** move cache bust before COPY to invalidate application files ([d97311f](https://github.com/anarzone/uptime-sentinel/commit/d97311fe8479317d4bcb6320245b6d68f30bbdd0))
+
 ## [1.11.4](https://github.com/anarzone/uptime-sentinel/compare/v1.11.3...v1.11.4) (2026-02-12)
 
 ### Bug Fixes
