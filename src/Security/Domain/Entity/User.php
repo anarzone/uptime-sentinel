@@ -16,7 +16,7 @@ use Symfony\Component\Uid\UuidV7;
 class User implements UserInterface
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'guid', unique: true)]
+    #[ORM\Column(type: 'string', length: 36, unique: true)]
     private string $id;
 
     #[ORM\Column(length: 180)]
