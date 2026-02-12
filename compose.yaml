@@ -58,9 +58,6 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    volumes:
-      - .:/var/www
-      - /var/www/vendor # Preserve container's vendor directory
 
   # 5. Telemetry Ingestor (The Data Collector)
   telemetry-ingestor:
@@ -78,9 +75,6 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    volumes:
-      - .:/var/www
-      - /var/www/vendor # Preserve container's vendor directory
 
   # 6. The Workers (Scaling Simulation)
   worker:
@@ -97,9 +91,6 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    volumes:
-      - .:/var/www
-      - /var/www/vendor # Preserve container's vendor directory
 
 volumes:
   mysql_data:
