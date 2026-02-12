@@ -152,8 +152,7 @@ jobs:
                     platforms: linux/arm64
                     push: true
                     tags: ghcr.io/${{ github.repository }}/app:latest
-                    cache-from: type=gha
-                    cache-to: type=gha,mode=max
+                    no-cache: true
 
     build-nginx:
         name: Build Nginx (ARM64)
