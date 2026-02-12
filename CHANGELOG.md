@@ -1,3 +1,9 @@
+## [1.11.0](https://github.com/anarzone/uptime-sentinel/compare/v1.10.4...v1.11.0) (2026-02-12)
+
+### Features
+
+* **health:** add /health endpoint for nginx healthcheck ([529b458](https://github.com/anarzone/uptime-sentinel/commit/529b4584f731f26bf801bb819f56c134f19acfc7))
+
 ## [1.10.4](https://github.com/anarzone/uptime-sentinel/compare/v1.10.3...v1.10.4) (2026-02-12)
 
 ### Bug Fixes
