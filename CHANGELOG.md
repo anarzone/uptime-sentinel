@@ -1,3 +1,9 @@
+## [1.11.6](https://github.com/anarzone/uptime-sentinel/compare/v1.11.5...v1.11.6) (2026-02-12)
+
+### Bug Fixes
+
+* **compose:** remove dev volume mounts to use image code in prod ([245a086](https://github.com/anarzone/uptime-sentinel/commit/245a086349da0d458390e3e5ec3f10a4c5bea3dd))
+
 ## [1.11.5](https://github.com/anarzone/uptime-sentinel/compare/v1.11.4...v1.11.5) (2026-02-12)
 
 ### Bug Fixes
