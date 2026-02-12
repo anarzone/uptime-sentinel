@@ -38,7 +38,7 @@ services:
     volumes:
       - app_public:/var/www/public
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 10s
       timeout: 5s
       retries: 3
