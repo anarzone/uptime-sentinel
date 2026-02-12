@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/anarzone/uptime-sentinel/compare/v1.10.1...v1.10.2) (2026-02-12)
+
+### Bug Fixes
+
+* **ci/migration:** clean up workflow config and fix migration syntax ([008cdee](https://github.com/anarzone/uptime-sentinel/commit/008cdee99329ea8c4fcf196183bc36fb1f05384c))
+* **ci:** remove _test prefix from url ([0877e4e](https://github.com/anarzone/uptime-sentinel/commit/0877e4ea98963ec58ba4ebdeaa1235f956ab8865))
+
 ## [1.10.1](https://github.com/anarzone/uptime-sentinel/compare/v1.10.0...v1.10.1) (2026-02-12)
 
 ### Bug Fixes
