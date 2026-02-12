@@ -1,3 +1,9 @@
+## [1.11.7](https://github.com/anarzone/uptime-sentinel/compare/v1.11.6...v1.11.7) (2026-02-12)
+
+### Bug Fixes
+
+* **docker:** refactor to copy app from builder stage (bypass cache) ([49cbf8e](https://github.com/anarzone/uptime-sentinel/commit/49cbf8ed57213e744e51b546024c7ed00b53665b))
+
 ## [1.11.6](https://github.com/anarzone/uptime-sentinel/compare/v1.11.5...v1.11.6) (2026-02-12)
 
 ### Bug Fixes
