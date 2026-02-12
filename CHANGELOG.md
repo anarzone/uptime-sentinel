@@ -1,3 +1,9 @@
+## [1.11.4](https://github.com/anarzone/uptime-sentinel/compare/v1.11.3...v1.11.4) (2026-02-12)
+
+### Bug Fixes
+
+* **docker:** bust build cache to force fresh code deployment ([a66b713](https://github.com/anarzone/uptime-sentinel/commit/a66b713b255dd8a56fd3633da5f0adfd53d3f1a7))
+
 ## [1.11.3](https://github.com/anarzone/uptime-sentinel/compare/v1.11.2...v1.11.3) (2026-02-12)
 
 ### Bug Fixes
