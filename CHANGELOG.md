@@ -1,3 +1,9 @@
+## [1.11.1](https://github.com/anarzone/uptime-sentinel/compare/v1.11.0...v1.11.1) (2026-02-12)
+
+### Bug Fixes
+
+* **healthcheck:** change nginx healthcheck to root path ([ac6422b](https://github.com/anarzone/uptime-sentinel/commit/ac6422b7caed13f918948fea9ee67318cef4086f))
+
 ## [1.11.0](https://github.com/anarzone/uptime-sentinel/compare/v1.10.4...v1.11.0) (2026-02-12)
 
 ### Features
