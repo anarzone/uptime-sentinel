@@ -69,12 +69,10 @@ ARG CACHE_BUST=2026-02-12-1
 RUN echo "Build: $CACHE_BUST"
 
 # Copy application files
-COPY . .
+# Copy application files from builder (ensures fresh code, avoids stale build context cache)
+COPY --from=builder /var/www .
 
-# Copy pre-built dependencies and assets from builder
-COPY --from=builder /var/www/vendor ./vendor
-COPY --from=builder /var/www/assets/vendor ./assets/vendor
-COPY --from=builder /var/www/public ./public
+# Create public_source backup (preserving existing logic)
 COPY --from=builder /var/www/public ./public_source
 
 # Optimizations
