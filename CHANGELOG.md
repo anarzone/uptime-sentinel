@@ -1,3 +1,15 @@
+## [1.10.3](https://github.com/anarzone/uptime-sentinel/compare/v1.10.2...v1.10.3) (2026-02-12)
+
+### Bug Fixes
+
+* **ci:** add CF-Access headers to deployment ([992b310](https://github.com/anarzone/uptime-sentinel/commit/992b31075906575d8b6910bee6c5d5da667bd48b))
+* **ci:** fix yaml syntax and indentation in deploy job ([1e406d5](https://github.com/anarzone/uptime-sentinel/commit/1e406d53b7c6b2653c527d4bdef28b888fc9c2d5))
+* **ci:** properly disable quality checks to unblock deployment ([8e12d1c](https://github.com/anarzone/uptime-sentinel/commit/8e12d1cb72285848d29bb3c653a6b19e181bb86c))
+
+### Reverts
+
+* Revert "fix(ci): properly disable quality checks to unblock deployment" ([be42242](https://github.com/anarzone/uptime-sentinel/commit/be4224225f8a85aaec700f68da8f929a500e9851))
+
 ## [1.10.2](https://github.com/anarzone/uptime-sentinel/compare/v1.10.1...v1.10.2) (2026-02-12)
 
 ### Bug Fixes
