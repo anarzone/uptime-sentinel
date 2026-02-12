@@ -67,7 +67,7 @@ jobs:
                     --health-retries=5
 
         env:
-            DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel_test
+            DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel
             REDIS_URL: redis://127.0.0.1:6379
 
         steps:
