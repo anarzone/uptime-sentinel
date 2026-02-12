@@ -1,3 +1,9 @@
+## [1.10.4](https://github.com/anarzone/uptime-sentinel/compare/v1.10.3...v1.10.4) (2026-02-12)
+
+### Bug Fixes
+
+* **deployment:** fix container healthcheck command ([f861b46](https://github.com/anarzone/uptime-sentinel/commit/f861b4657b21ece037eb636400802781cce0ef9b))
+
 ## [1.10.3](https://github.com/anarzone/uptime-sentinel/compare/v1.10.2...v1.10.3) (2026-02-12)
 
 ### Bug Fixes
