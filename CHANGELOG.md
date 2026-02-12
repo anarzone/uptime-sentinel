@@ -1,3 +1,9 @@
+## [1.11.3](https://github.com/anarzone/uptime-sentinel/compare/v1.11.2...v1.11.3) (2026-02-12)
+
+### Bug Fixes
+
+* change User.id from guid to string type for MySQL compatibility ([35bede0](https://github.com/anarzone/uptime-sentinel/commit/35bede0a3776bb7e2dfb2ccaa62ad7869dab75ae))
+
 ## [1.11.2](https://github.com/anarzone/uptime-sentinel/compare/v1.11.1...v1.11.2) (2026-02-12)
 
 ### Bug Fixes
