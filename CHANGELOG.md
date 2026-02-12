@@ -1,3 +1,14 @@
+## [1.10.1](https://github.com/anarzone/uptime-sentinel/compare/v1.10.0...v1.10.1) (2026-02-12)
+
+### Bug Fixes
+
+* **ci:** add missing test prefix to doctrin ([f06089b](https://github.com/anarzone/uptime-sentinel/commit/f06089b57dc80f66d7723e91d83cabffb9e258e2))
+* **ci:** update DATABASE_URL to use uptime_sentinel_test ([b6bcf5f](https://github.com/anarzone/uptime-sentinel/commit/b6bcf5f4edd4bc71619676b4882944570d689c46))
+* **migration:** remove invalid IF EXISTS syntax from DROP INDEX ([5697d4e](https://github.com/anarzone/uptime-sentinel/commit/5697d4ea5a19a99b210282da6a0ce8dd5db880c5))
+* **migrations:** make index drops conditional to fix CI failure ([d85023a](https://github.com/anarzone/uptime-sentinel/commit/d85023a05d30a61ba7ae7c36cda876d1f475d655))
+* **monitoring:** align infrastructure to prod and fix alert rule cooldown type mismatch ([606df02](https://github.com/anarzone/uptime-sentinel/commit/606df02beb52821669baa950fe655807fa57cdd8))
+* **tests:** resolve host environment hangs and config issues ([0410298](https://github.com/anarzone/uptime-sentinel/commit/04102987b2ef083fa8e12b93dc84ce9bf235b7f1))
+
 ## [1.10.0](https://github.com/anarzone/uptime-sentinel/compare/v1.9.1...v1.10.0) (2026-02-11)
 
 ### Features
