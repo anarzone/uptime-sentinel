@@ -1,3 +1,9 @@
+## [1.11.11](https://github.com/anarzone/uptime-sentinel/compare/v1.11.10...v1.11.11) (2026-02-12)
+
+### Bug Fixes
+
+* Update sender mail ([d14e3cf](https://github.com/anarzone/uptime-sentinel/commit/d14e3cf2d77d1d07d997d7f4ba4194454d976378))
+
 ## [1.11.10](https://github.com/anarzone/uptime-sentinel/compare/v1.11.9...v1.11.10) (2026-02-12)
 
 ### Bug Fixes
