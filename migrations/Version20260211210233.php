@@ -48,7 +48,7 @@ final class Version20260211210233 extends AbstractMigration
         $this->addSql('ALTER TABLE ping_results CHANGE id id VARCHAR(36) NOT NULL, CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
         $this->addSql('ALTER TABLE ping_stats_daily CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
         $this->addSql('ALTER TABLE ping_stats_hourly CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
-        $this->addSql('ALTER TABLE users CHANGE id id CHAR(36) NOT NULL, CHANGE roles roles JSON NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE users CHANGE roles roles JSON NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
     }
 
     /**
@@ -69,9 +69,9 @@ final class Version20260211210233 extends AbstractMigration
         $this->addSql('ALTER TABLE notification_templates CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', CHANGE updated_at updated_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
         $this->addSql('ALTER TABLE notification_templates RENAME INDEX unique_channel_event TO unique_template_channel_event');
         $this->addSql('ALTER TABLE notification_templates RENAME INDEX unique_name TO unique_template_name');
-        $this->addSql('ALTER TABLE ping_results CHANGE id id CHAR(36) NOT NULL, CHANGE monitor_id monitor_id CHAR(36) NOT NULL');
-        $this->addSql('ALTER TABLE ping_stats_daily CHANGE monitor_id monitor_id CHAR(36) NOT NULL');
-        $this->addSql('ALTER TABLE ping_stats_hourly CHANGE monitor_id monitor_id CHAR(36) NOT NULL');
-        $this->addSql('ALTER TABLE `users` CHANGE id id VARCHAR(36) NOT NULL, CHANGE roles roles LONGTEXT NOT NULL COMMENT \'(DC2Type:json)\', CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE ping_results CHANGE id id VARCHAR(36) NOT NULL, CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
+        $this->addSql('ALTER TABLE ping_stats_daily CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
+        $this->addSql('ALTER TABLE ping_stats_hourly CHANGE monitor_id monitor_id VARCHAR(36) NOT NULL');
+        $this->addSql('ALTER TABLE `users` CHANGE roles roles JSON NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
     }
 }
