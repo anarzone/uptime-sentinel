@@ -46,7 +46,8 @@ RUN apk add --no-cache \
     libxml2-dev \
     icu-dev \
     zlib-dev \
-    linux-headers
+    linux-headers \
+    netcat-openbsd
 
 # Install PHP extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
