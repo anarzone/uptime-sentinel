@@ -1,3 +1,9 @@
+## [1.11.8](https://github.com/anarzone/uptime-sentinel/compare/v1.11.7...v1.11.8) (2026-02-12)
+
+### Bug Fixes
+
+* **docker:** add cache bust to builder stage ([74ad7fd](https://github.com/anarzone/uptime-sentinel/commit/74ad7fdf9f3550130d8574376f4a2ab1f61d3854))
+
 ## [1.11.7](https://github.com/anarzone/uptime-sentinel/compare/v1.11.6...v1.11.7) (2026-02-12)
 
 ### Bug Fixes
