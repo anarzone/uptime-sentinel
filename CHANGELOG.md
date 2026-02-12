@@ -1,3 +1,9 @@
+## [1.11.10](https://github.com/anarzone/uptime-sentinel/compare/v1.11.9...v1.11.10) (2026-02-12)
+
+### Bug Fixes
+
+* **compose:** add pull_policy: always to force fresh image pull ([ae838b7](https://github.com/anarzone/uptime-sentinel/commit/ae838b76ba6a5cb2ef7266da7ac7ccb2685dfd14))
+
 ## [1.11.9](https://github.com/anarzone/uptime-sentinel/compare/v1.11.8...v1.11.9) (2026-02-12)
 
 ### Bug Fixes
