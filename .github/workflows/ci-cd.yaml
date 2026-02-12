@@ -83,13 +83,7 @@ jobs:
 
             -   name: Run Database Migrations
                 env:
-                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel
-                run: |
-                    php bin/console doctrine:migrations:migrate --no-interaction --env=test
-
-            -   name: Run Tests
-                env:
-                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel
+                    DATABASE_URL: mysql://root:root@127.0.0.1:3306/uptime_sentinel_test
                     REDIS_URL: redis://127.0.0.1:6379
                 run: vendor/bin/phpunit
 
