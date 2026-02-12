@@ -34,10 +34,10 @@ jobs:
                 run: composer install --no-progress --prefer-dist
 
             -   name: Check Code Style
-                run: echo "Quality checks disabled - testing deployment"
+                run: composer check-style
 
             -   name: Run Static Analysis
-                run: echo "Quality checks disabled - testing deployment"
+                run: vendor/bin/phpstan analyse src --memory-limit=1G
 
     tests:
         needs: quality
