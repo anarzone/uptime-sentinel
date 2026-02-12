@@ -1,3 +1,9 @@
+## [1.11.2](https://github.com/anarzone/uptime-sentinel/compare/v1.11.1...v1.11.2) (2026-02-12)
+
+### Bug Fixes
+
+* **migration:** Keep users.id as VARCHAR(36) to avoid Doctrine guid type issues ([603a8bc](https://github.com/anarzone/uptime-sentinel/commit/603a8bc4a643702fb6b34b3d8b8aa604c9e4df44))
+
 ## [1.11.1](https://github.com/anarzone/uptime-sentinel/compare/v1.11.0...v1.11.1) (2026-02-12)
 
 ### Bug Fixes
