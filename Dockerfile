@@ -64,6 +64,10 @@ RUN install-php-extensions \
 # Set working directory
 WORKDIR /var/www
 
+# Cache bust - add build arg to invalidate COPY cache
+ARG CACHE_BUST=2026-02-12-1
+RUN echo "Build: $CACHE_BUST"
+
 # Copy application files
 COPY . .
 
@@ -76,9 +80,6 @@ COPY --from=builder /var/www/public ./public_source
 # Optimizations
 ENV SYMFONY_ENV=prod
 ENV APP_ENV=prod
-
-# Cache bust to force fresh build - 2026-02-12
-RUN echo "Build timestamp: $(date +%s-%N)" > /tmp/.build_info
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
