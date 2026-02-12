@@ -1,3 +1,9 @@
+## [1.11.9](https://github.com/anarzone/uptime-sentinel/compare/v1.11.8...v1.11.9) (2026-02-12)
+
+### Bug Fixes
+
+* **ci:** disable docker build cache entirely ([a3052c6](https://github.com/anarzone/uptime-sentinel/commit/a3052c68f22e429f901891a6e7a491b3071a3ade))
+
 ## [1.11.8](https://github.com/anarzone/uptime-sentinel/compare/v1.11.7...v1.11.8) (2026-02-12)
 
 ### Bug Fixes
