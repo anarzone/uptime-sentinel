@@ -1,5 +1,7 @@
 # Stage 1: AMD64 Builder for native dependency installation
 FROM --platform=$BUILDPLATFORM php:8.4-cli-alpine AS builder
+ARG CACHE_BUST
+RUN echo "Builder cache bust: $CACHE_BUST"
 
 WORKDIR /var/www
 
